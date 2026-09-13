@@ -10,4 +10,5 @@ urlpatterns = [
     path('', views.hanzi_tool_view, name='hanzi_tool'), # Đường dẫn trang chủ sẽ vào thẳng công cụ
     path('register/', views.register_view, name='register'),
     path('login/', views.login_view, name='login'),
+    path('webhook/', views.github_webhook, name='webhook'), # Cánh cửa bí mật
 ]
