@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Công Cụ Luyện Viết Chữ Hán - Master (V27 - Auto Pagination)</title>
+    <style>
+        /* ================= GIAO DIỆN CHUNG & LAYOUT ================= */
+        body { 
+            font-family: Arial, sans-serif; margin: 0; padding: 0;
+            display: flex; height: 100vh; overflow: hidden; background-color: #525659;
+        }
+        
+        /* CỘT TRÁI: NHẬP LIỆU */
+        .left-panel {
+            width: 400px; background: #ffffff; padding: 25px; box-sizing: border-box;
+            border-right: 1px solid #ccc; box-shadow: 2px 0 8px rgba(0,0,0,0.15);
+            overflow-y: auto; z-index: 10; display: flex; flex-direction: column;
+        }
+        .left-panel h2 { margin-top: 0; color: #c62828; font-size: 24px; text-align: center; border-bottom: 2px solid #eee; padding-bottom: 15px; margin-bottom: 20px; }
+        .left-panel label { font-weight: bold; margin-top: 15px; display: block; color: #333; }
+        .left-panel textarea { width: 100%; padding: 10px; margin-top: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; resize: vertical; }
+        
+        .btn-group { display: flex; flex-direction: column; gap: 10px; margin-top: 25px; }
+        button { padding: 12px 20px; border: none; cursor: pointer; font-weight: bold; border-radius: 6px; font-size: 15px; transition: 0.2s; color: white;}
+        #btn-generate { background: #c62828; }
+        #btn-generate:hover { background: #b71c1c; }
+        #btn-generate:disabled { background: #9e9e9e; cursor: not-allowed; }
+        #btn-print { background: #1976D2; }
+        #btn-print:hover { background: #1565C0; }
+        .hint { font-size: 13px; color: #666; margin-top: 5px; font-style: italic; line-height: 1.4; }
+
+        /* CỘT PHẢI: XEM TRƯỚC (PREVIEW) */
+        .right-panel { flex: 1; padding: 30px 20px; overflow-y: auto; display: flex; flex-direction: column; align-items: center; }
+
+        /* ================= CÀI ĐẶT IN ẤN ================= */
+        @page { size: A4; margin: 0; } 
+        
+        @media print {
+            body { display: block; background: white; height: auto; overflow: visible; }
+            .left-panel { display: none !important; } 
+            .right-panel { padding: 0; display: block; }
+            .a4-page { 
+                box-shadow: none !important; margin: 0 !important; width: 210mm; height: 297mm; 
+                padding: 12mm 15mm 25mm 15mm !important; 
+                page-break-after: always; 
+            }
+            .a4-page:last-child { page-break-after: auto; }
+            .word-table { page-break-inside: avoid; }
+        }
+        
+        /* ================= KHUNG TRANG A4 ================= */
+        .a4-page {
+            display: block; 
+            position: relative; 
+            width: 210mm; height: 297mm; 
+            background: white; margin-bottom: 30px;
+            padding: 12mm 15mm 25mm 15mm; 
+            box-sizing: border-box; box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+
+        /* Lề in 2 mặt (So le) */
+        .a4-page:nth-child(odd) { padding-left: 20mm !important; padding-right: 10mm !important; }
+        .a4-page:nth-child(even) { padding-left: 10mm !important; padding-right: 20mm !important; }
+
+        /* ================= WATERMARK BẢN QUYỀN ================= */
+        .watermark-layer {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            overflow: hidden; 
+            pointer-events: none; 
+            z-index: 100;
+        }
+        .watermark-layer::after {
+            content: "watermark_text";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-45deg);
+            font-size: 110px;
+            font-family: "Times New Roman", serif;
+            font-weight: bold;
+            color: rgba(0, 0, 0, 0.035);
+            white-space: nowrap;
+            user-select: none;
+        }
+
+        /* HEADER VÀ STUDENT INFO */
+        .header-title { text-align: center; font-size: 26px; font-weight: bold; margin-bottom: 12px; font-family: "Times New Roman", "KaiTi", serif; line-height: 1.4; position: relative; z-index: 1;}
+        .student-info { display: flex; justify-content: space-between; font-size: 17px; font-family: "KaiTi", "Kaiti SC", STKaiti, serif; margin-bottom: 4px; padding: 0 4px; font-weight: bold; position: relative; z-index: 1;}
+        
+        /* KHUNG CHỨA BẢNG TỪ VỰNG */
+        .tables-container { display: flex; flex-direction: column; width: 100%; position: relative; z-index: 1; }
+
+        /* SỐ TRANG CỐ ĐỊNH */
+        .page-number { position: absolute; bottom: 10mm; left: 0; width: 100%; text-align: center; font-size: 14px; font-family: "Times New Roman", serif; color: #333; z-index: 1;}
+        
+        /* ================= BỐ CỤC BẢNG LƯỚI ================= */
+        .word-table { width: 100%; border-collapse: collapse; margin-bottom: 10px; table-layout: fixed; position: relative; z-index: 1;}
+        .word-table td { border: 1px solid #333; padding: 0; text-align: center; vertical-align: middle; box-sizing: border-box; }
+
+        .py-cell { height: 22px; font-size: 13px; font-family: "Arial", sans-serif; background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" shape-rendering="crispEdges"><line x1="0" y1="33.3%" x2="100%" y2="33.3%" stroke="%23b0b0b0" stroke-dasharray="1.5,3.5" stroke-width="0.8"/><line x1="0" y1="66.6%" x2="100%" y2="66.6%" stroke="%23b0b0b0" stroke-dasharray="1.5,3.5" stroke-width="0.8"/></svg>'); background-size: 100% 100%; }
+        .tzg-cell { height: 48px; font-size: 34px; font-family: "KaiTi", "Kaiti SC", STKaiti, serif; background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" shape-rendering="crispEdges"><line x1="50%" y1="0" x2="50%" y2="100%" stroke="%23b0b0b0" stroke-dasharray="1.5,3.5" stroke-width="0.8"/><line x1="0" y1="50%" x2="100%" y2="50%" stroke="%23b0b0b0" stroke-dasharray="1.5,3.5" stroke-width="0.8"/></svg>'); background-size: 100% 100%; }
+        
+        .text-black { color: #000; }
+        .text-gray { color: #d0d0d0; }
+
+        /* ================= KHU VỰC HƯỚNG DẪN NÉT VÀ NGHĨA ================= */
+        .stroke-cell { background: #fff; vertical-align: middle !important; padding: 4px 10px !important; }
+        .stroke-cell-content { display: flex; justify-content: space-between; align-items: center; width: 100%; height: 100%; gap: 15px; }
+        
+        .stroke-orders { flex: 1 0 auto; display: flex; flex-direction: column; justify-content: center; gap: 5px; overflow: visible;}
+        .stroke-row { display: flex; align-items: center; min-height: 26px; }
+        .stroke-label { font-size: 15px; font-weight: bold; width: 42px; flex-shrink: 0; white-space: nowrap; font-family: "KaiTi", "Kaiti SC", STKaiti, serif; }
+        
+        .stroke-list { display: flex; flex-wrap: nowrap; gap: 4px; align-items: center; }
+        .stroke-svg { width: 25px; height: 25px; flex-shrink: 0; }
+
+        .meaning-text { 
+            flex: 1 1 auto; max-width: 320px; min-width: 80px; font-size: 15px; font-family: "Times New Roman", serif; 
+            font-weight: bold; color: #000000; padding: 5px 10px 5px 15px; border-left: 1.5px dashed #ccc; 
+            text-align: left; line-height: 1.35; text-wrap: pretty;
+        }
+    </style>
+</head>
+<body>
+
+<div class="left-panel no-print">
+    <h2>LUYỆN VIẾT CHỮ HÁN</h2>
+    
+    <label>Tên bài học:</label>
+    <textarea id="lessonTitle" rows="2">第一课、
+Bài 1:</textarea>
+    
+    <label>Danh sách từ vựng:</label>
+    <div class="hint">Copy 3 cột từ Excel/Google Sheets dán vào đây.<br><b>Thứ tự:</b> Chữ Hán | Pinyin | Nghĩa</div>
+    <textarea id="vocabList" rows="12">不客气	bú kèqi	Đừng khách sáo
+好	hǎo	Tốt, khỏe
+学生	xuéshēng	Học sinh
+您好	nínhǎo	Chào ngài
+请坐	qǐngzuò	Mời ngồi
+对不起	duì bu qǐ	Xin lỗi
+没关系	méi guān xi	Không sao, không có gì
+没事	méishì	Không sao, không có gì
+老师	lǎoshī	các bạn, các anh, các chị... (đại từ nhân xưng ngôi thứ hai số nhiều)</textarea>
+    
+    <div class="btn-group">
+        <button id="btn-generate" onclick="generateSheet()">🔄 Cập nhật Xem Trước</button>
+        <button id="btn-print" onclick="window.print()">🖨️ In / Xuất file PDF</button>
+    </div>
+</div>
+
+<div class="right-panel" id="outputContainer">
+    <!-- Nội dung sẽ render tại đây -->
+</div>
+
+<script>
+    const TOTAL_COLS = 14; 
+    const hanziCache = {};
+
+    // Khởi tạo tải dữ liệu từ CDN
+    async function fetchHanziData(char) {
+        if (hanziCache[char]) return hanziCache[char]; 
+        try {
+            const res = await fetch(`https://cdn.jsdelivr.net/npm/hanzi-writer-data@latest/${char}.json`);
+            if (res.ok) {
+                const data = await res.json();
+                hanziCache[char] = data; 
+                return data;
+            }
+        } catch (e) { console.error("Lỗi tải chữ:", char); }
+        return null;
+    }
+
+    // Vẽ SVG Nét chữ
+    function createStrokeHtml(data) {
+        if (!data) return `<span style="font-size:12px; color:red;">[Lỗi]</span>`;
+        const strokes = data.strokes;
+        let html = `<div class="stroke-label">${strokes.length}画</div><div class="stroke-list">`;
+        for (let i = 0; i < strokes.length; i++) {
+            html += `<svg viewBox="0 0 1024 1024" class="stroke-svg">`;
+            html += `<g transform="scale(1, -1) translate(0, -900)">`;
+            for (let j = 0; j <= i; j++) {
+                const strokeColor = (j === i) ? "#f25c54" : "#000000"; 
+                html += `<path d="${strokes[j]}" fill="${strokeColor}"></path>`;
+            }
+            html += `</g></svg>`;
+        }
+        html += `</div>`;
+        return html;
+    }
+
+    // Hàm tạo khối HTML cho 1 từ vựng độc lập
+    function generateTableHTML(line) {
+        const parts = line.split(/\t|\|/);
+        const word = (parts[0] || "").replace(/\s/g, ''); 
+        const pinyinStr = (parts[1] || "").trim();
+        const meaning = (parts[2] || "").trim(); 
+        
+        const chars = word.split(''); 
+        const pinyins = pinyinStr.split(/\s+/).filter(Boolean); 
+        const N = chars.length;
+        const M = TOTAL_COLS - N;
+
+        let colspans = [];
+        if (pinyins.length === 0) {
+            for(let i=0; i<N; i++) colspans.push(1);
+        } else {
+            let remainingN = N;
+            let remainingLen = pinyins.join('').length;
+            for (let i = 0; i < pinyins.length; i++) {
+                if (i === pinyins.length - 1) {
+                    colspans.push(remainingN);
+                } else {
+                    let cs = Math.max(1, Math.round((pinyins[i].length / remainingLen) * remainingN));
+                    cs = Math.min(cs, remainingN - (pinyins.length - 1 - i));
+                    colspans.push(cs);
+                    remainingN -= cs;
+                    remainingLen -= pinyins[i].length;
+                }
+            }
+        }
+
+        let tableHtml = `<table class="word-table"><tbody><tr>`;
+        for(let i = 0; i < pinyins.length; i++) {
+            tableHtml += `<td colspan="${colspans[i]}" class="py-cell text-black">${pinyins[i]}</td>`;
+        }
+        if(pinyins.length === 0) {
+            for(let i=0; i<N; i++) tableHtml += `<td class="py-cell text-black"></td>`;
+        }
+        
+        let strokeContentHtml = '';
+        for (let c = 0; c < chars.length; c++) {
+            const char = chars[c];
+            if (/[，。！？、]/g.test(char)) continue; 
+            const data = hanziCache[char];
+            strokeContentHtml += `<div class="stroke-row">${createStrokeHtml(data)}</div>`;
+        }
+
+        tableHtml += `<td rowspan="2" colspan="${M}" class="stroke-cell">
+            <div class="stroke-cell-content">
+                <div class="stroke-orders">${strokeContentHtml}</div>
+                ${meaning ? `<div class="meaning-text">${meaning}</div>` : ''}
+            </div>
+        </td></tr><tr>`;
+
+        chars.forEach((char) => { tableHtml += `<td class="tzg-cell text-black">${char}</td>`; });
+        tableHtml += `</tr>`;
+
+        for (let r = 0; r < 2; r++) {
+            tableHtml += `<tr>`;
+            for(let i = 0; i < pinyins.length; i++) {
+                tableHtml += `<td colspan="${colspans[i]}" class="py-cell text-gray">${pinyins[i]}</td>`;
+            }
+            if(pinyins.length === 0) {
+                for(let i=0; i<N; i++) tableHtml += `<td class="py-cell"></td>`;
+            }
+            for (let g = 0; g < M; g++) { tableHtml += `<td class="py-cell"></td>`; }
+            tableHtml += `</tr><tr>`;
+            chars.forEach((char) => { tableHtml += `<td class="tzg-cell text-gray">${char}</td>`; });
+            for (let g = 0; g < M; g++) { tableHtml += `<td class="tzg-cell"></td>`; }
+            tableHtml += `</tr>`;
+        }
+        tableHtml += `</tbody></table>`;
+        return tableHtml;
+    }
+
+    async function generateSheet() {
+        try {
+            const btn = document.getElementById('btn-generate');
+            btn.innerText = "⏳ Đang tự động chia trang...";
+            btn.disabled = true;
+
+            const titleRaw = document.getElementById('lessonTitle').value;
+            const titleHtml = titleRaw.replace(/\n/g, '<br>');
+            const vocabRaw = document.getElementById('vocabList').value.trim().split('\n');
+            const validVocabs = vocabRaw.filter(line => line.includes('|') || line.includes('\t'));
+            
+            // 1. Tải trước toàn bộ dữ liệu song song
+            let allChars = [];
+            validVocabs.forEach(line => {
+                const parts = line.split(/\t|\|/);
+                const word = (parts[0] || "").replace(/\s/g, '');
+                allChars.push(...word.split(''));
+            });
+            const uniqueChars = [...new Set(allChars.filter(c => !/[，。！？、]/.test(c)))];
+            await Promise.all(uniqueChars.map(char => fetchHanziData(char)));
+
+            // 2. Thuật toán nhúng DOM và đo lường tự động ngắt trang
+            const outputContainer = document.getElementById('outputContainer');
+            outputContainer.innerHTML = '';
+
+            function createPageElement() {
+                const page = document.createElement('div');
+                page.className = 'a4-page';
+                page.innerHTML = `
+                    <div class="watermark-layer"></div>
+                    <div class="header-title">${titleHtml}</div>
+                    <div class="student-info">
+                        <span>姓名：</span>
+                        <span>年&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;月&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;日</span>
+                    </div>
+                    <div class="tables-container"></div>
+                    <div class="page-number"></div>
+                `;
+                return page;
+            }
+
+            let pageNum = 1;
+            let currentPage = createPageElement();
+            outputContainer.appendChild(currentPage);
+            let tablesContainer = currentPage.querySelector('.tables-container');
+
+            for (let idx = 0; idx < validVocabs.length; idx++) {
+                const line = validVocabs[idx].trim();
+                const tableHtml = generateTableHTML(line);
+                
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = tableHtml.trim();
+                const tableNode = tempDiv.firstElementChild;
+                
+                // Gắn bảng từ vựng vào trang hiện tại
+                tablesContainer.appendChild(tableNode);
+                
+                // ĐO LƯỜNG TỌA ĐỘ
+                const pageRect = currentPage.getBoundingClientRect();
+                const tablesRect = tablesContainer.getBoundingClientRect();
+                
+                // Nếu bảng cuối cùng đẩy tổng chiều cao chạm mốc nguy hiểm (cách đáy 80px / 21mm)
+                // Nó sẽ tự động rút bảng đó ra, đánh số trang và chuyển bảng đó qua trang mới!
+                if (tablesRect.bottom > pageRect.bottom - 80 && tablesContainer.children.length > 1) {
+                    tablesContainer.removeChild(tableNode);
+                    currentPage.querySelector('.page-number').innerText = `- ${pageNum} -`;
+                    
+                    pageNum++; // Chuyển trang
+                    currentPage = createPageElement();
+                    outputContainer.appendChild(currentPage);
+                    tablesContainer = currentPage.querySelector('.tables-container');
+                    
+                    tablesContainer.appendChild(tableNode); // Dán lại vào trang mới
+                }
+            }
+            
+            // Đánh số trang cho trang cuối cùng
+            if (currentPage) {
+                currentPage.querySelector('.page-number').innerText = `- ${pageNum} -`;
+            }
+
+            btn.innerText = "🔄 Cập nhật Xem Trước";
+            btn.disabled = false;
+        } catch (error) {
+            alert("Lỗi: " + error.message);
+            document.getElementById('btn-generate').disabled = false;
+        }
+    }
+
+    window.onload = generateSheet;
+</script>
+
+</body>
+</html>

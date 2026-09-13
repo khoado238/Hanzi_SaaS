@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Đăng ký Nhượng quyền</title>
+    <style>
+        body { font-family: Arial; background: #f0f2f5; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .box { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); width: 350px; text-align: center; }
+        input { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;}
+        button { width: 100%; padding: 12px; background: #1976D2; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;}
+        .success { color: green; font-weight: bold; line-height: 1.5; }
+    </style>
+</head>
+<body>
+    <div class="box">
+        {% if success %}
+            <h3 class="success">Đăng ký thành công! 🎉</h3>
+            <p>Yêu cầu của bạn đã được gửi tới Admin. Vui lòng chờ phê duyệt để có thể sử dụng hệ thống.</p>
+            <a href="/login/">Quay lại trang Đăng nhập</a>
+        {% else %}
+            <h2>Đăng ký Đối tác</h2>
+            <form method="POST">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <button type="submit">Gửi yêu cầu đăng ký</button>
+            </form>
+            <p><a href="/login/">Đã có tài khoản? Đăng nhập</a></p>
+        {% endif %}
+    </div>
+</body>
+</html>
