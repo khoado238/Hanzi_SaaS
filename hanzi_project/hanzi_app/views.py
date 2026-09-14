@@ -1,6 +1,8 @@
 import hmac
 import hashlib
 import subprocess
+import urllib.request
+import urllib.parse
 from django.http import HttpResponse, HttpResponseForbidden
 from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import render, redirect
@@ -24,6 +26,21 @@ def register_view(request):
                 watermark_text=form.cleaned_data['watermark']
             )
             success = True
+
+            # --- ĐOẠN CODE GỬI THÔNG BÁO TELEGRAM ---
+            bot_token = '8705917707:AAEGbjtzg8Co-KD8pJqqSnmnduqcSIT3qXM'
+            chat_id = '1334036104'
+            message = f"🚨 CÓ ĐỐI TÁC MỚI ĐĂNG KÝ!\n\n👤 Username: {user.username}\n📝 Watermark: {form.cleaned_data['watermark']}\n\n👉 Vào trang /admin để duyệt ngay sếp nhé!"
+            
+            try:
+                url = f"https://api.telegram.org/bot{bot_token}/sendMessage"
+                data = urllib.parse.urlencode({'chat_id': chat_id, 'text': message}).encode('utf-8')
+                req = urllib.request.Request(url, data=data)
+                urllib.request.urlopen(req, timeout=5)
+            except Exception as e:
+                pass # Nếu lỗi gửi tin thì web vẫn cứ đăng ký thành công, không báo lỗi cho người dùng
+            # ----------------------------------------
+
     else:
         form = PartnerRegistrationForm()
     return render(request, 'register.html', {'form': form, 'success': success})
