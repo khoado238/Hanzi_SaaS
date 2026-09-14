@@ -9,19 +9,16 @@ from django.contrib.auth.decorators import login_required
 from .forms import PartnerRegistrationForm
 from .models import PartnerProfile
 
-# 1. TRANG ĐĂNG KÝ (Dành cho đối tác mới)
+# 1. TRANG ĐĂNG KÝ
 def register_view(request):
     success = False
     if request.method == 'POST':
         form = PartnerRegistrationForm(request.POST)
         if form.is_valid():
-            # Tạo tài khoản nhưng KHÓA LẠI chờ phê duyệt
             user = form.save(commit=False)
             user.set_password(form.cleaned_data['password'])
-            user.is_active = False # Mấu chốt là dòng này
+            user.is_active = False
             user.save()
-
-            # Lưu Watermark vào Database
             PartnerProfile.objects.create(
                 user=user,
                 watermark_text=form.cleaned_data['watermark']
@@ -29,7 +26,6 @@ def register_view(request):
             success = True
     else:
         form = PartnerRegistrationForm()
-    
     return render(request, 'register.html', {'form': form, 'success': success})
 
 # 2. TRANG ĐĂNG NHẬP
@@ -44,7 +40,6 @@ def login_view(request):
             login(request, user)
             return redirect('hanzi_tool')
         else:
-            # Kiểm tra xem có phải do chưa được duyệt không
             try:
                 from django.contrib.auth.models import User
                 check_user = User.objects.get(username=u)
@@ -57,7 +52,7 @@ def login_view(request):
 
     return render(request, 'login.html', {'error': error_message})
 
-# 3. TRANG CÔNG CỤ (Giữ nguyên như cũ)
+# 3. TRANG CÔNG CỤ
 @login_required(login_url='/login/') 
 def hanzi_tool_view(request):
     watermark_text = request.user.username 
@@ -70,29 +65,33 @@ def hanzi_tool_view(request):
 # 4. WEBHOOK TỰ ĐỘNG CẬP NHẬT CODE
 @csrf_exempt
 def github_webhook(request):
-    # Mật mã bảo mật (Bạn có thể đổi thành chữ khác nếu muốn)
     secret_key = 'HanziSaaS2026' 
     
-    # Kiểm tra xem có phải GitHub gọi không
     github_signature = request.META.get('HTTP_X_HUB_SIGNATURE_256')
     if not github_signature:
         return HttpResponseForbidden('Không có quyền truy cập!')
 
-    # Xác thực mật mã
     signature = github_signature.replace('sha256=', '')
     mac = hmac.new(secret_key.encode(), msg=request.body, digestmod=hashlib.sha256)
     if not hmac.compare_digest(mac.hexdigest(), signature):
         return HttpResponseForbidden('Sai mật mã!')
 
-    # Nếu đúng mật mã, ra lệnh tự động Pull và Reload
     if request.method == 'POST':
         try:
-            # 1. Kéo code về
-            subprocess.run(['git', 'pull'], cwd='/home/ddkhoa238/hanzi_project', check=True)
-            # 2. Khởi động lại Server
+            # Cố gắng kéo code về, nếu lỗi sẽ bắt lại thông báo của Git
+            subprocess.run(
+                ['git', 'pull'], 
+                cwd='/home/ddkhoa238/hanzi_project', 
+                capture_output=True, 
+                text=True, 
+                check=True
+            )
             subprocess.run(['touch', '/var/www/ddkhoa238_pythonanywhere_com_wsgi.py'], check=True)
             return HttpResponse('Đã cập nhật code và khởi động lại Server!', status=200)
-        except subprocess.CalledProcessError:
-            return HttpResponse('Có lỗi xảy ra khi kéo code.', status=500)
+        except subprocess.CalledProcessError as e:
+            # Trả thẳng lỗi Git về GitHub để xem
+            return HttpResponse(f"Git báo lỗi: {e.stderr}", status=500)
+        except Exception as e:
+            return HttpResponse(f"Lỗi hệ thống: {str(e)}", status=500)
     
     return HttpResponseForbidden('Phương thức không hợp lệ.')
