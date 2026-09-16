@@ -100,28 +100,31 @@
         .text-black { color: #000; }
         .text-gray { color: #d0d0d0; }
 
-        /* ================= KHU VỰC HƯỚNG DẪN NÉT VÀ NGHĨA (AUTO-SCALING) ================= */
-        .stroke-cell { background: #fff; vertical-align: middle !important; padding: 4px 10px !important; overflow: hidden; }
-        .stroke-cell-content { display: flex; justify-content: space-between; align-items: center; width: 100%; height: 100%; gap: 10px; }
+        /* ================= KHU VỰC HƯỚNG DẪN NÉT VÀ NGHĨA (CẬP NHẬT WRAP) ================= */
+        .stroke-cell { background: #fff; vertical-align: middle !important; padding: 6px 10px !important; }
+        .stroke-cell-content { display: flex; justify-content: space-between; align-items: center; width: 100%; height: 100%; gap: 15px; }
         
         .stroke-orders { 
-            flex: 1 1 auto; display: flex; flex-direction: column; justify-content: center; 
-            gap: 3px; min-width: 0; overflow: hidden;
-        }
-        .stroke-row { display: flex; align-items: center; min-height: 0; }
-        .stroke-label { 
-            font-size: 13px; font-weight: bold; width: 38px; flex-shrink: 0; 
-            white-space: nowrap; font-family: "KaiTi", "Kaiti SC", STKaiti, serif; 
+            flex: 1 1 auto; display: flex; flex-direction: column; justify-content: center; gap: 6px; 
         }
         
-        .stroke-list { 
-            display: flex; flex-wrap: nowrap; gap: 2px; align-items: center; 
-            min-width: 0; /* Bắt buộc để SVGs có thể bị ép lại */
+        /* Căn lên trên cùng (flex-start) để label số nét không bị rớt xuống giữa khi có nhiều dòng */
+        .stroke-row { display: flex; align-items: flex-start; min-height: 24px; }
+        
+        .stroke-label { 
+            font-size: 14px; font-weight: bold; width: 42px; flex-shrink: 0; 
+            white-space: nowrap; font-family: "KaiTi", "Kaiti SC", STKaiti, serif; 
+            margin-top: 3px; /* Căn chỉnh cho thẳng hàng với dòng nét đầu tiên */
         }
+        
+        /* ĐỔI NOWRAP THÀNH WRAP ĐỂ TỰ ĐỘNG XUỐNG DÒNG */
+        .stroke-list { 
+            display: flex; flex-wrap: wrap; gap: 4px; align-items: center; 
+        }
+        
+        /* FIX CỨNG SIZE TO RÕ RÀNG (24px), KHÔNG CO GIÃN NỮA */
         .stroke-svg { 
-            width: 24px; height: auto; aspect-ratio: 1; /* Tự giữ tỷ lệ vuông */
-            flex-shrink: 1; /* Cho phép bị ép nhỏ nếu nét quá nhiều */
-            min-width: 8px; /* Không nhỏ hơn mức này */
+            width: 24px; height: 24px; flex-shrink: 0; 
         }
 
         .meaning-text { 
@@ -151,7 +154,7 @@ Bài 1:</textarea>
 对不起  duì bu qǐ   Xin lỗi
 没关系  méi guān xi Không sao, không có gì
 没事    méishì  Không sao, không có gì
-老师    lǎoshī  các bạn, các anh, các chị... (đại từ nhân xưng ngôi thứ hai số nhiều)</textarea>
+打篮球 dǎ lánqiú chơi bóng rổ</textarea>
     
     <div class="btn-group">
         <button id="btn-generate" onclick="generateSheet()">🔄 Cập nhật Xem Trước</button>
@@ -167,7 +170,6 @@ Bài 1:</textarea>
     const TOTAL_COLS = 14; 
     const hanziCache = {};
 
-    // Khởi tạo tải dữ liệu từ CDN
     async function fetchHanziData(char) {
         if (hanziCache[char]) return hanziCache[char]; 
         try {
@@ -181,14 +183,13 @@ Bài 1:</textarea>
         return null;
     }
 
-    // Vẽ SVG Nét chữ (Nhận thêm biến svgSize để ép size)
-    function createStrokeHtml(data, svgSize) {
+    // Đã xóa biến svgSize, render nguyên bản HTML SVG
+    function createStrokeHtml(data) {
         if (!data) return `<span style="font-size:12px; color:red;">[Lỗi]</span>`;
         const strokes = data.strokes;
         let html = `<div class="stroke-label">${strokes.length}画</div><div class="stroke-list">`;
         for (let i = 0; i < strokes.length; i++) {
-            // Nhúng thẳng inline style max-width để không bị tràn
-            html += `<svg viewBox="0 0 1024 1024" class="stroke-svg" style="max-width:${svgSize}px;">`;
+            html += `<svg viewBox="0 0 1024 1024" class="stroke-svg">`;
             html += `<g transform="scale(1, -1) translate(0, -900)">`;
             for (let j = 0; j <= i; j++) {
                 const strokeColor = (j === i) ? "#f25c54" : "#000000"; 
@@ -200,7 +201,6 @@ Bài 1:</textarea>
         return html;
     }
 
-    // Hàm tạo khối HTML cho 1 từ vựng độc lập
     function generateTableHTML(line) {
         const parts = line.split(/\t|\|/);
         const word = (parts[0] || "").replace(/\s/g, ''); 
@@ -239,26 +239,20 @@ Bài 1:</textarea>
             for(let i=0; i<N; i++) tableHtml += `<td class="py-cell text-black"></td>`;
         }
         
-        // --- LOGIC 1: ĐO TỌA ĐỘ NÉT CHỮ ĐỂ ÉP SVG SIZE (Tránh tràn dọc) ---
-        let svgSize = 24; 
-        if (chars.length === 3) svgSize = 18;  // Nếu 3 chữ -> Thu nhỏ xíu
-        if (chars.length >= 4) svgSize = 14;   // Nếu 4 chữ trở lên -> Thu nhỏ nhiều hơn
-
         let strokeContentHtml = '';
         for (let c = 0; c < chars.length; c++) {
             const char = chars[c];
             if (/[，。！？、]/g.test(char)) continue; 
             const data = hanziCache[char];
-            // Truyền svgSize vào để render
-            strokeContentHtml += `<div class="stroke-row">${createStrokeHtml(data, svgSize)}</div>`;
+            strokeContentHtml += `<div class="stroke-row">${createStrokeHtml(data)}</div>`;
         }
 
-        // --- LOGIC 2: ĐO CHIỀU DÀI NGHĨA TIẾNG VIỆT ĐỂ ÉP FONT SIZE (Tránh tràn ngang) ---
+        // Logic giữ font-size nhỏ khi nghĩa tiếng Việt quá dài
         let meaningStyle = "";
         if (meaning) {
-            let fSize = "15px"; // Mặc định
-            if (meaning.length > 70) fSize = "11px";      // Dài quá thì chữ nhỏ xíu
-            else if (meaning.length > 45) fSize = "12px"; // Hơi dài thì chữ vừa
+            let fSize = "15px"; 
+            if (meaning.length > 70) fSize = "11px";      
+            else if (meaning.length > 45) fSize = "12px"; 
             else if (meaning.length > 25) fSize = "13px";
             
             meaningStyle = `style="font-size: ${fSize};"`;
@@ -303,7 +297,6 @@ Bài 1:</textarea>
             const vocabRaw = document.getElementById('vocabList').value.trim().split('\n');
             const validVocabs = vocabRaw.filter(line => line.includes('|') || line.includes('\t'));
             
-            // 1. Tải trước toàn bộ dữ liệu song song
             let allChars = [];
             validVocabs.forEach(line => {
                 const parts = line.split(/\t|\|/);
@@ -313,7 +306,6 @@ Bài 1:</textarea>
             const uniqueChars = [...new Set(allChars.filter(c => !/[，。！？、]/.test(c)))];
             await Promise.all(uniqueChars.map(char => fetchHanziData(char)));
 
-            // 2. Thuật toán nhúng DOM và đo lường tự động ngắt trang
             const outputContainer = document.getElementById('outputContainer');
             outputContainer.innerHTML = '';
 
@@ -348,11 +340,9 @@ Bài 1:</textarea>
                 
                 tablesContainer.appendChild(tableNode);
                 
-                // ĐO LƯỜNG TỌA ĐỘ
                 const pageRect = currentPage.getBoundingClientRect();
                 const tablesRect = tablesContainer.getBoundingClientRect();
                 
-                // Thuật toán tách trang
                 if (tablesRect.bottom > pageRect.bottom - 80 && tablesContainer.children.length > 1) {
                     tablesContainer.removeChild(tableNode);
                     currentPage.querySelector('.page-number').innerText = `- ${pageNum} -`;
@@ -366,7 +356,6 @@ Bài 1:</textarea>
                 }
             }
             
-            // Đánh số trang cho trang cuối cùng
             if (currentPage) {
                 currentPage.querySelector('.page-number').innerText = `- ${pageNum} -`;
             }
