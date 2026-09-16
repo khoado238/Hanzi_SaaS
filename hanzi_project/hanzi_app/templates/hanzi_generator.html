@@ -100,38 +100,38 @@
         .text-black { color: #000; }
         .text-gray { color: #d0d0d0; }
 
-        /* ================= KHU VỰC HƯỚNG DẪN NÉT VÀ NGHĨA (CẬP NHẬT WRAP) ================= */
-        .stroke-cell { background: #fff; vertical-align: middle !important; padding: 6px 10px !important; }
+        /* ================= KHU VỰC HƯỚNG DẪN NÉT VÀ NGHĨA ================= */
+        /* Giảm padding dọc (từ 6px xuống 2px) để mở rộng không gian chứa chữ */
+        .stroke-cell { background: #fff; vertical-align: middle !important; padding: 2px 10px !important; }
         .stroke-cell-content { display: flex; justify-content: space-between; align-items: center; width: 100%; height: 100%; gap: 15px; }
         
         .stroke-orders { 
             flex: 1 1 auto; display: flex; flex-direction: column; justify-content: center; gap: 6px; 
         }
         
-        /* Căn lên trên cùng (flex-start) để label số nét không bị rớt xuống giữa khi có nhiều dòng */
         .stroke-row { display: flex; align-items: flex-start; min-height: 24px; }
         
         .stroke-label { 
             font-size: 14px; font-weight: bold; width: 42px; flex-shrink: 0; 
             white-space: nowrap; font-family: "KaiTi", "Kaiti SC", STKaiti, serif; 
-            margin-top: 3px; /* Căn chỉnh cho thẳng hàng với dòng nét đầu tiên */
+            margin-top: 3px; 
         }
         
-        /* ĐỔI NOWRAP THÀNH WRAP ĐỂ TỰ ĐỘNG XUỐNG DÒNG */
         .stroke-list { 
             display: flex; flex-wrap: wrap; gap: 4px; align-items: center; 
         }
         
-        /* FIX CỨNG SIZE TO RÕ RÀNG (24px), KHÔNG CO GIÃN NỮA */
         .stroke-svg { 
             width: 24px; height: 24px; flex-shrink: 0; 
         }
 
         .meaning-text { 
-            flex: 0 1 auto; max-width: 250px; min-width: 50px; font-family: "Times New Roman", serif; 
-            font-weight: bold; color: #000000; padding: 2px 5px 2px 10px; border-left: 1.5px dashed #ccc; 
+            flex: 0 1 auto; max-width: 280px; min-width: 50px; font-family: "Times New Roman", serif; 
+            font-size: 15px; /* Cố định 15px to rõ ràng */
+            font-weight: bold; color: #000000; padding: 0 5px 0 10px; border-left: 1.5px dashed #ccc; 
             text-align: left; line-height: 1.25; text-wrap: pretty;
-            display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden;
+            display: -webkit-box; -webkit-line-clamp: 6; /* Cho phép rớt tối đa 6 dòng */
+            -webkit-box-orient: vertical; overflow: hidden;
         }
     </style>
 </head>
@@ -154,7 +154,8 @@ Bài 1:</textarea>
 对不起  duì bu qǐ   Xin lỗi
 没关系  méi guān xi Không sao, không có gì
 没事    méishì  Không sao, không có gì
-打篮球 dǎ lánqiú chơi bóng rổ</textarea>
+打篮球 dǎ lánqiú chơi bóng rổ
+吧  ba  đi, nào, nhé... (trợ từ ngữ khí được dùng ở cuối câu đề nghị, yêu cầu hay mệnh lệnh)</textarea>
     
     <div class="btn-group">
         <button id="btn-generate" onclick="generateSheet()">🔄 Cập nhật Xem Trước</button>
@@ -183,7 +184,6 @@ Bài 1:</textarea>
         return null;
     }
 
-    // Đã xóa biến svgSize, render nguyên bản HTML SVG
     function createStrokeHtml(data) {
         if (!data) return `<span style="font-size:12px; color:red;">[Lỗi]</span>`;
         const strokes = data.strokes;
@@ -247,21 +247,12 @@ Bài 1:</textarea>
             strokeContentHtml += `<div class="stroke-row">${createStrokeHtml(data)}</div>`;
         }
 
-        // Logic giữ font-size nhỏ khi nghĩa tiếng Việt quá dài
-        let meaningStyle = "";
-        if (meaning) {
-            let fSize = "15px"; 
-            if (meaning.length > 70) fSize = "11px";      
-            else if (meaning.length > 45) fSize = "12px"; 
-            else if (meaning.length > 25) fSize = "13px";
-            
-            meaningStyle = `style="font-size: ${fSize};"`;
-        }
-
+        // Đã gỡ bỏ thuật toán bóp font size ở đây
+        // Chữ sẽ luôn hiển thị to, nếu dài sẽ rớt xuống tận 6 dòng (nhờ CSS -webkit-line-clamp)
         tableHtml += `<td rowspan="2" colspan="${M}" class="stroke-cell">
             <div class="stroke-cell-content">
                 <div class="stroke-orders">${strokeContentHtml}</div>
-                ${meaning ? `<div class="meaning-text" ${meaningStyle}>${meaning}</div>` : ''}
+                ${meaning ? `<div class="meaning-text">${meaning}</div>` : ''}
             </div>
         </td></tr><tr>`;
 
