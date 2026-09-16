@@ -100,21 +100,35 @@
         .text-black { color: #000; }
         .text-gray { color: #d0d0d0; }
 
-        /* ================= KHU VỰC HƯỚNG DẪN NÉT VÀ NGHĨA ================= */
-        .stroke-cell { background: #fff; vertical-align: middle !important; padding: 4px 10px !important; }
-        .stroke-cell-content { display: flex; justify-content: space-between; align-items: center; width: 100%; height: 100%; gap: 15px; }
+        /* ================= KHU VỰC HƯỚNG DẪN NÉT VÀ NGHĨA (AUTO-SCALING) ================= */
+        .stroke-cell { background: #fff; vertical-align: middle !important; padding: 4px 10px !important; overflow: hidden; }
+        .stroke-cell-content { display: flex; justify-content: space-between; align-items: center; width: 100%; height: 100%; gap: 10px; }
         
-        .stroke-orders { flex: 1 0 auto; display: flex; flex-direction: column; justify-content: center; gap: 5px; overflow: visible;}
-        .stroke-row { display: flex; align-items: center; min-height: 26px; }
-        .stroke-label { font-size: 15px; font-weight: bold; width: 42px; flex-shrink: 0; white-space: nowrap; font-family: "KaiTi", "Kaiti SC", STKaiti, serif; }
+        .stroke-orders { 
+            flex: 1 1 auto; display: flex; flex-direction: column; justify-content: center; 
+            gap: 3px; min-width: 0; overflow: hidden;
+        }
+        .stroke-row { display: flex; align-items: center; min-height: 0; }
+        .stroke-label { 
+            font-size: 13px; font-weight: bold; width: 38px; flex-shrink: 0; 
+            white-space: nowrap; font-family: "KaiTi", "Kaiti SC", STKaiti, serif; 
+        }
         
-        .stroke-list { display: flex; flex-wrap: nowrap; gap: 4px; align-items: center; }
-        .stroke-svg { width: 25px; height: 25px; flex-shrink: 0; }
+        .stroke-list { 
+            display: flex; flex-wrap: nowrap; gap: 2px; align-items: center; 
+            min-width: 0; /* Bắt buộc để SVGs có thể bị ép lại */
+        }
+        .stroke-svg { 
+            width: 24px; height: auto; aspect-ratio: 1; /* Tự giữ tỷ lệ vuông */
+            flex-shrink: 1; /* Cho phép bị ép nhỏ nếu nét quá nhiều */
+            min-width: 8px; /* Không nhỏ hơn mức này */
+        }
 
         .meaning-text { 
-            flex: 1 1 auto; max-width: 320px; min-width: 80px; font-size: 15px; font-family: "Times New Roman", serif; 
-            font-weight: bold; color: #000000; padding: 5px 10px 5px 15px; border-left: 1.5px dashed #ccc; 
-            text-align: left; line-height: 1.35; text-wrap: pretty;
+            flex: 0 1 auto; max-width: 250px; min-width: 50px; font-family: "Times New Roman", serif; 
+            font-weight: bold; color: #000000; padding: 2px 5px 2px 10px; border-left: 1.5px dashed #ccc; 
+            text-align: left; line-height: 1.25; text-wrap: pretty;
+            display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden;
         }
     </style>
 </head>
@@ -129,15 +143,15 @@ Bài 1:</textarea>
     
     <label>Danh sách từ vựng:</label>
     <div class="hint">Copy 3 cột từ Excel/Google Sheets dán vào đây.<br><b>Thứ tự:</b> Chữ Hán | Pinyin | Nghĩa</div>
-    <textarea id="vocabList" rows="12">不客气	bú kèqi	Đừng khách sáo
-好	hǎo	Tốt, khỏe
-学生	xuéshēng	Học sinh
-您好	nínhǎo	Chào ngài
-请坐	qǐngzuò	Mời ngồi
-对不起	duì bu qǐ	Xin lỗi
-没关系	méi guān xi	Không sao, không có gì
-没事	méishì	Không sao, không có gì
-老师	lǎoshī	các bạn, các anh, các chị... (đại từ nhân xưng ngôi thứ hai số nhiều)</textarea>
+    <textarea id="vocabList" rows="12">不客气   bú kèqi Đừng khách sáo
+好  hǎo Tốt, khỏe
+学生    xuéshēng    Học sinh
+您好    nínhǎo  Chào ngài
+请坐    qǐngzuò Mời ngồi
+对不起  duì bu qǐ   Xin lỗi
+没关系  méi guān xi Không sao, không có gì
+没事    méishì  Không sao, không có gì
+老师    lǎoshī  các bạn, các anh, các chị... (đại từ nhân xưng ngôi thứ hai số nhiều)</textarea>
     
     <div class="btn-group">
         <button id="btn-generate" onclick="generateSheet()">🔄 Cập nhật Xem Trước</button>
@@ -167,13 +181,14 @@ Bài 1:</textarea>
         return null;
     }
 
-    // Vẽ SVG Nét chữ
-    function createStrokeHtml(data) {
+    // Vẽ SVG Nét chữ (Nhận thêm biến svgSize để ép size)
+    function createStrokeHtml(data, svgSize) {
         if (!data) return `<span style="font-size:12px; color:red;">[Lỗi]</span>`;
         const strokes = data.strokes;
         let html = `<div class="stroke-label">${strokes.length}画</div><div class="stroke-list">`;
         for (let i = 0; i < strokes.length; i++) {
-            html += `<svg viewBox="0 0 1024 1024" class="stroke-svg">`;
+            // Nhúng thẳng inline style max-width để không bị tràn
+            html += `<svg viewBox="0 0 1024 1024" class="stroke-svg" style="max-width:${svgSize}px;">`;
             html += `<g transform="scale(1, -1) translate(0, -900)">`;
             for (let j = 0; j <= i; j++) {
                 const strokeColor = (j === i) ? "#f25c54" : "#000000"; 
@@ -224,18 +239,35 @@ Bài 1:</textarea>
             for(let i=0; i<N; i++) tableHtml += `<td class="py-cell text-black"></td>`;
         }
         
+        // --- LOGIC 1: ĐO TỌA ĐỘ NÉT CHỮ ĐỂ ÉP SVG SIZE (Tránh tràn dọc) ---
+        let svgSize = 24; 
+        if (chars.length === 3) svgSize = 18;  // Nếu 3 chữ -> Thu nhỏ xíu
+        if (chars.length >= 4) svgSize = 14;   // Nếu 4 chữ trở lên -> Thu nhỏ nhiều hơn
+
         let strokeContentHtml = '';
         for (let c = 0; c < chars.length; c++) {
             const char = chars[c];
             if (/[，。！？、]/g.test(char)) continue; 
             const data = hanziCache[char];
-            strokeContentHtml += `<div class="stroke-row">${createStrokeHtml(data)}</div>`;
+            // Truyền svgSize vào để render
+            strokeContentHtml += `<div class="stroke-row">${createStrokeHtml(data, svgSize)}</div>`;
+        }
+
+        // --- LOGIC 2: ĐO CHIỀU DÀI NGHĨA TIẾNG VIỆT ĐỂ ÉP FONT SIZE (Tránh tràn ngang) ---
+        let meaningStyle = "";
+        if (meaning) {
+            let fSize = "15px"; // Mặc định
+            if (meaning.length > 70) fSize = "11px";      // Dài quá thì chữ nhỏ xíu
+            else if (meaning.length > 45) fSize = "12px"; // Hơi dài thì chữ vừa
+            else if (meaning.length > 25) fSize = "13px";
+            
+            meaningStyle = `style="font-size: ${fSize};"`;
         }
 
         tableHtml += `<td rowspan="2" colspan="${M}" class="stroke-cell">
             <div class="stroke-cell-content">
                 <div class="stroke-orders">${strokeContentHtml}</div>
-                ${meaning ? `<div class="meaning-text">${meaning}</div>` : ''}
+                ${meaning ? `<div class="meaning-text" ${meaningStyle}>${meaning}</div>` : ''}
             </div>
         </td></tr><tr>`;
 
@@ -314,25 +346,23 @@ Bài 1:</textarea>
                 tempDiv.innerHTML = tableHtml.trim();
                 const tableNode = tempDiv.firstElementChild;
                 
-                // Gắn bảng từ vựng vào trang hiện tại
                 tablesContainer.appendChild(tableNode);
                 
                 // ĐO LƯỜNG TỌA ĐỘ
                 const pageRect = currentPage.getBoundingClientRect();
                 const tablesRect = tablesContainer.getBoundingClientRect();
                 
-                // Nếu bảng cuối cùng đẩy tổng chiều cao chạm mốc nguy hiểm (cách đáy 80px / 21mm)
-                // Nó sẽ tự động rút bảng đó ra, đánh số trang và chuyển bảng đó qua trang mới!
+                // Thuật toán tách trang
                 if (tablesRect.bottom > pageRect.bottom - 80 && tablesContainer.children.length > 1) {
                     tablesContainer.removeChild(tableNode);
                     currentPage.querySelector('.page-number').innerText = `- ${pageNum} -`;
                     
-                    pageNum++; // Chuyển trang
+                    pageNum++; 
                     currentPage = createPageElement();
                     outputContainer.appendChild(currentPage);
                     tablesContainer = currentPage.querySelector('.tables-container');
                     
-                    tablesContainer.appendChild(tableNode); // Dán lại vào trang mới
+                    tablesContainer.appendChild(tableNode); 
                 }
             }
             
