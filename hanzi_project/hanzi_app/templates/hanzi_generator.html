@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Công Cụ Luyện Viết Chữ Hán - Master (V36 - Watermark Opacity)</title>
+    <title>Công Cụ Luyện Viết Chữ Hán - Master (V37 - Fixed A4 Size)</title>
     <style>
         /* ================= GIAO DIỆN CHUNG & LAYOUT ================= */
         body { 
@@ -20,8 +20,6 @@
         .left-panel label { font-weight: bold; margin-top: 15px; display: block; color: #333; }
         .left-panel textarea { width: 100%; padding: 10px; margin-top: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; resize: vertical; }
         .left-panel input[type="number"] { width: 100%; padding: 10px; margin-top: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; }
-        
-        /* Style cho thanh trượt Slider */
         .left-panel input[type="range"] { width: 100%; margin-top: 8px; cursor: pointer; accent-color: #c62828; }
 
         .btn-group { display: flex; flex-direction: column; gap: 10px; margin-top: 25px; }
@@ -42,18 +40,23 @@
             .left-panel { display: none !important; } 
             .right-panel { padding: 0; display: block; }
             .a4-page { 
-                box-shadow: none !important; margin: 0 !important; width: 210mm; height: 297mm; 
+                box-shadow: none !important; margin: 0 !important; 
+                width: 210mm !important; height: 297mm !important; 
+                min-height: 297mm !important; flex-shrink: 0 !important;
                 padding: 12mm 15mm 25mm 15mm !important; 
                 page-break-after: always; 
             }
             .a4-page:last-child { page-break-after: auto; }
         }
         
-        /* ================= KHUNG TRANG A4 ================= */
+        /* ================= KHUNG TRANG A4 CHUẨN ================= */
         .a4-page {
             display: block; 
             position: relative; 
-            width: 210mm; height: 297mm; 
+            width: 210mm; 
+            height: 297mm; 
+            min-height: 297mm; /* Khóa cứng chiều cao A4 */
+            flex-shrink: 0;    /* Cấm thu nhỏ trang khi Xem Trước */
             background: white; margin-bottom: 30px;
             padding: 12mm 15mm 25mm 15mm; 
             box-sizing: border-box; box-shadow: 0 4px 15px rgba(0,0,0,0.3);
@@ -76,7 +79,6 @@
             font-size: 110px;
             font-family: "Times New Roman", serif;
             font-weight: bold;
-            /* Truyền biến CSS để JS có thể thay đổi mượt mà */
             color: rgba(0, 0, 0, var(--wm-opacity, 0.035));
             white-space: nowrap;
             user-select: none;
@@ -173,7 +175,6 @@
     <textarea id="lessonTitle" rows="2" oninput="autoUpdate()">第一课、
 Bài 1: AI小语，你好！</textarea>
 
-    <!-- Tích hợp thanh trượt độ đậm Watermark -->
     <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: 15px;">
         <label style="margin-top: 0;">Độ đậm Watermark:</label>
         <span id="wmOpacityVal" style="font-size: 13px; font-weight: bold; color: #c62828;">3.5%</span>
@@ -366,7 +367,6 @@ Bài 1: AI小语，你好！</textarea>
             const validVocabs = vocabRaw.filter(line => line.includes('|') || line.includes('\t'));
             
             const numRowsInput = parseInt(document.getElementById('numRows').value) || 1;
-            // Lấy giá trị thanh trượt Opacity
             const wmOpacityInput = document.getElementById('wmOpacity').value; 
 
             let allChars = [];
@@ -384,7 +384,6 @@ Bài 1: AI小语，你好！</textarea>
             function createPageElement() {
                 const page = document.createElement('div');
                 page.className = 'a4-page';
-                // Gán biến CSS để tuỳ chỉnh độ mờ Watermark
                 page.style.setProperty('--wm-opacity', wmOpacityInput);
                 page.innerHTML = `
                     <div class="watermark-layer"></div>
