@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Công Cụ Luyện Viết Chữ Hán - Master (V50 - Hoàn thiện Template & Layout)</title>
+    <title>Công Cụ Luyện Viết Chữ Hán - Master (V51 - Bổ sung Viết Từng Nét)</title>
     <style>
         /* ================= GIAO DIỆN CHUNG & LAYOUT ================= */
         body { 
@@ -176,7 +176,8 @@
             background-size: 100% 100%;
             -webkit-print-color-adjust: exact; print-color-adjust: exact;
         }
-        .stroke-svg { width: 100%; height: 100%; display: block; }
+        
+        .stroke-svg { width: 100%; height: 100%; display: block; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 
         .v-practice { display: flex; flex-direction: column; gap: 6px; margin-bottom: 6px; }
         .practice-row { display: flex; width: 100%; flex-wrap: nowrap; justify-content: space-between; }
@@ -211,7 +212,6 @@
         }
         .py-box.trace-text span { position: relative; z-index: 1; }
 
-        /* Lớp CSS mới: Hỗ trợ Chữ mẫu ĐEN ĐẬM (Solid) cho Template Câu Mẫu */
         .py-box.solid-text { 
             position: relative;
             background-image: none !important; 
@@ -248,8 +248,8 @@
             -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important;
         }
         .tzg-box.trace-text span { position: relative; z-index: 1; }
+        .tzg-box.trace-text svg { position: relative; z-index: 1; } /* Đảm bảo SVG luôn nổi lên */
 
-        /* Lớp CSS mới: Hỗ trợ Chữ mẫu ĐEN ĐẬM (Solid) */
         .tzg-box.solid-text { 
             position: relative;
             background-image: none !important; 
@@ -263,7 +263,6 @@
         }
         .tzg-box.solid-text span { position: relative; z-index: 1; }
 
-        /* TĂNG CHIỀU CAO LUYỆN VIẾT TỰ DO */
         .v-free { display: flex; align-items: flex-end; margin-top: 5px; gap: 10px; }
         .free-label { font-size: 14px; color: #111; white-space: nowrap; font-family: "Times New Roman", serif; font-weight: bold;}
         .dotted-line { flex: 1; border-bottom: 1.5px dotted #999; height: 25px; margin-bottom: 5px;}
@@ -288,7 +287,8 @@
     <label>Mẫu thiết kế (Template):</label>
     <select id="templateType" class="template-select" onchange="toggleInputs(); autoUpdate();">
         <option value="1">1. Từ vựng chi tiết (Hán + Pinyin + Nghĩa)</option>
-        <option value="2">2. Tách từng chữ Hán (Tự động tách)</option>
+        <option value="2">2. Tách từng chữ Hán (Lưới thường)</option>
+        <option value="5">5. Tách từng chữ Hán (Viết từng nét)</option>
         <option value="3">3. Trang trắng luyện viết</option>
         <option value="4">4. Luyện viết Đoạn văn / Câu</option>
     </select>
@@ -297,7 +297,7 @@
     <textarea id="lessonTitle" rows="2" oninput="autoUpdate()">第一课、
 Bài 1: AI小语，你好！</textarea>
 
-    <!-- BLOCK 1 & 2: Dành cho Từ vựng -->
+    <!-- BLOCK 1, 2 & 5: Dành cho Từ vựng / Chữ lẻ -->
     <div id="block-vocab">
         <label>Danh sách dữ liệu:</label>
         <div class="hint" id="vocabHint">Copy 3 cột từ Excel dán vào đây.<br><b>Thứ tự:</b> Chữ Hán | Pinyin | Nghĩa</div>
@@ -356,10 +356,10 @@ Bài 1: AI小语，你好！</textarea>
         const type = document.getElementById('templateType').value;
         const labelNumRows = document.getElementById('label-numRows');
         
-        document.getElementById('block-vocab').style.display = (type === '1' || type === '2') ? 'block' : 'none';
+        document.getElementById('block-vocab').style.display = (type === '1' || type === '2' || type === '5') ? 'block' : 'none';
         document.getElementById('block-paragraph').style.display = (type === '4') ? 'block' : 'none';
         document.getElementById('block-numPages').style.display = (type === '3') ? 'block' : 'none';
-        document.getElementById('block-numRows').style.display = (type === '1' || type === '2' || type === '4') ? 'block' : 'none';
+        document.getElementById('block-numRows').style.display = (type === '1' || type === '2' || type === '4' || type === '5') ? 'block' : 'none';
         
         const hint = document.getElementById('vocabHint');
         if (type === '1') {
@@ -368,6 +368,9 @@ Bài 1: AI小语，你好！</textarea>
         } else if (type === '2') {
             hint.innerHTML = 'Dán chữ Hán, từ vựng hoặc cụm từ.<br>Hệ thống tự động <b>tách từng chữ Hán</b> thành các mục riêng biệt.';
             labelNumRows.innerText = 'Số hàng tập viết (mỗi chữ):';
+        } else if (type === '5') {
+            hint.innerHTML = 'Dán chữ Hán, từ vựng hoặc cụm từ.<br>Hệ thống sẽ <b>phân tích nét bút (Stroke)</b> từng chữ một.';
+            labelNumRows.innerText = 'Số hàng tập viết (Tối thiểu):';
         } else if (type === '4') {
             labelNumRows.innerText = 'Số lần viết (áp dụng cho Đoạn văn):';
         }
@@ -428,6 +431,75 @@ Bài 1: AI小语，你好！</textarea>
         }
         html += `</div>`;
         return html;
+    }
+
+    // ==========================================
+    // MODULE: Template 5 (Viết Từng Nét Bút)
+    // ==========================================
+    function generateStrokeByStrokeHTML(char, index, numRows, showPinyinBox) {
+        if (!char) return '';
+        const data = hanziCache[char];
+        if (!data) return generateSimpleVocabHTML(char, index, numRows, showPinyinBox); // Backup
+
+        const strokes = data.strokes;
+        const idxStr = index.toString().padStart(2, '0');
+        
+        // Tính toán số dòng cần thiết. 1 dòng có 12 ô. Cần chỗ cho các nét + 2 ô in mờ đồ chữ.
+        let actualNumRows = numRows;
+        if (strokes.length + 2 > actualNumRows * 12) {
+            actualNumRows = Math.ceil((strokes.length + 3) / 12);
+        }
+
+        let bigCharsHtml = `<div class="big-char"><span>${char}</span></div>`;
+        
+        let practiceHtml = `<div class="v-practice">`;
+        for (let r = 0; r < actualNumRows; r++) {
+            practiceHtml += `<div class="practice-row">`; 
+            for (let i = 0; i < 12; i++) {
+                let k = r * 12 + i;
+                practiceHtml += `<div class="word-group">`;
+                
+                if (showPinyinBox) {
+                    practiceHtml += `<div class="py-row"><div class="py-box" style="flex: 1;"></div></div>`;
+                }
+
+                practiceHtml += `<div class="hz-row">`;
+                if (k < strokes.length) {
+                    // Vẽ từng nét của chữ
+                    let svgPaths = '';
+                    for (let s = 0; s <= k; s++) {
+                        const color = (s === k) ? "#c62828" : "#000000"; 
+                        svgPaths += `<path d="${strokes[s]}" fill="${color}"></path>`;
+                    }
+                    const svgHtml = `<svg viewBox="0 0 1024 1024" class="stroke-svg" style="width: 85%; height: 85%;"><g transform="scale(1, -1) translate(0, -900)">${svgPaths}</g></svg>`;
+                    practiceHtml += `<div class="tzg-box trace-text">${svgHtml}</div>`;
+                } else if (k === strokes.length || k === strokes.length + 1) {
+                    // 2 ô đầu tiên sau nét cuối làm chữ in mờ để đồ theo
+                    practiceHtml += `<div class="tzg-box trace-text"><span>${char}</span></div>`;
+                } else {
+                    // Các ô còn lại để trống
+                    practiceHtml += `<div class="tzg-box"></div>`;
+                }
+                practiceHtml += `</div></div>`; 
+            }
+            practiceHtml += `</div>`; 
+        }
+        practiceHtml += `</div>`; 
+
+        return `
+        <div class="vocab-block">
+            <div class="v-top-section">
+                <div class="v-badge">${idxStr}</div>
+                <div class="v-left"><div class="big-chars">${bigCharsHtml}</div></div>
+                <div class="v-right" style="justify-content: center; padding-left: 10px;">
+                    <div class="info-row-1">
+                        <span class="total-strokes" style="font-size: 15px; font-weight: bold; color: #333;">Số nét (Strokes): ${strokes.length}</span>
+                    </div>
+                </div>
+            </div>
+            ${practiceHtml}
+            <div class="v-free"><span class="free-label">Luyện viết tự do:</span> <div class="dotted-line"></div></div>
+        </div>`;
     }
 
     // ==========================================
@@ -623,7 +695,7 @@ Bài 1: AI小语，你好！</textarea>
             let allChars = [];
             let validVocabs = [];
             
-            if (template === '1' || template === '2') {
+            if (template === '1' || template === '2' || template === '5') {
                 validVocabs = document.getElementById('vocabList').value.trim().split('\n').filter(line => line.trim().length > 0);
                 validVocabs.forEach(line => {
                     const word = line.split(/\t|\|/)[0].replace(/\s/g, '');
@@ -688,6 +760,13 @@ Bài 1: AI小语，你好！</textarea>
             else if (template === '2') {
                 uniqueChars.forEach((char, idx) => {
                     const html = generateSimpleVocabHTML(char, idx + 1, numRowsInput, showPinyinBox); 
+                    if(!html) return;
+                    appendNodeWithPagination(stringToNode(html));
+                });
+            }
+            else if (template === '5') {
+                uniqueChars.forEach((char, idx) => {
+                    const html = generateStrokeByStrokeHTML(char, idx + 1, numRowsInput, showPinyinBox); 
                     if(!html) return;
                     appendNodeWithPagination(stringToNode(html));
                 });
