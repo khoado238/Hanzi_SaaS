@@ -2,41 +2,89 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Công Cụ Luyện Viết Chữ Hán - Master (V53 - Luyện Viết Từng Nét Chuyên Sâu)</title>
+    <title>Công Cụ Luyện Viết Chữ Hán - Master (V54 - Pro UI/UX)</title>
     <style>
         /* ================= GIAO DIỆN CHUNG & LAYOUT ================= */
         body { 
-            font-family: Arial, sans-serif; margin: 0; padding: 0;
+            font-family: 'Segoe UI', Arial, sans-serif; margin: 0; padding: 0;
             display: flex; height: 100vh; overflow: hidden; background-color: #525659;
         }
         
-        /* CỘT TRÁI: NHẬP LIỆU */
+        /* ================= BẢNG ĐIỀU KHIỂN BÊN TRÁI (UI LÀM MỚI) ================= */
         .left-panel {
-            width: 400px; background: #ffffff; padding: 25px; box-sizing: border-box;
-            border-right: 1px solid #ccc; box-shadow: 2px 0 8px rgba(0,0,0,0.15);
+            width: 420px; background: #f4f6f8; box-sizing: border-box;
+            border-right: 1px solid #ddd; box-shadow: 2px 0 10px rgba(0,0,0,0.1);
             overflow-y: auto; z-index: 10; display: flex; flex-direction: column;
         }
-        .left-panel h2 { margin-top: 0; color: #c62828; font-size: 24px; text-align: center; border-bottom: 2px solid #eee; padding-bottom: 15px; margin-bottom: 20px; }
-        .left-panel label { font-weight: bold; margin-top: 15px; display: block; color: #333; }
-        .left-panel textarea { width: 100%; padding: 10px; margin-top: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; resize: vertical; }
-        .left-panel input[type="number"] { width: 100%; padding: 10px; margin-top: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; }
-        .left-panel input[type="range"] { width: 100%; margin-top: 8px; cursor: pointer; accent-color: #c62828; }
         
-        .template-select { width: 100%; padding: 10px; margin-top: 8px; border: 1.5px solid #c62828; border-radius: 4px; font-size: 15px; background: #fff; font-weight: bold; color: #c62828; cursor: pointer;}
+        .panel-header {
+            background: #fff; padding: 20px; text-align: center;
+            border-bottom: 1px solid #e0e0e0; position: sticky; top: 0; z-index: 20;
+        }
+        .panel-header h2 { margin: 0; color: #c62828; font-size: 22px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;}
+        .panel-header p { margin: 5px 0 0 0; font-size: 12px; color: #666; font-style: italic; }
 
-        .btn-group { display: flex; flex-direction: column; gap: 10px; margin-top: 25px; }
-        button { padding: 12px 20px; border: none; cursor: pointer; font-weight: bold; border-radius: 6px; font-size: 15px; transition: 0.2s; color: white;}
-        #btn-print { background: #1976D2; }
-        #btn-print:hover { background: #1565C0; }
-        .hint { font-size: 13px; color: #666; margin-top: 5px; font-style: italic; line-height: 1.4; }
-        .status-text { font-size: 13px; color: #4CAF50; font-weight: bold; text-align: center; height: 15px; margin-top: 5px; }
+        .panel-body { padding: 15px; display: flex; flex-direction: column; gap: 15px; }
 
-        /* CỘT PHẢI: XEM TRƯỚC (PREVIEW) */
+        /* Card UI cho từng nhóm chức năng */
+        .ui-card {
+            background: #ffffff; padding: 15px; border-radius: 8px;
+            border: 1px solid #e0e0e0; box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+        .ui-card-title {
+            font-size: 13px; font-weight: bold; color: #888; text-transform: uppercase;
+            margin-bottom: 12px; border-bottom: 1px solid #eee; padding-bottom: 5px;
+        }
+
+        /* Elements Styling */
+        label { font-weight: 600; font-size: 14px; display: block; color: #333; margin-bottom: 6px;}
+        .input-group { margin-bottom: 12px; }
+        .input-group:last-child { margin-bottom: 0; }
+        
+        input[type="text"], input[type="number"], textarea, select {
+            width: 100%; padding: 10px; box-sizing: border-box;
+            border: 1.5px solid #d1d5db; border-radius: 6px; font-size: 14px;
+            transition: all 0.2s; font-family: inherit;
+        }
+        input[type="text"]:focus, input[type="number"]:focus, textarea:focus, select:focus {
+            border-color: #c62828; outline: none; box-shadow: 0 0 0 3px rgba(198, 40, 40, 0.1);
+        }
+        textarea { resize: vertical; min-height: 80px; }
+        
+        .template-select { font-weight: bold; color: #c62828; background-color: #fff9f9; cursor: pointer;}
+        
+        .hint { font-size: 12px; color: #6b7280; margin-bottom: 8px; line-height: 1.4; padding: 8px; background: #f9fafb; border-radius: 4px; border-left: 3px solid #9ca3af;}
+
+        /* Modern Toggle Switch */
+        .toggle-container { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        .toggle-label { font-weight: 600; font-size: 14px; color: #333; margin: 0;}
+        .switch { position: relative; display: inline-block; width: 44px; height: 24px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .3s; border-radius: 24px; }
+        .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .3s; border-radius: 50%; }
+        input:checked + .slider { background-color: #c62828; }
+        input:checked + .slider:before { transform: translateX(20px); }
+
+        /* Range Slider Styling */
+        .range-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 5px;}
+        input[type="range"] { width: 100%; cursor: pointer; accent-color: #c62828; margin: 0;}
+
+        /* Footer & Print Button */
+        .panel-footer { padding: 15px; background: #fff; border-top: 1px solid #e0e0e0; position: sticky; bottom: 0; z-index: 20;}
+        #btn-print { 
+            width: 100%; padding: 14px; border: none; cursor: pointer; font-weight: bold; 
+            border-radius: 6px; font-size: 15px; transition: 0.2s; color: white;
+            background: #1976D2; display: flex; justify-content: center; align-items: center; gap: 8px;
+        }
+        #btn-print:hover { background: #1565C0; transform: translateY(-1px); box-shadow: 0 4px 6px rgba(0,0,0,0.1);}
+        .status-text { font-size: 13px; color: #4CAF50; font-weight: bold; text-align: center; height: 15px; margin-bottom: 10px; }
+
+
+        /* ================= KHU VỰC XEM TRƯỚC (BÊN PHẢI) ================= */
         .right-panel { flex: 1; padding: 30px 20px; overflow-y: auto; display: flex; flex-direction: column; align-items: center; }
 
-        /* ================= CÀI ĐẶT IN ẤN ================= */
+        /* ================= CÀI ĐẶT IN ẤN & A4 LÕI (GIỮ NGUYÊN) ================= */
         @page { size: A4; margin: 0; } 
-        
         @media print {
             body { display: block; background: white; height: auto; overflow: visible; }
             .left-panel { display: none !important; } 
@@ -45,94 +93,39 @@
                 box-shadow: none !important; margin: 0 !important; 
                 width: 210mm !important; height: 297mm !important; 
                 min-height: 297mm !important; flex-shrink: 0 !important;
-                padding: 12mm 15mm 15mm 15mm !important; 
-                page-break-after: always; 
+                padding: 12mm 15mm 15mm 15mm !important; page-break-after: always; 
             }
             .a4-page:last-child { page-break-after: auto; }
         }
         
-        /* ================= KHUNG TRANG A4 CHUẨN ================= */
         .a4-page {
-            display: block; 
-            position: relative; 
-            width: 210mm; 
-            height: 297mm; 
-            min-height: 297mm; 
-            flex-shrink: 0;    
-            background: white; margin-bottom: 30px;
-            padding: 12mm 15mm 15mm 15mm; 
+            display: block; position: relative; width: 210mm; height: 297mm; min-height: 297mm; flex-shrink: 0;    
+            background: white; margin-bottom: 30px; padding: 12mm 15mm 15mm 15mm; 
             box-sizing: border-box; box-shadow: 0 4px 15px rgba(0,0,0,0.3);
         }
 
-        /* ================= WATERMARK BẢN QUYỀN ================= */
-        .watermark-layer {
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            overflow: hidden; 
-            pointer-events: none; 
-            z-index: 100;
-        }
+        .watermark-layer { position: absolute; top: 0; left: 0; right: 0; bottom: 0; overflow: hidden; pointer-events: none; z-index: 100; }
         .watermark-layer::after {
-            content: "{{ watermark_text }}";
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%) rotate(-45deg);
-            font-size: 110px;
-            font-family: "Times New Roman", serif;
-            font-weight: bold;
-            color: rgba(0, 0, 0, var(--wm-opacity, 0.035));
-            white-space: nowrap;
-            user-select: none;
+            content: "{{ watermark_text }}"; position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%, -50%) rotate(-45deg); font-size: 110px; font-family: "Times New Roman", serif;
+            font-weight: bold; color: rgba(0, 0, 0, var(--wm-opacity, 0.035)); white-space: nowrap; user-select: none;
         }
 
-        /* HEADER VÀ STUDENT INFO */
         .header-title { text-align: center; font-size: 26px; font-weight: bold; margin-bottom: 12px; font-family: "Times New Roman", "KaiTi", serif; line-height: 1.4; position: relative; z-index: 1;}
         .student-info { display: flex; justify-content: space-between; font-size: 17px; font-family: "KaiTi", "Kaiti SC", STKaiti, serif; margin-bottom: 12px; padding: 0 4px; font-weight: bold; position: relative; z-index: 1; border-bottom: 2px solid #e0e0e0; padding-bottom: 5px;}
-        
         .tables-container { display: flex; flex-direction: column; width: 100%; position: relative; z-index: 1; }
         .page-number { position: absolute; bottom: 6mm; left: 0; width: 100%; text-align: center; font-size: 14px; font-family: "Times New Roman", serif; color: #333; z-index: 1;}
 
-        /* ================= CẤU TRÚC BLOCK TỪ VỰNG ================= */
-        .vocab-block { 
-            display: flex; flex-direction: column; 
-            margin-bottom: 15px; padding-bottom: 15px; 
-            position: relative;
-            page-break-inside: avoid; 
-        }
-        
-        .vocab-block::after {
-            content: "";
-            position: absolute;
-            bottom: 0;
-            left: 50%; 
-            transform: translateX(-50%);
-            width: 30%; 
-            border-bottom: 2px solid #c62828; 
-            border-radius: 2px;
-        }
-        
+        .vocab-block { display: flex; flex-direction: column; margin-bottom: 15px; padding-bottom: 15px; position: relative; page-break-inside: avoid; }
+        .vocab-block::after { content: ""; position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: 30%; border-bottom: 2px solid #c62828; border-radius: 2px; }
         .vocab-block:last-child::after { display: none; }
         .vocab-block:last-child { margin-bottom: 0px; padding-bottom: 0; }
         
         .v-top-section { display: flex; gap: 15px; align-items: flex-start; margin-bottom: 8px; position: relative;}
-        
         .v-badge {
-            position: absolute;
-            top: -5px;
-            left: -12px;
-            background-color: #c62828;
-            color: white;
-            font-size: 12px;
-            font-weight: bold;
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 2;
-            box-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+            position: absolute; top: -5px; left: -12px; background-color: #c62828; color: white;
+            font-size: 12px; font-weight: bold; width: 20px; height: 20px; border-radius: 50%; display: flex;
+            align-items: center; justify-content: center; z-index: 2; box-shadow: 1px 1px 3px rgba(0,0,0,0.3);
             -webkit-print-color-adjust: exact; print-color-adjust: exact;
         }
 
@@ -142,26 +135,20 @@
         .big-char { 
             width: 44px; height: 44px; font-size: 34px; font-family: "KaiTi", "Kaiti SC", STKaiti, serif; 
             display: flex; align-items: center; justify-content: center; border-right: 1.5px solid #333; 
-            background: white; 
-            position: relative;
-            -webkit-print-color-adjust: exact; print-color-adjust: exact;
+            background: white; position: relative; -webkit-print-color-adjust: exact; print-color-adjust: exact;
         }
         .big-char:last-child { border-right: none; }
-        
         .big-char::before {
             content: ""; position: absolute; top: 0; left: 0; right: 0; bottom: 0; z-index: 0;
             background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" shape-rendering="crispEdges"><line x1="50%" y1="0" x2="50%" y2="100%" stroke="%23b0b0b0" stroke-dasharray="2,2.5" stroke-width="0.8"/><line x1="0" y1="50%" x2="100%" y2="50%" stroke="%23b0b0b0" stroke-dasharray="2,2.5" stroke-width="0.8"/></svg>');
-            background-size: 100% 100%;
-            -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important;
+            background-size: 100% 100%; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important;
         }
         .big-char span { position: relative; z-index: 1; }
         
         .v-right { flex: 1; display: flex; flex-direction: column; gap: 4px; justify-content: flex-start; min-width: 0; padding-left: 5px;}
-        
         .info-row-1 { display: flex; justify-content: space-between; align-items: center; width: 100%; }
         .pinyin { font-weight: bold; font-size: 17px; color: #c62828; font-family: "Arial", sans-serif; letter-spacing: 0.5px; } 
         .total-strokes { font-size: 13px; font-style: italic; color: #555; }
-        
         .info-row-2 { display: flex; margin-bottom: 2px;}
         .meaning-label { font-weight: bold; font-style: italic; color: #333; margin-right: 5px; }
         .meaning { font-size: 15px; color: #222; font-family: "Times New Roman", serif; line-height: 1.4; }
@@ -170,177 +157,146 @@
         .stroke-char-row { display: flex; flex-wrap: wrap; gap: 2px;}
         
         .tiny-tzg {
-            width: 24px; height: 24px; 
-            border: 1px solid #777;
+            width: 24px; height: 24px; border: 1px solid #777;
             background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" shape-rendering="crispEdges"><line x1="50%" y1="0" x2="50%" y2="100%" stroke="%23b0b0b0" stroke-dasharray="1.5,1.5" stroke-width="0.6"/><line x1="0" y1="50%" x2="100%" y2="50%" stroke="%23b0b0b0" stroke-dasharray="1.5,1.5" stroke-width="0.6"/></svg>'); 
-            background-size: 100% 100%;
-            -webkit-print-color-adjust: exact; print-color-adjust: exact;
+            background-size: 100% 100%; -webkit-print-color-adjust: exact; print-color-adjust: exact;
         }
-        
         .stroke-svg { width: 100%; height: 100%; display: block; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 
         .v-practice { display: flex; flex-direction: column; gap: 6px; margin-bottom: 6px; }
         .practice-row { display: flex; width: 100%; flex-wrap: nowrap; justify-content: space-between; }
-
-        .word-group { 
-            display: flex; flex-direction: column; 
-            border: 1.5px solid #555; width: max-content; 
-        }
+        .word-group { display: flex; flex-direction: column; border: 1.5px solid #555; width: max-content; }
         .py-row { display: flex; width: 100%; border-bottom: 1px solid #999; }
         .hz-row { display: flex; width: 100%; }
 
         .py-box {
             height: 18px; 
             background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" shape-rendering="crispEdges"><line x1="0" y1="33.3%" x2="100%" y2="33.3%" stroke="%23c0c0c0" stroke-dasharray="1.5,2.5" stroke-width="0.8"/><line x1="0" y1="66.6%" x2="100%" y2="66.6%" stroke="%23c0c0c0" stroke-dasharray="1.5,2.5" stroke-width="0.8"/></svg>'); 
-            background-size: 100% 100%;
-            border-right: 1px solid #999;
-            display: flex; align-items: center; justify-content: center;
+            background-size: 100% 100%; border-right: 1px solid #999; display: flex; align-items: center; justify-content: center;
             font-family: "Arial", sans-serif; font-size: 12px; color: #000;
         }
         .py-box:last-child { border-right: none; }
-        
-        .py-box.trace-text { 
-            position: relative;
-            background-image: none !important; 
-            color: rgba(0,0,0,0.35); font-weight: bold; 
-        }
-        .py-box.trace-text::before {
+        .py-box.trace-text, .py-box.solid-text { position: relative; background-image: none !important; }
+        .py-box.trace-text { color: rgba(0,0,0,0.35); font-weight: bold; }
+        .py-box.solid-text { color: rgba(0,0,0,1) !important; }
+        .py-box.trace-text::before, .py-box.solid-text::before {
             content: ""; position: absolute; top: 0; left: 0; right: 0; bottom: 0; z-index: 0;
             background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" shape-rendering="crispEdges"><line x1="0" y1="33.3%" x2="100%" y2="33.3%" stroke="%23c0c0c0" stroke-dasharray="1.5,2.5" stroke-width="0.8"/><line x1="0" y1="66.6%" x2="100%" y2="66.6%" stroke="%23c0c0c0" stroke-dasharray="1.5,2.5" stroke-width="0.8"/></svg>'); 
-            background-size: 100% 100%;
-            -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important;
+            background-size: 100% 100%; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important;
         }
-        .py-box.trace-text span { position: relative; z-index: 1; }
-
-        .py-box.solid-text { 
-            position: relative;
-            background-image: none !important; 
-            color: rgba(0,0,0,1) !important; 
-        }
-        .py-box.solid-text::before {
-            content: ""; position: absolute; top: 0; left: 0; right: 0; bottom: 0; z-index: 0;
-            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" shape-rendering="crispEdges"><line x1="0" y1="33.3%" x2="100%" y2="33.3%" stroke="%23c0c0c0" stroke-dasharray="1.5,2.5" stroke-width="0.8"/><line x1="0" y1="66.6%" x2="100%" y2="66.6%" stroke="%23c0c0c0" stroke-dasharray="1.5,2.5" stroke-width="0.8"/></svg>'); 
-            background-size: 100% 100%;
-            -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important;
-        }
-        .py-box.solid-text span { position: relative; z-index: 1; }
+        .py-box.trace-text span, .py-box.solid-text span { position: relative; z-index: 1; }
 
         .tzg-box {
-            width: 44px; height: 44px; 
-            border-right: 1px solid #999;
+            width: 44px; height: 44px; border-right: 1px solid #999;
             background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" shape-rendering="crispEdges"><line x1="50%" y1="0" x2="50%" y2="100%" stroke="%23b0b0b0" stroke-dasharray="2,2.5" stroke-width="0.8"/><line x1="0" y1="50%" x2="100%" y2="50%" stroke="%23b0b0b0" stroke-dasharray="2,2.5" stroke-width="0.8"/></svg>'); 
-            background-size: 100% 100%;
-            display: flex; align-items: center; justify-content: center;
-            font-family: "KaiTi", "Kaiti SC", STKaiti, serif; font-size: 32px; 
-            color: #000;
+            background-size: 100% 100%; display: flex; align-items: center; justify-content: center;
+            font-family: "KaiTi", "Kaiti SC", STKaiti, serif; font-size: 32px; color: #000;
         }
         .tzg-box:last-child { border-right: none; }
-        
-        .tzg-box.trace-text { 
-            position: relative;
-            background-image: none !important; 
-            color: rgba(0,0,0,0.25) !important; 
-        }
-        .tzg-box.trace-text::before {
+        .tzg-box.trace-text, .tzg-box.solid-text { position: relative; background-image: none !important; }
+        .tzg-box.trace-text { color: rgba(0,0,0,0.25) !important; }
+        .tzg-box.solid-text { color: rgba(0,0,0,1) !important; }
+        .tzg-box.trace-text::before, .tzg-box.solid-text::before {
             content: ""; position: absolute; top: 0; left: 0; right: 0; bottom: 0; z-index: 0;
             background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" shape-rendering="crispEdges"><line x1="50%" y1="0" x2="50%" y2="100%" stroke="%23b0b0b0" stroke-dasharray="2,2.5" stroke-width="0.8"/><line x1="0" y1="50%" x2="100%" y2="50%" stroke="%23b0b0b0" stroke-dasharray="2,2.5" stroke-width="0.8"/></svg>'); 
-            background-size: 100% 100%;
-            -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important;
+            background-size: 100% 100%; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important;
         }
-        .tzg-box.trace-text span { position: relative; z-index: 1; }
-        .tzg-box.trace-text svg { position: relative; z-index: 1; }
-
-        .tzg-box.solid-text { 
-            position: relative;
-            background-image: none !important; 
-            color: rgba(0,0,0,1) !important; 
-        }
-        .tzg-box.solid-text::before {
-            content: ""; position: absolute; top: 0; left: 0; right: 0; bottom: 0; z-index: 0;
-            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" shape-rendering="crispEdges"><line x1="50%" y1="0" x2="50%" y2="100%" stroke="%23b0b0b0" stroke-dasharray="2,2.5" stroke-width="0.8"/><line x1="0" y1="50%" x2="100%" y2="50%" stroke="%23b0b0b0" stroke-dasharray="2,2.5" stroke-width="0.8"/></svg>'); 
-            background-size: 100% 100%;
-            -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important;
-        }
-        .tzg-box.solid-text span { position: relative; z-index: 1; }
+        .tzg-box.trace-text span, .tzg-box.solid-text span, .tzg-box.trace-text svg { position: relative; z-index: 1; }
 
         .v-free { display: flex; align-items: flex-end; margin-top: 5px; gap: 10px; }
         .free-label { font-size: 14px; color: #111; white-space: nowrap; font-family: "Times New Roman", serif; font-weight: bold;}
         .dotted-line { flex: 1; border-bottom: 1.5px dotted #999; height: 25px; margin-bottom: 5px;}
-
-        /* CSS KHU VỰC CÂU MẪU */
-        .sample-text-title {
-            font-family: 'Arial', sans-serif;
-            font-weight: bold; 
-            font-size: 16px; 
-            color: #c62828; 
-            margin-bottom: 12px; 
-            border-bottom: 2px solid #eee; 
-            padding-bottom: 5px;
-        }
+        .sample-text-title { font-family: 'Arial', sans-serif; font-weight: bold; font-size: 16px; color: #c62828; margin-bottom: 12px; border-bottom: 2px solid #eee; padding-bottom: 5px;}
     </style>
 </head>
 <body onload="toggleInputs(); generateSheet();">
 
 <div class="left-panel no-print">
-    <h2>LUYỆN VIẾT CHỮ HÁN</h2>
+    <div class="panel-header">
+        <h2>Học Liệu Chữ Hán</h2>
+        <p>Hệ thống tạo giấy luyện viết HSK</p>
+    </div>
 
-    <label>Mẫu thiết kế (Template):</label>
-    <select id="templateType" class="template-select" onchange="toggleInputs(); autoUpdate();">
-        <option value="1">1. Từ vựng chi tiết (Hán + Pinyin + Nghĩa)</option>
-        <option value="2">2. Tách từng chữ Hán (Lưới thường)</option>
-        <option value="5">5. Luyện viết từng nét (Mỗi nét 1 hàng)</option>
-        <option value="3">3. Trang trắng luyện viết</option>
-        <option value="4">4. Luyện viết Đoạn văn / Câu</option>
-    </select>
-    
-    <label>Tên bài học:</label>
-    <textarea id="lessonTitle" rows="2" oninput="autoUpdate()">第一课、
+    <div class="panel-body">
+        <!-- NHÓM 1: CẤU HÌNH TRANG -->
+        <div class="ui-card">
+            <div class="ui-card-title">1. Cấu hình bài học</div>
+            
+            <div class="input-group">
+                <label>Mẫu thiết kế (Template)</label>
+                <select id="templateType" class="template-select" onchange="toggleInputs(); autoUpdate();">
+                    <option value="1">Mẫu 1: Từ vựng (Hán - Việt - Pinyin)</option>
+                    <option value="2">Mẫu 2: Phân tách nét bút (Mỗi nét 1 hàng)</option>
+                    <option value="3">Mẫu 3: Luyện chữ đơn lẻ (Chỉ chữ Hán)</option>
+                    <option value="4">Mẫu 4: Luyện viết Câu / Đoạn văn</option>
+                    <option value="5">Mẫu 5: Trang lưới trắng</option>
+                </select>
+            </div>
+            
+            <div class="input-group">
+                <label>Tên bài học</label>
+                <textarea id="lessonTitle" rows="2" oninput="autoUpdate()">第一课、
 Bài 1: AI小语，你好！</textarea>
+            </div>
+        </div>
 
-    <!-- BLOCK 1, 2, 5: Dành cho Từ vựng / Chữ lẻ -->
-    <div id="block-vocab">
-        <label>Danh sách dữ liệu:</label>
-        <div class="hint" id="vocabHint">Copy 3 cột từ Excel dán vào đây.<br><b>Thứ tự:</b> Chữ Hán | Pinyin | Nghĩa</div>
-        <textarea id="vocabList" rows="8" oninput="autoUpdate()">你好	nǐhǎo	xin chào; chào bạn
+        <!-- NHÓM 2: DỮ LIỆU ĐẦU VÀO -->
+        <div class="ui-card">
+            <div class="ui-card-title">2. Nội dung đầu vào</div>
+            
+            <div id="block-vocab" class="input-group">
+                <div class="hint" id="vocabHint"></div>
+                <textarea id="vocabList" rows="6" oninput="autoUpdate()">你好	nǐhǎo	xin chào; chào bạn
 大家	dàjiā	mọi người
 好	hǎo	tốt; khỏe</textarea>
+            </div>
+
+            <div id="block-paragraph" class="input-group" style="display:none;">
+                <div class="hint">Dán văn bản tiếng Trung. Hệ thống tự tạo khung mẫu và lưới trống bên dưới.</div>
+                <textarea id="paragraphText" rows="6" oninput="autoUpdate()">你好，我叫小明。认识你很高兴！</textarea>
+            </div>
+
+            <div id="block-numPages" class="input-group" style="display:none;">
+                <label>Số trang trắng cần tạo:</label>
+                <input type="number" id="numPages" value="1" min="1" max="50" oninput="autoUpdate()">
+            </div>
+        </div>
+
+        <!-- NHÓM 3: TÙY CHỈNH HIỂN THỊ -->
+        <div class="ui-card" id="block-display-options">
+            <div class="ui-card-title">3. Tùy chỉnh hiển thị</div>
+            
+            <div class="input-group" id="block-numRows">
+                <label id="label-numRows">Số lượng tập viết:</label>
+                <input type="number" id="numRows" value="2" min="1" max="50" oninput="autoUpdate()">
+            </div>
+
+            <div class="toggle-container">
+                <span class="toggle-label">Hiển thị lưới Pinyin</span>
+                <label class="switch">
+                    <input type="checkbox" id="showPinyinBox" checked onchange="autoUpdate()">
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <div class="input-group">
+                <div class="range-header">
+                    <label style="margin:0;">Độ đậm Watermark</label>
+                    <span id="wmOpacityVal" style="font-size: 13px; font-weight: bold; color: #c62828;">3.5%</span>
+                </div>
+                <input type="range" id="wmOpacity" min="0" max="0.15" step="0.005" value="0.035" 
+                       oninput="document.getElementById('wmOpacityVal').innerText = (this.value * 100).toFixed(1) + '%'; autoUpdate();">
+            </div>
+        </div>
     </div>
 
-    <!-- BLOCK 4: Dành cho Đoạn văn -->
-    <div id="block-paragraph" style="display:none;">
-        <label>Nội dung Đoạn văn / Câu:</label>
-        <div class="hint">Dán văn bản tiếng Trung vào đây. Hệ thống sẽ tự động tạo phần câu mẫu nét đậm và các ô luyện viết trống tương ứng.</div>
-        <textarea id="paragraphText" rows="8" oninput="autoUpdate()">你好，我叫小明。认识你很高兴！</textarea>
-    </div>
-
-    <!-- BLOCK 3: Dành cho Trang trắng -->
-    <div id="block-numPages" style="display:none;">
-        <label>Số trang trắng muốn tạo:</label>
-        <input type="number" id="numPages" value="1" min="1" max="50" oninput="autoUpdate()">
-    </div>
-
-    <!-- CÁC CÀI ĐẶT CHUNG -->
-    <div id="block-numRows">
-        <label id="label-numRows">Số hàng tập viết (mỗi từ):</label>
-        <input type="number" id="numRows" value="2" min="1" max="50" oninput="autoUpdate()">
-    </div>
-
-    <label style="display: flex; align-items: center; cursor: pointer; margin-top: 20px; font-weight: normal; color: #333;">
-        <input type="checkbox" id="showPinyinBox" checked onchange="autoUpdate()" style="width: 16px; height: 16px; margin-right: 8px; margin-top: 0; accent-color: #c62828;"> 
-        <b>Hiển thị ô tập viết Pinyin</b>
-    </label>
-
-    <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: 15px;">
-        <label style="margin-top: 0;">Độ đậm Watermark:</label>
-        <span id="wmOpacityVal" style="font-size: 13px; font-weight: bold; color: #c62828;">3.5%</span>
-    </div>
-    <input type="range" id="wmOpacity" min="0" max="0.15" step="0.005" value="0.035" 
-           oninput="document.getElementById('wmOpacityVal').innerText = (this.value * 100).toFixed(1) + '%'; autoUpdate();">
-    
-    <div id="statusText" class="status-text"></div>
-    
-    <div class="btn-group">
-        <button id="btn-print" onclick="window.print()">🖨️ In / Xuất file PDF</button>
+    <!-- KHU VỰC IN ẤN -->
+    <div class="panel-footer no-print">
+        <div id="statusText" class="status-text"></div>
+        <button id="btn-print" onclick="window.print()">
+            <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M19 8H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3zm-3 11H8v-5h8v5zm3-7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm-1-9H6v4h12V3z"/></svg>
+            In / Lưu PDF
+        </button>
     </div>
 </div>
 
@@ -357,27 +313,27 @@ Bài 1: AI小语，你好！</textarea>
         const labelNumRows = document.getElementById('label-numRows');
         const inputNumRows = document.getElementById('numRows');
         
-        document.getElementById('block-vocab').style.display = (type === '1' || type === '2' || type === '5') ? 'block' : 'none';
+        document.getElementById('block-vocab').style.display = (type === '1' || type === '2' || type === '3') ? 'block' : 'none';
         document.getElementById('block-paragraph').style.display = (type === '4') ? 'block' : 'none';
-        document.getElementById('block-numPages').style.display = (type === '3') ? 'block' : 'none';
-        document.getElementById('block-numRows').style.display = (type === '1' || type === '2' || type === '4' || type === '5') ? 'block' : 'none';
+        document.getElementById('block-numPages').style.display = (type === '5') ? 'block' : 'none';
+        document.getElementById('block-display-options').style.display = (type === '5') ? 'none' : 'block';
         
         const hint = document.getElementById('vocabHint');
         
         if (type === '1') {
-            hint.innerHTML = 'Copy 3 cột từ Excel dán vào đây.<br><b>Thứ tự:</b> Chữ Hán | Pinyin | Nghĩa';
-            labelNumRows.innerText = 'Số hàng tập viết (mỗi từ):';
+            hint.innerHTML = '<b>Dán 3 cột từ Excel:</b> Chữ Hán | Pinyin | Nghĩa';
+            labelNumRows.innerText = 'Số hàng tập viết (mỗi mục):';
             if (parseInt(inputNumRows.value) > 10) inputNumRows.value = 2;
         } else if (type === '2') {
-            hint.innerHTML = 'Dán chữ Hán, từ vựng hoặc cụm từ.<br>Hệ thống tự động <b>tách từng chữ Hán</b> thành các mục riêng biệt.';
-            labelNumRows.innerText = 'Số hàng tập viết (mỗi chữ):';
-            if (parseInt(inputNumRows.value) > 10) inputNumRows.value = 2;
-        } else if (type === '5') {
-            hint.innerHTML = 'Dán chữ Hán, từ vựng hoặc cụm từ.<br>Hệ thống sẽ tạo lưới luyện viết cho <b>từng nét</b> của mỗi chữ.';
-            labelNumRows.innerText = 'Số hàng tập viết (mỗi nét):';
+            hint.innerHTML = 'Hệ thống tự phân tích và tạo lưới tập viết cho <b>từng nét bút</b>.';
+            labelNumRows.innerText = 'Số hàng luyện viết (Mỗi nét):';
             if (parseInt(inputNumRows.value) > 5) inputNumRows.value = 1; 
+        } else if (type === '3') {
+            hint.innerHTML = 'Hệ thống tự động <b>tách từng chữ Hán</b> từ chuỗi nhập vào.';
+            labelNumRows.innerText = 'Số hàng luyện viết (Mỗi chữ):';
+            if (parseInt(inputNumRows.value) > 10) inputNumRows.value = 2;
         } else if (type === '4') {
-            labelNumRows.innerText = 'Số lần viết (áp dụng cho Đoạn văn):';
+            labelNumRows.innerText = 'Số lần viết (áp dụng cho toàn Câu):';
             if (parseInt(inputNumRows.value) > 10) inputNumRows.value = 2;
         }
     }
@@ -413,35 +369,24 @@ Bài 1: AI小语，你好！</textarea>
     }
 
     // ==========================================
-    // MODULE: Tạo dòng Lưới (Đa nhiệm)
-    // Mode: 'trace' (in mờ), 'solid' (đen đậm), 'blank' (ô trống)
+    // MODULE: Tạo dòng Lưới
     // ==========================================
     function createGridRow(chunk, showPinyinBox, mode = 'trace') {
         let html = `<div class="practice-row" style="margin-bottom: 8px;">`;
         for(let i=0; i<12; i++) {
             let char = (mode !== 'blank' && chunk && i < chunk.length) ? chunk[i] : '';
-            let charClass = '';
-            if (char) {
-                if (mode === 'trace') charClass = 'trace-text';
-                else if (mode === 'solid') charClass = 'solid-text';
-            }
+            let charClass = char ? (mode === 'trace' ? 'trace-text' : 'solid-text') : '';
             
             html += `<div class="word-group">`;
-            if (showPinyinBox) {
-                html += `<div class="py-row"><div class="py-box ${charClass}" style="flex:1;"><span></span></div></div>`;
-            }
-            html += `<div class="hz-row">
-                        <div class="tzg-box ${charClass}">${char ? '<span>'+char+'</span>' : ''}</div>
-                     </div>`;
-            html += `</div>`;
+            if (showPinyinBox) html += `<div class="py-row"><div class="py-box ${charClass}" style="flex:1;"><span></span></div></div>`;
+            html += `<div class="hz-row"><div class="tzg-box ${charClass}">${char ? '<span>'+char+'</span>' : ''}</div></div></div>`;
         }
         html += `</div>`;
         return html;
     }
 
     // ==========================================
-    // MODULE: Template 5 (Mỗi nét 1 hàng - Tương thích Phân trang thông minh)
-    // Trả về mảng HTML Node để không bị cắt đôi qua trang
+    // MODULE: Template 2 (Mỗi nét 1 hàng)
     // ==========================================
     function generateSingleStrokePracticeNodes(char, index, numRowsPerStroke, showPinyinBox) {
         if (!char) return [];
@@ -450,40 +395,29 @@ Bài 1: AI小语，你好！</textarea>
 
         const strokes = data.strokes;
         const idxStr = index.toString().padStart(2, '0');
-        
-        let strokeContentHtml = '';
+        let strokeContentHtml = createStrokeHtml(data);
         let bigCharsHtml = `<div class="big-char"><span>${char}</span></div>`;
-        if (data) strokeContentHtml += createStrokeHtml(data);
 
         const nodes = [];
-        
-        // Khối Header của Chữ
         nodes.push(`
         <div style="display: flex; flex-direction: column; margin-bottom: 12px; position: relative; page-break-inside: avoid;">
             <div class="v-top-section">
                 <div class="v-badge">${idxStr}</div>
                 <div class="v-left"><div class="big-chars">${bigCharsHtml}</div></div>
-                <div class="v-right">
-                    <div class="v-strokes">${strokeContentHtml}</div>
-                </div>
+                <div class="v-right"><div class="v-strokes">${strokeContentHtml}</div></div>
             </div>
         </div>`);
 
-        // Các hàng lưới luyện viết (Lặp qua từng nét)
         for (let s = 0; s < strokes.length; s++) {
             let practiceHtml = `<div class="v-practice" style="margin-bottom: 10px; page-break-inside: avoid;">`;
             for (let r = 0; r < numRowsPerStroke; r++) {
                 practiceHtml += `<div class="practice-row">`; 
                 for (let i = 0; i < 12; i++) {
                     practiceHtml += `<div class="word-group">`;
-                    
-                    if (showPinyinBox) {
-                        practiceHtml += `<div class="py-row"><div class="py-box" style="flex: 1;"></div></div>`;
-                    }
-
+                    if (showPinyinBox) practiceHtml += `<div class="py-row"><div class="py-box" style="flex: 1;"></div></div>`;
                     practiceHtml += `<div class="hz-row">`;
+                    
                     if (r === 0 && i === 0) {
-                        // Nét đơn duy nhất hiển thị mờ ở ô đầu tiên của hàng
                         const svgHtml = `<svg viewBox="0 0 1024 1024" class="stroke-svg" style="width: 85%; height: 85%;"><g transform="scale(1, -1) translate(0, -900)"><path d="${strokes[s]}" fill="rgba(0,0,0,0.3)"></path></g></svg>`;
                         practiceHtml += `<div class="tzg-box trace-text">${svgHtml}</div>`;
                     } else {
@@ -497,30 +431,22 @@ Bài 1: AI小语，你好！</textarea>
             nodes.push(practiceHtml);
         }
 
-        // Khối Footer (Có đường kẻ đỏ theo Style chuẩn)
-        nodes.push(`
-        <div class="vocab-block" style="padding-bottom: 15px; margin-bottom: 15px; page-break-inside: avoid;">
-            <div class="v-free"><span class="free-label">Luyện viết tự do:</span> <div class="dotted-line"></div></div>
-        </div>`);
-
+        nodes.push(`<div class="vocab-block" style="padding-bottom: 15px; margin-bottom: 15px; page-break-inside: avoid;"><div class="v-free"><span class="free-label">Luyện viết tự do:</span> <div class="dotted-line"></div></div></div>`);
         return nodes;
     }
 
     // ==========================================
-    // MODULE: Template 2 (Chỉ chữ Hán đơn lẻ)
+    // MODULE: Template 3 (Chữ Hán đơn lẻ)
     // ==========================================
     function generateSimpleVocabHTML(char, index, numRows, showPinyinBox) {
         if (!char) return '';
-
         let strokeContentHtml = '';
         let bigCharsHtml = `<div class="big-char"><span>${char}</span></div>`;
-        
         const data = hanziCache[char];
         if (data) strokeContentHtml += createStrokeHtml(data);
 
         const idxStr = index.toString().padStart(2, '0');
-        let groupCount = Math.floor((675 + 8) / (1 * 44 + 3 + 8));
-        if (groupCount < 1) groupCount = 1;
+        let groupCount = 12;
 
         let practiceHtml = `<div class="v-practice">`;
         for (let r = 0; r < numRows; r++) {
@@ -528,16 +454,8 @@ Bài 1: AI小语，你好！</textarea>
             for (let i = 0; i < groupCount; i++) {
                 let isFirstOverall = (r === 0 && i === 0); 
                 practiceHtml += `<div class="word-group">`;
-                
-                if (showPinyinBox) {
-                    practiceHtml += `<div class="py-row">`;
-                    practiceHtml += `<div class="py-box" style="flex: 1;"></div>`;
-                    practiceHtml += `</div>`;
-                }
-
-                practiceHtml += `<div class="hz-row">`;
-                practiceHtml += `<div class="tzg-box ${isFirstOverall ? 'trace-text' : ''}">${isFirstOverall ? '<span>'+char+'</span>' : ''}</div>`;
-                practiceHtml += `</div></div>`; 
+                if (showPinyinBox) practiceHtml += `<div class="py-row"><div class="py-box" style="flex: 1;"></div></div>`;
+                practiceHtml += `<div class="hz-row"><div class="tzg-box ${isFirstOverall ? 'trace-text' : ''}">${isFirstOverall ? '<span>'+char+'</span>' : ''}</div></div></div>`; 
             }
             practiceHtml += `</div>`; 
         }
@@ -548,9 +466,7 @@ Bài 1: AI小语，你好！</textarea>
             <div class="v-top-section">
                 <div class="v-badge">${idxStr}</div>
                 <div class="v-left"><div class="big-chars">${bigCharsHtml}</div></div>
-                <div class="v-right">
-                    <div class="v-strokes">${strokeContentHtml}</div>
-                </div>
+                <div class="v-right"><div class="v-strokes">${strokeContentHtml}</div></div>
             </div>
             ${practiceHtml}
             <div class="v-free"><span class="free-label">Luyện viết tự do:</span> <div class="dotted-line"></div></div>
@@ -558,7 +474,7 @@ Bài 1: AI小语，你好！</textarea>
     }
 
     // ==========================================
-    // MODULE: Template 1 (Hán + Pinyin + Nghĩa)
+    // MODULE: Template 1 (Từ vựng Đầy đủ)
     // ==========================================
     function generateVocabHTML(line, index, numRows, showPinyinBox) {
         const parts = line.split(/\t|\|/);
@@ -579,46 +495,31 @@ Bài 1: AI小语，你好！</textarea>
             bigCharsHtml += `<div class="big-char"><span>${char}</span></div>`;
             if (/[，。！？、]/g.test(char)) return; 
             const data = hanziCache[char];
-            if (data) {
-                totalStrokes += data.strokes.length;
-                strokeContentHtml += createStrokeHtml(data);
-            }
+            if (data) { totalStrokes += data.strokes.length; strokeContentHtml += createStrokeHtml(data); }
         });
 
         const idxStr = index.toString().padStart(2, '0');
-
         let colspans = [];
         if (pinyins.length === 0) {
             for(let i=0; i<N; i++) colspans.push(1);
         } else {
-            let remainingN = N;
-            let remainingLen = pinyins.join('').length;
+            let remainingN = N, remainingLen = pinyins.join('').length;
             for (let i = 0; i < pinyins.length; i++) {
-                if (i === pinyins.length - 1) {
-                    colspans.push(remainingN);
-                } else {
+                if (i === pinyins.length - 1) colspans.push(remainingN);
+                else {
                     let cs = Math.max(1, Math.round((pinyins[i].length / remainingLen) * remainingN));
                     cs = Math.min(cs, remainingN - (pinyins.length - 1 - i));
-                    colspans.push(cs);
-                    remainingN -= cs;
-                    remainingLen -= pinyins[i].length;
+                    colspans.push(cs); remainingN -= cs; remainingLen -= pinyins[i].length;
                 }
             }
         }
 
-        const maxWidth = 675; 
-        const groupWidth = N * 44 + 3; 
-        const gap = 8; 
-        let groupCount = Math.floor((maxWidth + gap) / (groupWidth + gap));
-        if (groupCount < 1) groupCount = 1;
-
+        let groupCount = Math.floor((675 + 8) / (N * 44 + 3 + 8)) || 1;
         let practiceHtml = `<div class="v-practice">`;
         for (let r = 0; r < numRows; r++) {
             practiceHtml += `<div class="practice-row">`; 
-            
             for (let i = 0; i < groupCount; i++) {
                 let isFirstOverall = (r === 0 && i === 0); 
-                
                 practiceHtml += `<div class="word-group">`;
                 
                 if (showPinyinBox) {
@@ -627,9 +528,7 @@ Bài 1: AI小语，你好！</textarea>
                         for(let j=0; j<N; j++) practiceHtml += `<div class="py-box" style="flex: 1;"></div>`;
                     } else {
                         for(let j = 0; j < pinyins.length; j++) {
-                            const text = isFirstOverall ? pinyins[j] : ''; 
-                            const traceClass = isFirstOverall ? 'trace-text' : ''; 
-                            practiceHtml += `<div class="py-box ${traceClass}" style="flex: ${colspans[j]};"><span>${text}</span></div>`;
+                            practiceHtml += `<div class="py-box ${isFirstOverall ? 'trace-text' : ''}" style="flex: ${colspans[j]};"><span>${isFirstOverall ? pinyins[j] : ''}</span></div>`;
                         }
                     }
                     practiceHtml += `</div>`;
@@ -637,14 +536,9 @@ Bài 1: AI小语，你好！</textarea>
 
                 practiceHtml += `<div class="hz-row">`;
                 chars.forEach(char => {
-                    if (isFirstOverall) {
-                        practiceHtml += `<div class="tzg-box trace-text"><span>${char}</span></div>`; 
-                    } else {
-                        practiceHtml += `<div class="tzg-box"></div>`;
-                    }
+                    practiceHtml += `<div class="tzg-box ${isFirstOverall ? 'trace-text' : ''}"><span>${isFirstOverall ? char : ''}</span></div>`; 
                 });
-                practiceHtml += `</div>`;
-                practiceHtml += `</div>`; 
+                practiceHtml += `</div></div>`; 
             }
             practiceHtml += `</div>`; 
         }
@@ -654,28 +548,16 @@ Bài 1: AI小语，你好！</textarea>
         <div class="vocab-block">
             <div class="v-top-section">
                 <div class="v-badge">${idxStr}</div>
-                <div class="v-left">
-                    <div class="big-chars">${bigCharsHtml}</div>
-                </div>
+                <div class="v-left"><div class="big-chars">${bigCharsHtml}</div></div>
                 <div class="v-right">
-                    <div class="info-row-1">
-                        <span class="pinyin">[ ${pinyinStr} ]</span>
-                        <span class="total-strokes">Số nét: ${totalStrokes}</span>
-                    </div>
-                    <div class="info-row-2">
-                        <span class="meaning"><span class="meaning-label">Nghĩa:</span>${meaning}</span>
-                    </div>
-                    <div class="v-strokes">
-                        ${strokeContentHtml}
-                    </div>
+                    <div class="info-row-1"><span class="pinyin">[ ${pinyinStr} ]</span><span class="total-strokes">Số nét: ${totalStrokes}</span></div>
+                    <div class="info-row-2"><span class="meaning"><span class="meaning-label">Nghĩa:</span>${meaning}</span></div>
+                    <div class="v-strokes">${strokeContentHtml}</div>
                 </div>
             </div>
             ${practiceHtml}
-            <div class="v-free">
-                <span class="free-label">Luyện viết tự do:</span> <div class="dotted-line"></div>
-            </div>
-        </div>
-        `;
+            <div class="v-free"><span class="free-label">Luyện viết tự do:</span> <div class="dotted-line"></div></div>
+        </div>`;
     }
 
     function stringToNode(html) {
@@ -687,19 +569,19 @@ Bài 1: AI小语，你好！</textarea>
     async function generateSheet() {
         const statusText = document.getElementById('statusText');
         try {
-            statusText.innerText = "⏳ Đang tạo trang...";
+            statusText.innerText = "⏳ Đang xử lý trang...";
             statusText.style.color = "#ff9800";
 
             const template = document.getElementById('templateType').value;
             const titleHtml = document.getElementById('lessonTitle').value.replace(/\n/g, '<br>');
             const numRowsInput = parseInt(document.getElementById('numRows').value) || 1;
-            const wmOpacityInput = document.getElementById('wmOpacity').value; 
+            const wmOpacityInput = document.getElementById('wmOpacity').value || 0.035; 
             const showPinyinBox = document.getElementById('showPinyinBox').checked;
 
             let allChars = [];
             let validVocabs = [];
             
-            if (template === '1' || template === '2' || template === '5') {
+            if (template === '1' || template === '2' || template === '3') {
                 validVocabs = document.getElementById('vocabList').value.trim().split('\n').filter(line => line.trim().length > 0);
                 validVocabs.forEach(line => {
                     const word = line.split(/\t|\|/)[0].replace(/\s/g, '');
@@ -710,7 +592,6 @@ Bài 1: AI小语，你好！</textarea>
                 allChars.push(...text.split(''));
             }
 
-            // Tải dữ liệu nét chữ
             const uniqueChars = [...new Set(allChars.filter(c => !/[，。！？、：；（）《》“”‘’]/g.test(c)))];
             await Promise.all(uniqueChars.map(char => fetchHanziData(char)));
 
@@ -757,36 +638,29 @@ Bài 1: AI小语，你好！</textarea>
             if (template === '1') {
                 validVocabs.forEach((line, idx) => {
                     const html = generateVocabHTML(line, idx + 1, numRowsInput, showPinyinBox); 
-                    if(!html) return;
-                    appendNodeWithPagination(stringToNode(html));
+                    if(html) appendNodeWithPagination(stringToNode(html));
                 });
             } 
             else if (template === '2') {
                 uniqueChars.forEach((char, idx) => {
-                    const html = generateSimpleVocabHTML(char, idx + 1, numRowsInput, showPinyinBox); 
-                    if(!html) return;
-                    appendNodeWithPagination(stringToNode(html));
-                });
-            }
-            else if (template === '5') {
-                uniqueChars.forEach((char, idx) => {
                     const htmlArray = generateSingleStrokePracticeNodes(char, idx + 1, numRowsInput, showPinyinBox); 
-                    htmlArray.forEach(htmlString => {
-                        if(htmlString) appendNodeWithPagination(stringToNode(htmlString));
-                    });
+                    htmlArray.forEach(htmlString => { if(htmlString) appendNodeWithPagination(stringToNode(htmlString)); });
                 });
             }
             else if (template === '3') {
+                uniqueChars.forEach((char, idx) => {
+                    const html = generateSimpleVocabHTML(char, idx + 1, numRowsInput, showPinyinBox); 
+                    if(html) appendNodeWithPagination(stringToNode(html));
+                });
+            }
+            else if (template === '5') {
                 const targetPages = parseInt(document.getElementById('numPages').value) || 1;
                 while(pageNum <= targetPages) {
                     const html = createGridRow(null, showPinyinBox, 'blank');
                     const node = stringToNode(html);
                     
                     tablesContainer.appendChild(node);
-                    const pageRect = currentPage.getBoundingClientRect();
-                    const tablesRect = tablesContainer.getBoundingClientRect();
-                    
-                    if (tablesRect.bottom > pageRect.bottom - 40) {
+                    if (tablesContainer.getBoundingClientRect().bottom > currentPage.getBoundingClientRect().bottom - 40) {
                         tablesContainer.removeChild(node);
                         pageNum++;
                         if (pageNum <= targetPages) {
@@ -803,36 +677,26 @@ Bài 1: AI小语，你好！</textarea>
                 const textForGrid = rawText.replace(/[\n\r]/g, ''); 
                 const chars = textForGrid.split('');
                 
-                // Khối Câu mẫu
-                const sampleTitleHtml = `<div class="sample-text-title" style="margin-top: 10px;">Câu mẫu / Đoạn văn:</div>`;
-                appendNodeWithPagination(stringToNode(sampleTitleHtml));
+                appendNodeWithPagination(stringToNode(`<div class="sample-text-title" style="margin-top: 10px;">Câu mẫu / Đoạn văn:</div>`));
                 
                 const sampleChunks = [];
                 for(let i=0; i<chars.length; i+=12) sampleChunks.push(chars.slice(i, i+12));
                 sampleChunks.forEach((chunk) => {
-                    const html = createGridRow(chunk, showPinyinBox, 'solid');
-                    appendNodeWithPagination(stringToNode(html));
+                    appendNodeWithPagination(stringToNode(createGridRow(chunk, showPinyinBox, 'solid')));
                 });
 
-                // Khối Luyện viết
-                const practiceTitleHtml = `<div class="sample-text-title" style="margin-top: 15px; border-bottom: none; color: #333;">Luyện viết:</div>`;
-                appendNodeWithPagination(stringToNode(practiceTitleHtml));
+                appendNodeWithPagination(stringToNode(`<div class="sample-text-title" style="margin-top: 15px; border-bottom: none; color: #333;">Luyện viết:</div>`));
                 
-                const totalPracticeBoxes = chars.length * numRowsInput;
-                const practiceChars = new Array(totalPracticeBoxes).fill('');
-                
+                const practiceChars = new Array(chars.length * numRowsInput).fill('');
                 const practiceChunks = [];
                 for(let i=0; i<practiceChars.length; i+=12) practiceChunks.push(practiceChars.slice(i, i+12));
                 practiceChunks.forEach((chunk) => {
-                    const html = createGridRow(chunk, showPinyinBox, 'blank');
-                    appendNodeWithPagination(stringToNode(html));
+                    appendNodeWithPagination(stringToNode(createGridRow(chunk, showPinyinBox, 'blank')));
                 });
             }
 
-            statusText.innerText = "✅ Đã cập nhật xong!";
-            statusText.style.color = "#4CAF50";
-            
-            setTimeout(() => { statusText.innerText = ""; }, 2000);
+            statusText.innerText = "✅ Đã tải dữ liệu thành công!";
+            setTimeout(() => { statusText.innerText = ""; }, 2500);
 
         } catch (error) {
             statusText.innerText = "❌ Có lỗi xảy ra!";
@@ -843,11 +707,10 @@ Bài 1: AI小语，你好！</textarea>
 
     function autoUpdate() {
         const statusText = document.getElementById('statusText');
-        statusText.innerText = "Đang chờ nhập...";
+        statusText.innerText = "Đang xử lý...";
         statusText.style.color = "#666";
-
         clearTimeout(updateTimer);
-        updateTimer = setTimeout(() => { generateSheet(); }, 600);
+        updateTimer = setTimeout(() => { generateSheet(); }, 500);
     }
 </script>
 
