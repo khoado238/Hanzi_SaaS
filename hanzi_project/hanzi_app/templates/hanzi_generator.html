@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Công Cụ Luyện Viết Chữ Hán - Master (V40 - Tối ưu 3 mục 2 hàng)</title>
+    <title>Công Cụ Luyện Viết Chữ Hán - Master (V41 - Tối ưu Linh động 3 Mục)</title>
     <style>
         /* ================= GIAO DIỆN CHUNG & LAYOUT ================= */
         body { 
@@ -43,7 +43,8 @@
                 box-shadow: none !important; margin: 0 !important; 
                 width: 210mm !important; height: 297mm !important; 
                 min-height: 297mm !important; flex-shrink: 0 !important;
-                padding: 12mm 15mm 20mm 15mm !important; 
+                /* Giảm lề dưới để tăng không gian in */
+                padding: 12mm 15mm 15mm 15mm !important; 
                 page-break-after: always; 
             }
             .a4-page:last-child { page-break-after: auto; }
@@ -58,7 +59,8 @@
             min-height: 297mm; 
             flex-shrink: 0;    
             background: white; margin-bottom: 30px;
-            padding: 12mm 15mm 20mm 15mm; /* Đã giảm lề dưới một chút để vừa 3 mục */
+            /* Giảm lề dưới để tăng không gian chứa */
+            padding: 12mm 15mm 15mm 15mm; 
             box-sizing: border-box; box-shadow: 0 4px 15px rgba(0,0,0,0.3);
         }
 
@@ -89,17 +91,17 @@
         .student-info { display: flex; justify-content: space-between; font-size: 17px; font-family: "KaiTi", "Kaiti SC", STKaiti, serif; margin-bottom: 12px; padding: 0 4px; font-weight: bold; position: relative; z-index: 1; border-bottom: 2px solid #e0e0e0; padding-bottom: 5px;}
         
         .tables-container { display: flex; flex-direction: column; width: 100%; position: relative; z-index: 1; }
-        .page-number { position: absolute; bottom: 8mm; left: 0; width: 100%; text-align: center; font-size: 14px; font-family: "Times New Roman", serif; color: #333; z-index: 1;}
+        .page-number { position: absolute; bottom: 6mm; left: 0; width: 100%; text-align: center; font-size: 14px; font-family: "Times New Roman", serif; color: #333; z-index: 1;}
 
         /* ================= CẤU TRÚC BLOCK TỪ VỰNG ================= */
         .vocab-block { 
             display: flex; flex-direction: column; 
-            margin-bottom: 20px; padding-bottom: 18px; 
+            /* Thu gọn khoảng cách giữa các block để tiết kiệm không gian */
+            margin-bottom: 15px; padding-bottom: 15px; 
             position: relative;
             page-break-inside: avoid; 
         }
         
-        /* CẬP NHẬT: Vạch liền ngắn, đậm, có màu và căn giữa */
         .vocab-block::after {
             content: "";
             position: absolute;
@@ -120,7 +122,7 @@
             padding-bottom: 0;
         }
         
-        .v-top-section { display: flex; gap: 20px; align-items: flex-start; margin-bottom: 10px; }
+        .v-top-section { display: flex; gap: 20px; align-items: flex-start; margin-bottom: 8px; }
         
         .v-left { display: inline-flex; flex-direction: column; border: 1.5px solid #333; border-radius: 2px; overflow: hidden; flex-shrink: 0;}
         .big-chars { display: flex; }
@@ -142,18 +144,18 @@
         .meaning { font-size: 15px; color: #222; font-family: "Times New Roman", serif; line-height: 1.4; }
 
         .v-strokes { display: flex; flex-direction: column; gap: 4px; }
-        .stroke-char-row { display: flex; flex-wrap: wrap; }
+        .stroke-char-row { display: flex; flex-wrap: wrap; gap: 2px;}
         
         .tiny-tzg {
             width: 24px; height: 24px; 
-            border: 1px solid #777; border-right: none;
+            border: 1px solid #777;
             background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" shape-rendering="crispEdges"><line x1="50%" y1="0" x2="50%" y2="100%" stroke="%23b0b0b0" stroke-dasharray="1.5,1.5" stroke-width="0.6"/><line x1="0" y1="50%" x2="100%" y2="50%" stroke="%23b0b0b0" stroke-dasharray="1.5,1.5" stroke-width="0.6"/></svg>'); 
             background-size: 100% 100%;
         }
-        .stroke-char-row .tiny-tzg:last-child { border-right: 1px solid #777; }
         .stroke-svg { width: 100%; height: 100%; display: block; }
 
-        .v-practice { display: flex; flex-direction: column; gap: 8px; margin-bottom: 8px; }
+        /* Thu hẹp khoảng cách giữa các hàng viết */
+        .v-practice { display: flex; flex-direction: column; gap: 6px; margin-bottom: 6px; }
         .practice-row { display: flex; width: 100%; flex-wrap: nowrap; justify-content: space-between; }
 
         .word-group { 
@@ -164,7 +166,7 @@
         .hz-row { display: flex; width: 100%; }
 
         .py-box {
-            height: 20px; 
+            height: 18px; 
             background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" shape-rendering="crispEdges"><line x1="0" y1="33.3%" x2="100%" y2="33.3%" stroke="%23c0c0c0" stroke-dasharray="1.5,2.5" stroke-width="0.8"/><line x1="0" y1="66.6%" x2="100%" y2="66.6%" stroke="%23c0c0c0" stroke-dasharray="1.5,2.5" stroke-width="0.8"/></svg>'); 
             background-size: 100% 100%;
             border-right: 1px solid #999;
@@ -392,7 +394,6 @@ Bài 1: AI小语，你好！</textarea>
             const vocabRaw = document.getElementById('vocabList').value.trim().split('\n');
             const validVocabs = vocabRaw.filter(line => line.includes('|') || line.includes('\t'));
             
-            // Lấy giá trị hàng tập viết, ép mặc định là 2 nếu rỗng
             const numRowsInput = parseInt(document.getElementById('numRows').value) || 2;
             const wmOpacityInput = document.getElementById('wmOpacity').value; 
 
@@ -444,8 +445,8 @@ Bài 1: AI小语，你好！</textarea>
                 const pageRect = currentPage.getBoundingClientRect();
                 const tablesRect = tablesContainer.getBoundingClientRect();
                 
-                // Mốc ngắt trang được điều chỉnh để nhét vừa khít 3 mục (mỗi mục 2 hàng)
-                if (tablesRect.bottom > pageRect.bottom - 60 && tablesContainer.children.length > 1) {
+                /* TỐI ƯU HÓA: Ép ngưỡng ngắt trang sát viền dưới (40px) để 3 từ vựng x 2 hàng sẽ nhét vừa 1 trang */
+                if (tablesRect.bottom > pageRect.bottom - 40 && tablesContainer.children.length > 1) {
                     tablesContainer.removeChild(vocabNode);
                     currentPage.querySelector('.page-number').innerText = `- ${pageNum} -`;
                     
