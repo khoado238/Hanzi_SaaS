@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Công Cụ Luyện Viết Chữ Hán - Master (V32 - Auto Update & No Overflow)</title>
+    <title>Công Cụ Luyện Viết Chữ Hán - Master (V33 - Tối ưu Bố cục & Nét in)</title>
     <style>
         /* ================= GIAO DIỆN CHUNG & LAYOUT ================= */
         body { 
@@ -88,8 +88,10 @@
         /* ================= CẤU TRÚC BLOCK TỪ VỰNG ================= */
         .vocab-block { display: flex; flex-direction: column; margin-bottom: 25px; padding-bottom: 15px; border-bottom: 1.5px solid #eee; page-break-inside: avoid; }
         
-        .v-header { display: flex; gap: 15px; align-items: flex-start; margin-bottom: 10px; }
-        .v-left { display: inline-flex; flex-direction: column; border: 1.5px solid #333; border-radius: 2px; overflow: hidden; }
+        /* Gộp chung Hộp chữ to và Hộp thông tin để tận dụng không gian ngang */
+        .v-top-section { display: flex; gap: 20px; align-items: flex-start; margin-bottom: 12px; }
+        
+        .v-left { display: inline-flex; flex-direction: column; border: 1.5px solid #333; border-radius: 2px; overflow: hidden; flex-shrink: 0;}
         .big-chars { display: flex; }
         .big-char { 
             width: 44px; height: 44px; font-size: 34px; font-family: "KaiTi", "Kaiti SC", STKaiti, serif; 
@@ -98,26 +100,32 @@
         .big-char:last-child { border-right: none; }
         .v-idx { background: #ffe599; font-size: 13px; font-weight: bold; text-align: center; padding: 2px 0; border-top: 1.5px solid #333; }
         
-        .v-info { flex: 1; display: flex; flex-direction: column; gap: 4px; padding-top: 2px; }
+        /* Cột bên phải chứa Pinyin, Nghĩa và Nét bút */
+        .v-right { flex: 1; display: flex; flex-direction: column; gap: 6px; justify-content: flex-start; min-width: 0; }
+        
         .info-row-1 { display: flex; justify-content: space-between; align-items: center; width: 100%; }
         .pinyin { font-weight: bold; font-size: 17px; color: #c62828; font-family: "Arial", sans-serif; letter-spacing: 0.5px; } 
         .total-strokes { font-size: 13px; font-style: italic; color: #555; }
         
-        .info-row-2 { display: flex; }
+        .info-row-2 { display: flex; margin-bottom: 2px;}
         .meaning-label { font-weight: bold; font-style: italic; color: #333; margin-right: 5px; }
         .meaning { font-size: 15px; color: #222; font-family: "Times New Roman", serif; line-height: 1.4; }
 
-        .v-strokes { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; }
+        /* Đưa thứ tự nét bút vào chung cột thông tin */
+        .v-strokes { display: flex; flex-direction: column; gap: 4px; }
         .stroke-char-row { display: flex; flex-wrap: wrap; }
+        
+        /* Làm đậm SVG nhỏ */
         .tiny-tzg {
             width: 24px; height: 24px; 
             border: 1px solid #777; border-right: none;
-            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" shape-rendering="crispEdges"><line x1="50%" y1="0" x2="50%" y2="100%" stroke="%23e0e0e0" stroke-dasharray="1.5,1.5" stroke-width="0.6"/><line x1="0" y1="50%" x2="100%" y2="50%" stroke="%23e0e0e0" stroke-dasharray="1.5,1.5" stroke-width="0.6"/></svg>'); 
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" shape-rendering="crispEdges"><line x1="50%" y1="0" x2="50%" y2="100%" stroke="%23a0a0a0" stroke-dasharray="2,2" stroke-width="0.9"/><line x1="0" y1="50%" x2="100%" y2="50%" stroke="%23a0a0a0" stroke-dasharray="2,2" stroke-width="0.9"/></svg>'); 
             background-size: 100% 100%;
         }
         .stroke-char-row .tiny-tzg:last-child { border-right: 1px solid #777; }
         .stroke-svg { width: 100%; height: 100%; display: block; }
 
+        /* Lưới tập viết */
         .v-practice { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
         .practice-row { display: flex; gap: 8px; width: 100%; flex-wrap: nowrap; }
 
@@ -128,9 +136,10 @@
         .py-row { display: flex; width: 100%; border-bottom: 1px solid #999; }
         .hz-row { display: flex; width: 100%; }
 
+        /* Làm đậm nét đứt ô Pinyin */
         .py-box {
             height: 20px; 
-            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" shape-rendering="crispEdges"><line x1="0" y1="33.3%" x2="100%" y2="33.3%" stroke="%23b0b0b0" stroke-dasharray="1.5,3.5" stroke-width="0.8"/><line x1="0" y1="66.6%" x2="100%" y2="66.6%" stroke="%23b0b0b0" stroke-dasharray="1.5,3.5" stroke-width="0.8"/></svg>'); 
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" shape-rendering="crispEdges"><line x1="0" y1="33.3%" x2="100%" y2="33.3%" stroke="%23888888" stroke-dasharray="2,3" stroke-width="1"/><line x1="0" y1="66.6%" x2="100%" y2="66.6%" stroke="%23888888" stroke-dasharray="2,3" stroke-width="1"/></svg>'); 
             background-size: 100% 100%;
             border-right: 1px solid #999;
             display: flex; align-items: center; justify-content: center;
@@ -141,10 +150,11 @@
         .py-box.trace-text { color: rgba(0,0,0,0.35); font-weight: bold; }
         .trace-text { color: rgba(0,0,0,0.25); }
 
+        /* Làm đậm nét đứt ô chữ Hán */
         .tzg-box {
             width: 44px; height: 44px; 
             border-right: 1px solid #999;
-            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" shape-rendering="crispEdges"><line x1="50%" y1="0" x2="50%" y2="100%" stroke="%23e0e0e0" stroke-dasharray="2,2" stroke-width="1"/><line x1="0" y1="50%" x2="100%" y2="50%" stroke="%23e0e0e0" stroke-dasharray="2,2" stroke-width="1"/></svg>'); 
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" shape-rendering="crispEdges"><line x1="50%" y1="0" x2="50%" y2="100%" stroke="%23999999" stroke-dasharray="3,3" stroke-width="1.2"/><line x1="0" y1="50%" x2="100%" y2="50%" stroke="%23999999" stroke-dasharray="3,3" stroke-width="1.2"/></svg>'); 
             background-size: 100% 100%;
             display: flex; align-items: center; justify-content: center;
             font-family: "KaiTi", "Kaiti SC", STKaiti, serif; font-size: 32px; color: #000;
@@ -178,7 +188,6 @@ Bài 1: AI小语，你好！</textarea>
     <div id="statusText" class="status-text"></div>
     
     <div class="btn-group">
-        <!-- Nút Cập nhật đã được gỡ bỏ vì giờ đã có Auto-Update -->
         <button id="btn-print" onclick="window.print()">🖨️ In / Xuất file PDF</button>
     </div>
 </div>
@@ -189,7 +198,7 @@ Bài 1: AI小语，你好！</textarea>
 
 <script>
     const hanziCache = {};
-    let updateTimer = null; // Biến dùng cho tính năng Auto-Update (Debounce)
+    let updateTimer = null; 
 
     async function fetchHanziData(char) {
         if (hanziCache[char]) return hanziCache[char]; 
@@ -267,7 +276,6 @@ Bài 1: AI小语，你好！</textarea>
             }
         }
 
-        // Đã sửa maxCells từ 14 xuống 12 để không bao giờ bị tràn khổ giấy A4
         const maxCells = 12; 
         let groupCount = Math.floor(maxCells / N);
         if (groupCount < 1) groupCount = 1;
@@ -311,12 +319,12 @@ Bài 1: AI小语，你好！</textarea>
 
         return `
         <div class="vocab-block">
-            <div class="v-header">
+            <div class="v-top-section">
                 <div class="v-left">
                     <div class="big-chars">${bigCharsHtml}</div>
                     <div class="v-idx">${idxStr}</div>
                 </div>
-                <div class="v-info">
+                <div class="v-right">
                     <div class="info-row-1">
                         <span class="pinyin">[ ${pinyinStr} ]</span>
                         <span class="total-strokes">Số nét: ${totalStrokes}</span>
@@ -324,10 +332,10 @@ Bài 1: AI小语，你好！</textarea>
                     <div class="info-row-2">
                         <span class="meaning"><span class="meaning-label">Nghĩa:</span>${meaning}</span>
                     </div>
+                    <div class="v-strokes">
+                        ${strokeContentHtml}
+                    </div>
                 </div>
-            </div>
-            <div class="v-strokes">
-                ${strokeContentHtml}
             </div>
             ${practiceHtml}
             <div class="v-free">
@@ -417,7 +425,6 @@ Bài 1: AI小语，你好！</textarea>
             statusText.innerText = "✅ Đã cập nhật xong!";
             statusText.style.color = "#4CAF50";
             
-            // Ẩn thông báo sau 2 giây
             setTimeout(() => { statusText.innerText = ""; }, 2000);
 
         } catch (error) {
@@ -427,20 +434,17 @@ Bài 1: AI小语，你好！</textarea>
         }
     }
 
-    // Hàm đệm thời gian (Debounce) để tự động cập nhật
     function autoUpdate() {
         const statusText = document.getElementById('statusText');
         statusText.innerText = "Đang chờ nhập...";
         statusText.style.color = "#666";
 
         clearTimeout(updateTimer);
-        // Đợi 0.6 giây sau khi ngừng gõ mới bắt đầu chạy để tránh lag
         updateTimer = setTimeout(() => {
             generateSheet();
         }, 600);
     }
 
-    // Chạy lần đầu tiên khi load trang
     window.onload = generateSheet;
 </script>
 
