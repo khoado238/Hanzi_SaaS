@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Công Cụ Luyện Viết Chữ Hán - Master (V42 - Tối ưu In ấn đồ họa)</title>
+    <title>Công Cụ Luyện Viết Chữ Hán - Master (V43 - Tối ưu In ấn Final)</title>
     <style>
         /* ================= GIAO DIỆN CHUNG & LAYOUT ================= */
         body { 
@@ -129,7 +129,6 @@
         }
         .big-char:last-child { border-right: none; }
         
-        /* CẬP NHẬT: Khóa in nền màu vàng */
         .v-idx { 
             background: #ffe599; font-size: 13px; font-weight: bold; text-align: center; padding: 2px 0; border-top: 1.5px solid #333; 
             -webkit-print-color-adjust: exact; print-color-adjust: exact;
@@ -148,7 +147,6 @@
         .v-strokes { display: flex; flex-direction: column; gap: 4px; }
         .stroke-char-row { display: flex; flex-wrap: wrap; gap: 2px;}
         
-        /* CẬP NHẬT: Khóa in nền đứt của ô hướng dẫn nét bút */
         .tiny-tzg {
             width: 24px; height: 24px; 
             border: 1px solid #777;
@@ -168,7 +166,7 @@
         .py-row { display: flex; width: 100%; border-bottom: 1px solid #999; }
         .hz-row { display: flex; width: 100%; }
 
-        /* Ô lưới tập viết KHÔNG khóa để tự ẩn khi tắt Background Graphics */
+        /* Khóa nét kẻ Pinyin 4 ô ly luôn hiển thị */
         .py-box {
             height: 18px; 
             background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" shape-rendering="crispEdges"><line x1="0" y1="33.3%" x2="100%" y2="33.3%" stroke="%23c0c0c0" stroke-dasharray="1.5,2.5" stroke-width="0.8"/><line x1="0" y1="66.6%" x2="100%" y2="66.6%" stroke="%23c0c0c0" stroke-dasharray="1.5,2.5" stroke-width="0.8"/></svg>'); 
@@ -176,12 +174,13 @@
             border-right: 1px solid #999;
             display: flex; align-items: center; justify-content: center;
             font-family: "Arial", sans-serif; font-size: 12px; color: #000;
+            -webkit-print-color-adjust: exact; print-color-adjust: exact;
         }
         .py-box:last-child { border-right: none; }
         
         .py-box.trace-text { color: rgba(0,0,0,0.35); font-weight: bold; }
 
-        /* Ô lưới tập viết KHÔNG khóa để tự ẩn khi tắt Background Graphics */
+        /* Ô lưới tập viết KHÔNG KHÓA để tự ẩn khi tắt Background Graphics */
         .tzg-box {
             width: 44px; height: 44px; 
             border-right: 1px solid #999;
@@ -192,7 +191,12 @@
             color: #000;
         }
         .tzg-box:last-child { border-right: none; }
-        .tzg-box.trace-text { color: rgba(0,0,0,0.25) !important; }
+        
+        /* Khóa nét đứt của ô chữ mẫu (ô in mờ) luôn hiển thị */
+        .tzg-box.trace-text { 
+            color: rgba(0,0,0,0.25) !important; 
+            -webkit-print-color-adjust: exact; print-color-adjust: exact;
+        }
 
         .v-free { display: flex; align-items: flex-end; margin-top: 5px; gap: 10px; }
         .free-label { font-size: 14px; color: #111; white-space: nowrap; font-family: "Times New Roman", serif; font-weight: bold;}
