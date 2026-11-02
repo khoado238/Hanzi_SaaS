@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Công Cụ Luyện Viết Chữ Hán - Master (V49 - Hoàn thiện Template & Layout)</title>
+    <title>Công Cụ Luyện Viết Chữ Hán - Master (V50 - Hoàn thiện Template & Layout)</title>
     <style>
         /* ================= GIAO DIỆN CHUNG & LAYOUT ================= */
         body { 
@@ -211,6 +211,20 @@
         }
         .py-box.trace-text span { position: relative; z-index: 1; }
 
+        /* Lớp CSS mới: Hỗ trợ Chữ mẫu ĐEN ĐẬM (Solid) cho Template Câu Mẫu */
+        .py-box.solid-text { 
+            position: relative;
+            background-image: none !important; 
+            color: rgba(0,0,0,1) !important; 
+        }
+        .py-box.solid-text::before {
+            content: ""; position: absolute; top: 0; left: 0; right: 0; bottom: 0; z-index: 0;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" shape-rendering="crispEdges"><line x1="0" y1="33.3%" x2="100%" y2="33.3%" stroke="%23c0c0c0" stroke-dasharray="1.5,2.5" stroke-width="0.8"/><line x1="0" y1="66.6%" x2="100%" y2="66.6%" stroke="%23c0c0c0" stroke-dasharray="1.5,2.5" stroke-width="0.8"/></svg>'); 
+            background-size: 100% 100%;
+            -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important;
+        }
+        .py-box.solid-text span { position: relative; z-index: 1; }
+
         .tzg-box {
             width: 44px; height: 44px; 
             border-right: 1px solid #999;
@@ -235,34 +249,34 @@
         }
         .tzg-box.trace-text span { position: relative; z-index: 1; }
 
-        /* TĂNG CHIỀU CAO LUYỆN VIẾT TỰ DO LÊN 25px */
+        /* Lớp CSS mới: Hỗ trợ Chữ mẫu ĐEN ĐẬM (Solid) */
+        .tzg-box.solid-text { 
+            position: relative;
+            background-image: none !important; 
+            color: rgba(0,0,0,1) !important; 
+        }
+        .tzg-box.solid-text::before {
+            content: ""; position: absolute; top: 0; left: 0; right: 0; bottom: 0; z-index: 0;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" shape-rendering="crispEdges"><line x1="50%" y1="0" x2="50%" y2="100%" stroke="%23b0b0b0" stroke-dasharray="2,2.5" stroke-width="0.8"/><line x1="0" y1="50%" x2="100%" y2="50%" stroke="%23b0b0b0" stroke-dasharray="2,2.5" stroke-width="0.8"/></svg>'); 
+            background-size: 100% 100%;
+            -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important;
+        }
+        .tzg-box.solid-text span { position: relative; z-index: 1; }
+
+        /* TĂNG CHIỀU CAO LUYỆN VIẾT TỰ DO */
         .v-free { display: flex; align-items: flex-end; margin-top: 5px; gap: 10px; }
         .free-label { font-size: 14px; color: #111; white-space: nowrap; font-family: "Times New Roman", serif; font-weight: bold;}
         .dotted-line { flex: 1; border-bottom: 1.5px dotted #999; height: 25px; margin-bottom: 5px;}
 
-        /* CSS KHU VỰC CÂU MẪU (Dành cho Template 4) */
-        .sample-text-section {
-            margin-bottom: 20px; 
-            page-break-inside: avoid;
-        }
+        /* CSS KHU VỰC CÂU MẪU */
         .sample-text-title {
             font-family: 'Arial', sans-serif;
             font-weight: bold; 
             font-size: 16px; 
             color: #c62828; 
-            margin-bottom: 8px; 
+            margin-bottom: 12px; 
             border-bottom: 2px solid #eee; 
             padding-bottom: 5px;
-        }
-        .sample-text-content {
-            font-family: 'KaiTi', 'Kaiti SC', STKaiti, serif; 
-            font-size: 26px; 
-            line-height: 1.6; 
-            padding: 12px 15px; 
-            border: 1.5px dashed #999; 
-            border-radius: 4px; 
-            color: #111;
-            white-space: pre-wrap;
         }
     </style>
 </head>
@@ -295,7 +309,7 @@ Bài 1: AI小语，你好！</textarea>
     <!-- BLOCK 4: Dành cho Đoạn văn -->
     <div id="block-paragraph" style="display:none;">
         <label>Nội dung Đoạn văn / Câu:</label>
-        <div class="hint">Dán văn bản tiếng Trung vào đây. Hệ thống sẽ tự động tạo phần câu mẫu và lưới đồ chữ bên dưới.</div>
+        <div class="hint">Dán văn bản tiếng Trung vào đây. Hệ thống sẽ tự động tạo phần câu mẫu nét đậm và các ô luyện viết trống tương ứng.</div>
         <textarea id="paragraphText" rows="8" oninput="autoUpdate()">你好，我叫小明。认识你很高兴！</textarea>
     </div>
 
@@ -307,7 +321,7 @@ Bài 1: AI小语，你好！</textarea>
 
     <!-- CÁC CÀI ĐẶT CHUNG -->
     <div id="block-numRows">
-        <label>Số hàng tập viết (mỗi từ):</label>
+        <label id="label-numRows">Số hàng tập viết (mỗi từ):</label>
         <input type="number" id="numRows" value="2" min="1" max="10" oninput="autoUpdate()">
     </div>
 
@@ -340,16 +354,22 @@ Bài 1: AI小语，你好！</textarea>
 
     function toggleInputs() {
         const type = document.getElementById('templateType').value;
+        const labelNumRows = document.getElementById('label-numRows');
+        
         document.getElementById('block-vocab').style.display = (type === '1' || type === '2') ? 'block' : 'none';
         document.getElementById('block-paragraph').style.display = (type === '4') ? 'block' : 'none';
         document.getElementById('block-numPages').style.display = (type === '3') ? 'block' : 'none';
-        document.getElementById('block-numRows').style.display = (type === '1' || type === '2') ? 'block' : 'none';
+        document.getElementById('block-numRows').style.display = (type === '1' || type === '2' || type === '4') ? 'block' : 'none';
         
         const hint = document.getElementById('vocabHint');
         if (type === '1') {
             hint.innerHTML = 'Copy 3 cột từ Excel dán vào đây.<br><b>Thứ tự:</b> Chữ Hán | Pinyin | Nghĩa';
+            labelNumRows.innerText = 'Số hàng tập viết (mỗi từ):';
         } else if (type === '2') {
-            hint.innerHTML = 'Dán chữ Hán, từ vựng hoặc cụm từ (dư pinyin cũng không sao).<br>Hệ thống tự động <b>tách từng chữ Hán</b> thành các mục riêng biệt.';
+            hint.innerHTML = 'Dán chữ Hán, từ vựng hoặc cụm từ.<br>Hệ thống tự động <b>tách từng chữ Hán</b> thành các mục riêng biệt.';
+            labelNumRows.innerText = 'Số hàng tập viết (mỗi chữ):';
+        } else if (type === '4') {
+            labelNumRows.innerText = 'Số lần viết (áp dụng cho Đoạn văn):';
         }
     }
 
@@ -384,18 +404,25 @@ Bài 1: AI小语，你好！</textarea>
     }
 
     // ==========================================
-    // MODULE: Tạo dòng Lưới Trống (Template 3 & 4)
+    // MODULE: Tạo dòng Lưới (Đa nhiệm)
+    // Mode: 'trace' (in mờ), 'solid' (đen đậm), 'blank' (ô trống)
     // ==========================================
-    function createGridRow(chunk, showPinyinBox, isBlank = false) {
+    function createGridRow(chunk, showPinyinBox, mode = 'trace') {
         let html = `<div class="practice-row" style="margin-bottom: 8px;">`;
         for(let i=0; i<12; i++) {
-            let char = (!isBlank && chunk && i < chunk.length) ? chunk[i] : '';
+            let char = (mode !== 'blank' && chunk && i < chunk.length) ? chunk[i] : '';
+            let charClass = '';
+            if (char) {
+                if (mode === 'trace') charClass = 'trace-text';
+                else if (mode === 'solid') charClass = 'solid-text';
+            }
+            
             html += `<div class="word-group">`;
             if (showPinyinBox) {
-                html += `<div class="py-row"><div class="py-box ${char ? 'trace-text' : ''}" style="flex:1;"><span></span></div></div>`;
+                html += `<div class="py-row"><div class="py-box ${charClass}" style="flex:1;"><span></span></div></div>`;
             }
             html += `<div class="hz-row">
-                        <div class="tzg-box ${char ? 'trace-text' : ''}">${char ? '<span>'+char+'</span>' : ''}</div>
+                        <div class="tzg-box ${charClass}">${char ? '<span>'+char+'</span>' : ''}</div>
                      </div>`;
             html += `</div>`;
         }
@@ -408,7 +435,6 @@ Bài 1: AI小语，你好！</textarea>
     // ==========================================
     function generateSimpleVocabHTML(char, index, numRows, showPinyinBox) {
         if (!char) return '';
-        const N = 1;
 
         let strokeContentHtml = '';
         let bigCharsHtml = `<div class="big-char"><span>${char}</span></div>`;
@@ -576,6 +602,12 @@ Bài 1: AI小语，你好！</textarea>
         `;
     }
 
+    function stringToNode(html) {
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = html.trim();
+        return tempDiv.firstElementChild;
+    }
+
     async function generateSheet() {
         const statusText = document.getElementById('statusText');
         try {
@@ -584,7 +616,7 @@ Bài 1: AI小语，你好！</textarea>
 
             const template = document.getElementById('templateType').value;
             const titleHtml = document.getElementById('lessonTitle').value.replace(/\n/g, '<br>');
-            const numRowsInput = parseInt(document.getElementById('numRows').value) || 2;
+            const numRowsInput = parseInt(document.getElementById('numRows').value) || 1;
             const wmOpacityInput = document.getElementById('wmOpacity').value; 
             const showPinyinBox = document.getElementById('showPinyinBox').checked;
 
@@ -602,7 +634,7 @@ Bài 1: AI小语，你好！</textarea>
                 allChars.push(...text.split(''));
             }
 
-            // Lọc ra các ký tự cần tải nét bút
+            // Tải dữ liệu nét chữ
             const uniqueChars = [...new Set(allChars.filter(c => !/[，。！？、：；（）《》“”‘’]/g.test(c)))];
             await Promise.all(uniqueChars.map(char => fetchHanziData(char)));
 
@@ -650,28 +682,21 @@ Bài 1: AI小语，你好！</textarea>
                 validVocabs.forEach((line, idx) => {
                     const html = generateVocabHTML(line, idx + 1, numRowsInput, showPinyinBox); 
                     if(!html) return;
-                    const tempDiv = document.createElement('div');
-                    tempDiv.innerHTML = html.trim();
-                    appendNodeWithPagination(tempDiv.firstElementChild);
+                    appendNodeWithPagination(stringToNode(html));
                 });
             } 
             else if (template === '2') {
-                // Tách từng chữ Hán để in riêng lẻ
                 uniqueChars.forEach((char, idx) => {
                     const html = generateSimpleVocabHTML(char, idx + 1, numRowsInput, showPinyinBox); 
                     if(!html) return;
-                    const tempDiv = document.createElement('div');
-                    tempDiv.innerHTML = html.trim();
-                    appendNodeWithPagination(tempDiv.firstElementChild);
+                    appendNodeWithPagination(stringToNode(html));
                 });
             }
             else if (template === '3') {
                 const targetPages = parseInt(document.getElementById('numPages').value) || 1;
                 while(pageNum <= targetPages) {
-                    const html = createGridRow(null, showPinyinBox, true);
-                    const tempDiv = document.createElement('div');
-                    tempDiv.innerHTML = html.trim();
-                    const node = tempDiv.firstElementChild;
+                    const html = createGridRow(null, showPinyinBox, 'blank');
+                    const node = stringToNode(html);
                     
                     tablesContainer.appendChild(node);
                     const pageRect = currentPage.getBoundingClientRect();
@@ -692,29 +717,31 @@ Bài 1: AI小语，你好！</textarea>
             else if (template === '4') {
                 const rawText = document.getElementById('paragraphText').value;
                 const textForGrid = rawText.replace(/[\n\r]/g, ''); 
-                
-                // Khối Câu mẫu
-                const sampleHtml = `
-                    <div class="sample-text-section">
-                        <div class="sample-text-title">Câu mẫu / Đoạn văn:</div>
-                        <div class="sample-text-content">${rawText}</div>
-                        <div class="sample-text-title" style="margin-top: 15px; border-bottom: none; color: #333;">Luyện viết:</div>
-                    </div>
-                `;
-                const tempDiv = document.createElement('div');
-                tempDiv.innerHTML = sampleHtml.trim();
-                appendNodeWithPagination(tempDiv.firstElementChild);
-
-                // Khối luyện viết (Dàn chữ liên tục)
                 const chars = textForGrid.split('');
-                const chunks = [];
-                for(let i=0; i<chars.length; i+=12) chunks.push(chars.slice(i, i+12));
                 
-                chunks.forEach((chunk) => {
-                    const html = createGridRow(chunk, showPinyinBox, false);
-                    const tempDiv2 = document.createElement('div');
-                    tempDiv2.innerHTML = html.trim();
-                    appendNodeWithPagination(tempDiv2.firstElementChild);
+                // Khối Câu mẫu (Chữ Đen đậm trong ô lưới)
+                const sampleTitleHtml = `<div class="sample-text-title" style="margin-top: 10px;">Câu mẫu / Đoạn văn:</div>`;
+                appendNodeWithPagination(stringToNode(sampleTitleHtml));
+                
+                const sampleChunks = [];
+                for(let i=0; i<chars.length; i+=12) sampleChunks.push(chars.slice(i, i+12));
+                sampleChunks.forEach((chunk) => {
+                    const html = createGridRow(chunk, showPinyinBox, 'solid');
+                    appendNodeWithPagination(stringToNode(html));
+                });
+
+                // Khối Luyện viết (Các ô trống dựa trên số lần viết)
+                const practiceTitleHtml = `<div class="sample-text-title" style="margin-top: 15px; border-bottom: none; color: #333;">Luyện viết:</div>`;
+                appendNodeWithPagination(stringToNode(practiceTitleHtml));
+                
+                const totalPracticeBoxes = chars.length * numRowsInput;
+                const practiceChars = new Array(totalPracticeBoxes).fill('');
+                
+                const practiceChunks = [];
+                for(let i=0; i<practiceChars.length; i+=12) practiceChunks.push(practiceChars.slice(i, i+12));
+                practiceChunks.forEach((chunk) => {
+                    const html = createGridRow(chunk, showPinyinBox, 'blank');
+                    appendNodeWithPagination(stringToNode(html));
                 });
             }
 
