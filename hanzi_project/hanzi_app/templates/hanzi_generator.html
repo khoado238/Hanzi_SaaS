@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Công Cụ Luyện Viết Chữ Hán - Master (V41 - Tối ưu Linh động 3 Mục)</title>
+    <title>Công Cụ Luyện Viết Chữ Hán - Master (V42 - Tối ưu In ấn đồ họa)</title>
     <style>
         /* ================= GIAO DIỆN CHUNG & LAYOUT ================= */
         body { 
@@ -43,7 +43,6 @@
                 box-shadow: none !important; margin: 0 !important; 
                 width: 210mm !important; height: 297mm !important; 
                 min-height: 297mm !important; flex-shrink: 0 !important;
-                /* Giảm lề dưới để tăng không gian in */
                 padding: 12mm 15mm 15mm 15mm !important; 
                 page-break-after: always; 
             }
@@ -59,7 +58,6 @@
             min-height: 297mm; 
             flex-shrink: 0;    
             background: white; margin-bottom: 30px;
-            /* Giảm lề dưới để tăng không gian chứa */
             padding: 12mm 15mm 15mm 15mm; 
             box-sizing: border-box; box-shadow: 0 4px 15px rgba(0,0,0,0.3);
         }
@@ -96,7 +94,6 @@
         /* ================= CẤU TRÚC BLOCK TỪ VỰNG ================= */
         .vocab-block { 
             display: flex; flex-direction: column; 
-            /* Thu gọn khoảng cách giữa các block để tiết kiệm không gian */
             margin-bottom: 15px; padding-bottom: 15px; 
             position: relative;
             page-break-inside: avoid; 
@@ -131,7 +128,12 @@
             display: flex; align-items: center; justify-content: center; border-right: 1.5px solid #333; 
         }
         .big-char:last-child { border-right: none; }
-        .v-idx { background: #ffe599; font-size: 13px; font-weight: bold; text-align: center; padding: 2px 0; border-top: 1.5px solid #333; }
+        
+        /* CẬP NHẬT: Khóa in nền màu vàng */
+        .v-idx { 
+            background: #ffe599; font-size: 13px; font-weight: bold; text-align: center; padding: 2px 0; border-top: 1.5px solid #333; 
+            -webkit-print-color-adjust: exact; print-color-adjust: exact;
+        }
         
         .v-right { flex: 1; display: flex; flex-direction: column; gap: 4px; justify-content: flex-start; min-width: 0; }
         
@@ -146,15 +148,16 @@
         .v-strokes { display: flex; flex-direction: column; gap: 4px; }
         .stroke-char-row { display: flex; flex-wrap: wrap; gap: 2px;}
         
+        /* CẬP NHẬT: Khóa in nền đứt của ô hướng dẫn nét bút */
         .tiny-tzg {
             width: 24px; height: 24px; 
             border: 1px solid #777;
             background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" shape-rendering="crispEdges"><line x1="50%" y1="0" x2="50%" y2="100%" stroke="%23b0b0b0" stroke-dasharray="1.5,1.5" stroke-width="0.6"/><line x1="0" y1="50%" x2="100%" y2="50%" stroke="%23b0b0b0" stroke-dasharray="1.5,1.5" stroke-width="0.6"/></svg>'); 
             background-size: 100% 100%;
+            -webkit-print-color-adjust: exact; print-color-adjust: exact;
         }
         .stroke-svg { width: 100%; height: 100%; display: block; }
 
-        /* Thu hẹp khoảng cách giữa các hàng viết */
         .v-practice { display: flex; flex-direction: column; gap: 6px; margin-bottom: 6px; }
         .practice-row { display: flex; width: 100%; flex-wrap: nowrap; justify-content: space-between; }
 
@@ -165,6 +168,7 @@
         .py-row { display: flex; width: 100%; border-bottom: 1px solid #999; }
         .hz-row { display: flex; width: 100%; }
 
+        /* Ô lưới tập viết KHÔNG khóa để tự ẩn khi tắt Background Graphics */
         .py-box {
             height: 18px; 
             background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" shape-rendering="crispEdges"><line x1="0" y1="33.3%" x2="100%" y2="33.3%" stroke="%23c0c0c0" stroke-dasharray="1.5,2.5" stroke-width="0.8"/><line x1="0" y1="66.6%" x2="100%" y2="66.6%" stroke="%23c0c0c0" stroke-dasharray="1.5,2.5" stroke-width="0.8"/></svg>'); 
@@ -177,6 +181,7 @@
         
         .py-box.trace-text { color: rgba(0,0,0,0.35); font-weight: bold; }
 
+        /* Ô lưới tập viết KHÔNG khóa để tự ẩn khi tắt Background Graphics */
         .tzg-box {
             width: 44px; height: 44px; 
             border-right: 1px solid #999;
@@ -445,7 +450,6 @@ Bài 1: AI小语，你好！</textarea>
                 const pageRect = currentPage.getBoundingClientRect();
                 const tablesRect = tablesContainer.getBoundingClientRect();
                 
-                /* TỐI ƯU HÓA: Ép ngưỡng ngắt trang sát viền dưới (40px) để 3 từ vựng x 2 hàng sẽ nhét vừa 1 trang */
                 if (tablesRect.bottom > pageRect.bottom - 40 && tablesContainer.children.length > 1) {
                     tablesContainer.removeChild(vocabNode);
                     currentPage.querySelector('.page-number').innerText = `- ${pageNum} -`;
