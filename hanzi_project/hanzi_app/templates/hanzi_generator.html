@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Công Cụ Luyện Viết Chữ Hán - Master (V54 - Pro UI/UX)</title>
+    <title>Công Cụ Luyện Viết Chữ Hán - Master (V55 - Hỗ trợ gõ Tab thủ công)</title>
     <style>
         /* ================= GIAO DIỆN CHUNG & LAYOUT ================= */
         body { 
@@ -246,6 +246,7 @@ Bài 1: AI小语，你好！</textarea>
             
             <div id="block-vocab" class="input-group">
                 <div class="hint" id="vocabHint"></div>
+                <!-- Box này giờ đã có thể bấm phím Tab bình thường -->
                 <textarea id="vocabList" rows="6" oninput="autoUpdate()">你好	nǐhǎo	xin chào; chào bạn
 大家	dàjiā	mọi người
 好	hǎo	tốt; khỏe</textarea>
@@ -308,6 +309,24 @@ Bài 1: AI小语，你好！</textarea>
     const hanziCache = {};
     let updateTimer = null; 
 
+    // CHỨC NĂNG MỚI: Bắt sự kiện phím Tab trong ô textarea
+    document.getElementById('vocabList').addEventListener('keydown', function(e) {
+        if (e.key === 'Tab') {
+            e.preventDefault();
+            var start = this.selectionStart;
+            var end = this.selectionEnd;
+
+            // Chèn ký tự \t (Tab) vào vị trí con trỏ
+            this.value = this.value.substring(0, start) + "\t" + this.value.substring(end);
+            
+            // Đặt lại con trỏ chuột ngay sau ký tự Tab vừa chèn
+            this.selectionStart = this.selectionEnd = start + 1;
+            
+            // Kích hoạt render lại
+            autoUpdate();
+        }
+    });
+
     function toggleInputs() {
         const type = document.getElementById('templateType').value;
         const labelNumRows = document.getElementById('label-numRows');
@@ -321,7 +340,7 @@ Bài 1: AI小语，你好！</textarea>
         const hint = document.getElementById('vocabHint');
         
         if (type === '1') {
-            hint.innerHTML = '<b>Dán 3 cột từ Excel:</b> Chữ Hán | Pinyin | Nghĩa';
+            hint.innerHTML = '<b>Dán 3 cột từ Excel (Hoặc bấm Tab để tự nhập):</b><br>Chữ Hán | Pinyin | Nghĩa';
             labelNumRows.innerText = 'Số hàng tập viết (mỗi mục):';
             if (parseInt(inputNumRows.value) > 10) inputNumRows.value = 2;
         } else if (type === '2') {
