@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Công Cụ Luyện Viết Chữ Hán - Master (V45 - Bố cục Badge & Fix SVG)</title>
+    <title>Công Cụ Luyện Viết Chữ Hán - Master (V46 - Nét đứt ô chữ mẫu)</title>
     <style>
         /* ================= GIAO DIỆN CHUNG & LAYOUT ================= */
         body { 
@@ -121,7 +121,6 @@
         
         .v-top-section { display: flex; gap: 15px; align-items: flex-start; margin-bottom: 8px; position: relative;}
         
-        /* Đã xóa v-idx màu vàng. Đổi sang thiết kế Badge lơ lửng */
         .v-badge {
             position: absolute;
             top: -5px;
@@ -143,12 +142,24 @@
 
         .v-left { display: inline-flex; border: 1.5px solid #333; border-radius: 2px; overflow: hidden; flex-shrink: 0; position: relative;}
         .big-chars { display: flex; }
+        
+        /* CẬP NHẬT: Thêm lưới nét đứt cho ô chữ mẫu */
         .big-char { 
             width: 44px; height: 44px; font-size: 34px; font-family: "KaiTi", "Kaiti SC", STKaiti, serif; 
             display: flex; align-items: center; justify-content: center; border-right: 1.5px solid #333; 
-            background: white; /* Nền trắng đè lên nét đứt nếu có */
+            background: white; 
+            position: relative;
+            -webkit-print-color-adjust: exact; print-color-adjust: exact;
         }
         .big-char:last-child { border-right: none; }
+        
+        .big-char::before {
+            content: ""; position: absolute; top: 0; left: 0; right: 0; bottom: 0; z-index: 0;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" shape-rendering="crispEdges"><line x1="50%" y1="0" x2="50%" y2="100%" stroke="%23b0b0b0" stroke-dasharray="2,2.5" stroke-width="0.8"/><line x1="0" y1="50%" x2="100%" y2="50%" stroke="%23b0b0b0" stroke-dasharray="2,2.5" stroke-width="0.8"/></svg>');
+            background-size: 100% 100%;
+            -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important;
+        }
+        .big-char span { position: relative; z-index: 1; }
         
         .v-right { flex: 1; display: flex; flex-direction: column; gap: 4px; justify-content: flex-start; min-width: 0; padding-left: 5px;}
         
@@ -182,7 +193,6 @@
         .py-row { display: flex; width: 100%; border-bottom: 1px solid #999; }
         .hz-row { display: flex; width: 100%; }
 
-        /* Lưới tập viết trống sẽ ẩn khi tắt Graphics */
         .py-box {
             height: 18px; 
             background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" shape-rendering="crispEdges"><line x1="0" y1="33.3%" x2="100%" y2="33.3%" stroke="%23c0c0c0" stroke-dasharray="1.5,2.5" stroke-width="0.8"/><line x1="0" y1="66.6%" x2="100%" y2="66.6%" stroke="%23c0c0c0" stroke-dasharray="1.5,2.5" stroke-width="0.8"/></svg>'); 
@@ -193,10 +203,9 @@
         }
         .py-box:last-child { border-right: none; }
         
-        /* CẬP NHẬT: Vẽ SVG nội tuyến để ÉP nét đứt hiển thị cho ô Pinyin mẫu */
         .py-box.trace-text { 
             position: relative;
-            background-image: none !important; /* Tắt hình nền cũ */
+            background-image: none !important; 
             color: rgba(0,0,0,0.35); font-weight: bold; 
         }
         .py-box.trace-text::before {
@@ -207,7 +216,6 @@
         }
         .py-box.trace-text span { position: relative; z-index: 1; }
 
-        /* Lưới tập viết trống sẽ ẩn khi tắt Graphics */
         .tzg-box {
             width: 44px; height: 44px; 
             border-right: 1px solid #999;
@@ -219,10 +227,9 @@
         }
         .tzg-box:last-child { border-right: none; }
         
-        /* CẬP NHẬT: Vẽ SVG nội tuyến để ÉP nét đứt hiển thị cho ô Chữ Hán mẫu */
         .tzg-box.trace-text { 
             position: relative;
-            background-image: none !important; /* Tắt hình nền cũ */
+            background-image: none !important; 
             color: rgba(0,0,0,0.25) !important; 
         }
         .tzg-box.trace-text::before {
@@ -325,7 +332,8 @@ Bài 1: AI小语，你好！</textarea>
         let bigCharsHtml = '';
         
         chars.forEach(char => {
-            bigCharsHtml += `<div class="big-char">${char}</div>`;
+            // Bao bọc ${char} trong thẻ span
+            bigCharsHtml += `<div class="big-char"><span>${char}</span></div>`;
             if (/[，。！？、]/g.test(char)) return; 
             const data = hanziCache[char];
             if (data) {
@@ -378,7 +386,6 @@ Bài 1: AI小语，你好！</textarea>
                     for(let j = 0; j < pinyins.length; j++) {
                         const text = isFirstOverall ? pinyins[j] : ''; 
                         const traceClass = isFirstOverall ? 'trace-text' : ''; 
-                        // Bọc text trong thẻ span để layer CSS vẽ nét đứt hoạt động
                         practiceHtml += `<div class="py-box ${traceClass}" style="flex: ${colspans[j]};"><span>${text}</span></div>`;
                     }
                 }
@@ -387,7 +394,6 @@ Bài 1: AI小语，你好！</textarea>
                 practiceHtml += `<div class="hz-row">`;
                 chars.forEach(char => {
                     if (isFirstOverall) {
-                        // Bọc text trong thẻ span để layer CSS vẽ nét đứt hoạt động
                         practiceHtml += `<div class="tzg-box trace-text"><span>${char}</span></div>`; 
                     } else {
                         practiceHtml += `<div class="tzg-box"></div>`;
@@ -404,7 +410,7 @@ Bài 1: AI小语，你好！</textarea>
         return `
         <div class="vocab-block">
             <div class="v-top-section">
-                <div class="v-badge">${idxStr}</div> <!-- Đã cập nhật thành Badge -->
+                <div class="v-badge">${idxStr}</div>
                 <div class="v-left">
                     <div class="big-chars">${bigCharsHtml}</div>
                 </div>
