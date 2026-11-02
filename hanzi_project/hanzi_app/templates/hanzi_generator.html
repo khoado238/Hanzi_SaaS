@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Công Cụ Luyện Viết Chữ Hán - Master (V39 - Vạch liền ngăn cách)</title>
+    <title>Công Cụ Luyện Viết Chữ Hán - Master (V40 - Tối ưu 3 mục 2 hàng)</title>
     <style>
         /* ================= GIAO DIỆN CHUNG & LAYOUT ================= */
         body { 
@@ -43,7 +43,7 @@
                 box-shadow: none !important; margin: 0 !important; 
                 width: 210mm !important; height: 297mm !important; 
                 min-height: 297mm !important; flex-shrink: 0 !important;
-                padding: 12mm 15mm 25mm 15mm !important; 
+                padding: 12mm 15mm 20mm 15mm !important; 
                 page-break-after: always; 
             }
             .a4-page:last-child { page-break-after: auto; }
@@ -58,7 +58,7 @@
             min-height: 297mm; 
             flex-shrink: 0;    
             background: white; margin-bottom: 30px;
-            padding: 12mm 15mm 25mm 15mm; 
+            padding: 12mm 15mm 20mm 15mm; /* Đã giảm lề dưới một chút để vừa 3 mục */
             box-sizing: border-box; box-shadow: 0 4px 15px rgba(0,0,0,0.3);
         }
 
@@ -86,40 +86,41 @@
 
         /* HEADER VÀ STUDENT INFO */
         .header-title { text-align: center; font-size: 26px; font-weight: bold; margin-bottom: 12px; font-family: "Times New Roman", "KaiTi", serif; line-height: 1.4; position: relative; z-index: 1;}
-        .student-info { display: flex; justify-content: space-between; font-size: 17px; font-family: "KaiTi", "Kaiti SC", STKaiti, serif; margin-bottom: 15px; padding: 0 4px; font-weight: bold; position: relative; z-index: 1; border-bottom: 2px solid #e0e0e0; padding-bottom: 5px;}
+        .student-info { display: flex; justify-content: space-between; font-size: 17px; font-family: "KaiTi", "Kaiti SC", STKaiti, serif; margin-bottom: 12px; padding: 0 4px; font-weight: bold; position: relative; z-index: 1; border-bottom: 2px solid #e0e0e0; padding-bottom: 5px;}
         
         .tables-container { display: flex; flex-direction: column; width: 100%; position: relative; z-index: 1; }
-        .page-number { position: absolute; bottom: 10mm; left: 0; width: 100%; text-align: center; font-size: 14px; font-family: "Times New Roman", serif; color: #333; z-index: 1;}
+        .page-number { position: absolute; bottom: 8mm; left: 0; width: 100%; text-align: center; font-size: 14px; font-family: "Times New Roman", serif; color: #333; z-index: 1;}
 
         /* ================= CẤU TRÚC BLOCK TỪ VỰNG ================= */
         .vocab-block { 
             display: flex; flex-direction: column; 
-            margin-bottom: 25px; padding-bottom: 20px; 
-            position: relative; /* Giữ khung cho đường kẻ ::after */
+            margin-bottom: 20px; padding-bottom: 18px; 
+            position: relative;
             page-break-inside: avoid; 
         }
         
-        /* CẬP NHẬT: Vạch liền ngăn cách thu gọn ở giữa (80% chiều ngang) */
+        /* CẬP NHẬT: Vạch liền ngắn, đậm, có màu và căn giữa */
         .vocab-block::after {
             content: "";
             position: absolute;
             bottom: 0;
-            left: 10%; /* Căn lề trái 10% (để đường kẻ nằm giữa) */
-            width: 80%; /* Đường kẻ dài 80% */
-            border-bottom: 1.5px solid #d0d0d0; /* Đổi thành vạch liền (solid) */
+            left: 50%; 
+            transform: translateX(-50%);
+            width: 30%; 
+            border-bottom: 2px solid #c62828; 
+            border-radius: 2px;
         }
         
-        /* Ẩn đường kẻ ở mục từ vựng cuối cùng của mỗi trang */
         .vocab-block:last-child::after {
             display: none;
         }
         
         .vocab-block:last-child {
-            margin-bottom: 10px;
+            margin-bottom: 0px;
             padding-bottom: 0;
         }
         
-        .v-top-section { display: flex; gap: 20px; align-items: flex-start; margin-bottom: 12px; }
+        .v-top-section { display: flex; gap: 20px; align-items: flex-start; margin-bottom: 10px; }
         
         .v-left { display: inline-flex; flex-direction: column; border: 1.5px solid #333; border-radius: 2px; overflow: hidden; flex-shrink: 0;}
         .big-chars { display: flex; }
@@ -130,7 +131,7 @@
         .big-char:last-child { border-right: none; }
         .v-idx { background: #ffe599; font-size: 13px; font-weight: bold; text-align: center; padding: 2px 0; border-top: 1.5px solid #333; }
         
-        .v-right { flex: 1; display: flex; flex-direction: column; gap: 6px; justify-content: flex-start; min-width: 0; }
+        .v-right { flex: 1; display: flex; flex-direction: column; gap: 4px; justify-content: flex-start; min-width: 0; }
         
         .info-row-1 { display: flex; justify-content: space-between; align-items: center; width: 100%; }
         .pinyin { font-weight: bold; font-size: 17px; color: #c62828; font-family: "Arial", sans-serif; letter-spacing: 0.5px; } 
@@ -152,7 +153,7 @@
         .stroke-char-row .tiny-tzg:last-child { border-right: 1px solid #777; }
         .stroke-svg { width: 100%; height: 100%; display: block; }
 
-        .v-practice { display: flex; flex-direction: column; gap: 10px; margin-bottom: 12px; }
+        .v-practice { display: flex; flex-direction: column; gap: 8px; margin-bottom: 8px; }
         .practice-row { display: flex; width: 100%; flex-wrap: nowrap; justify-content: space-between; }
 
         .word-group { 
@@ -208,7 +209,7 @@ Bài 1: AI小语，你好！</textarea>
            oninput="document.getElementById('wmOpacityVal').innerText = (this.value * 100).toFixed(1) + '%'; autoUpdate();">
 
     <label>Số hàng tập viết (mỗi từ):</label>
-    <input type="number" id="numRows" value="1" min="1" max="10" oninput="autoUpdate()">
+    <input type="number" id="numRows" value="2" min="1" max="10" oninput="autoUpdate()">
     
     <label>Danh sách từ vựng:</label>
     <div class="hint">Copy 3 cột từ Excel/Google Sheets dán vào đây.<br><b>Thứ tự:</b> Chữ Hán | Pinyin | Nghĩa</div>
@@ -391,7 +392,8 @@ Bài 1: AI小语，你好！</textarea>
             const vocabRaw = document.getElementById('vocabList').value.trim().split('\n');
             const validVocabs = vocabRaw.filter(line => line.includes('|') || line.includes('\t'));
             
-            const numRowsInput = parseInt(document.getElementById('numRows').value) || 1;
+            // Lấy giá trị hàng tập viết, ép mặc định là 2 nếu rỗng
+            const numRowsInput = parseInt(document.getElementById('numRows').value) || 2;
             const wmOpacityInput = document.getElementById('wmOpacity').value; 
 
             let allChars = [];
@@ -442,7 +444,8 @@ Bài 1: AI小语，你好！</textarea>
                 const pageRect = currentPage.getBoundingClientRect();
                 const tablesRect = tablesContainer.getBoundingClientRect();
                 
-                if (tablesRect.bottom > pageRect.bottom - 80 && tablesContainer.children.length > 1) {
+                // Mốc ngắt trang được điều chỉnh để nhét vừa khít 3 mục (mỗi mục 2 hàng)
+                if (tablesRect.bottom > pageRect.bottom - 60 && tablesContainer.children.length > 1) {
                     tablesContainer.removeChild(vocabNode);
                     currentPage.querySelector('.page-number').innerText = `- ${pageNum} -`;
                     
