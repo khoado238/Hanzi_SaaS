@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Công Cụ Luyện Viết Chữ Hán - Master (V34 - Tinh chỉnh Nét & Bố cục)</title>
+    <title>Công Cụ Luyện Viết Chữ Hán - Master (V35 - Fix Trace & Justify)</title>
     <style>
         /* ================= GIAO DIỆN CHUNG & LAYOUT ================= */
         body { 
@@ -115,16 +115,20 @@
         .tiny-tzg {
             width: 24px; height: 24px; 
             border: 1px solid #777; border-right: none;
-            /* Điều chỉnh nét đứt mảnh và nhạt hơn cho SVG nhỏ */
             background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" shape-rendering="crispEdges"><line x1="50%" y1="0" x2="50%" y2="100%" stroke="%23b0b0b0" stroke-dasharray="1.5,1.5" stroke-width="0.6"/><line x1="0" y1="50%" x2="100%" y2="50%" stroke="%23b0b0b0" stroke-dasharray="1.5,1.5" stroke-width="0.6"/></svg>'); 
             background-size: 100% 100%;
         }
         .stroke-char-row .tiny-tzg:last-child { border-right: 1px solid #777; }
         .stroke-svg { width: 100%; height: 100%; display: block; }
 
-        /* Lưới tập viết - Cân đối khoảng cách giữa các hàng */
-        .v-practice { display: flex; flex-direction: column; gap: 10px; margin-bottom: 12px; } /* Tăng gap cho thoáng */
-        .practice-row { display: flex; gap: 8px; width: 100%; flex-wrap: nowrap; }
+        /* Lưới tập viết - CĂN ĐỀU 2 BÊN (SPACE-BETWEEN) ĐỂ LẤP KÍN HÀNG */
+        .v-practice { display: flex; flex-direction: column; gap: 10px; margin-bottom: 12px; }
+        .practice-row { 
+            display: flex; 
+            width: 100%; 
+            flex-wrap: nowrap; 
+            justify-content: space-between; /* Lệnh thần thánh giúp dàn đều các cụm chữ */
+        }
 
         .word-group { 
             display: flex; flex-direction: column; 
@@ -135,7 +139,6 @@
 
         .py-box {
             height: 20px; 
-            /* Chỉnh nét đứt ô Pinyin mảnh và nhạt hơn */
             background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" shape-rendering="crispEdges"><line x1="0" y1="33.3%" x2="100%" y2="33.3%" stroke="%23c0c0c0" stroke-dasharray="1.5,2.5" stroke-width="0.8"/><line x1="0" y1="66.6%" x2="100%" y2="66.6%" stroke="%23c0c0c0" stroke-dasharray="1.5,2.5" stroke-width="0.8"/></svg>'); 
             background-size: 100% 100%;
             border-right: 1px solid #999;
@@ -145,18 +148,20 @@
         .py-box:last-child { border-right: none; }
         
         .py-box.trace-text { color: rgba(0,0,0,0.35); font-weight: bold; }
-        .trace-text { color: rgba(0,0,0,0.25); }
 
         .tzg-box {
             width: 44px; height: 44px; 
             border-right: 1px solid #999;
-            /* Chỉnh nét đứt ô chữ Hán mảnh và nhạt hơn */
             background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" shape-rendering="crispEdges"><line x1="50%" y1="0" x2="50%" y2="100%" stroke="%23b0b0b0" stroke-dasharray="2,2.5" stroke-width="0.8"/><line x1="0" y1="50%" x2="100%" y2="50%" stroke="%23b0b0b0" stroke-dasharray="2,2.5" stroke-width="0.8"/></svg>'); 
             background-size: 100% 100%;
             display: flex; align-items: center; justify-content: center;
-            font-family: "KaiTi", "Kaiti SC", STKaiti, serif; font-size: 32px; color: #000;
+            font-family: "KaiTi", "Kaiti SC", STKaiti, serif; font-size: 32px; 
+            color: #000; /* Màu mặc định */
         }
         .tzg-box:last-child { border-right: none; }
+
+        /* FIX 1: Nâng cao độ ưu tiên để lớp trace-text ghi đè được màu đen của ô chữ */
+        .tzg-box.trace-text { color: rgba(0,0,0,0.25) !important; }
 
         .v-free { display: flex; align-items: flex-end; margin-top: 5px; gap: 10px; }
         .free-label { font-size: 14px; color: #111; white-space: nowrap; font-family: "Times New Roman", serif; font-weight: bold;}
@@ -273,8 +278,12 @@ Bài 1: AI小语，你好！</textarea>
             }
         }
 
-        const maxCells = 12; 
-        let groupCount = Math.floor(maxCells / N);
+        // FIX 2: Thuật toán đo lường chính xác số cụm từ tối đa trên một hàng ngang (A4)
+        const maxWidth = 675; // Bề rộng nội dung khả dụng
+        const groupWidth = N * 44 + 3; 
+        const gap = 8; 
+        
+        let groupCount = Math.floor((maxWidth + gap) / (groupWidth + gap));
         if (groupCount < 1) groupCount = 1;
 
         let practiceHtml = `<div class="v-practice">`;
@@ -300,7 +309,6 @@ Bài 1: AI小语，你好！</textarea>
 
                 practiceHtml += `<div class="hz-row">`;
                 chars.forEach(char => {
-                    // SỬA Ở ĐÂY: Thêm chữ Hán vào và làm mờ nếu là ô đầu tiên
                     if (isFirstOverall) {
                         practiceHtml += `<div class="tzg-box trace-text">${char}</div>`; 
                     } else {
