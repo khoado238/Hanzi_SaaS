@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Công Cụ Luyện Viết Chữ Hán - Master (V30 - Auto Merge Pinyin)</title>
+    <title>Công Cụ Luyện Viết Chữ Hán - Master (V31 - Tùy chỉnh số hàng)</title>
     <style>
         /* ================= GIAO DIỆN CHUNG & LAYOUT ================= */
         body { 
@@ -20,6 +20,9 @@
         .left-panel label { font-weight: bold; margin-top: 15px; display: block; color: #333; }
         .left-panel textarea { width: 100%; padding: 10px; margin-top: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; resize: vertical; }
         
+        /* Ô input chọn số hàng */
+        .left-panel input[type="number"] { width: 100%; padding: 10px; margin-top: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; }
+
         .btn-group { display: flex; flex-direction: column; gap: 10px; margin-top: 25px; }
         button { padding: 12px 20px; border: none; cursor: pointer; font-weight: bold; border-radius: 6px; font-size: 15px; transition: 0.2s; color: white;}
         #btn-generate { background: #c62828; }
@@ -121,9 +124,10 @@
         .stroke-char-row .tiny-tzg:last-child { border-right: 1px solid #777; }
         .stroke-svg { width: 100%; height: 100%; display: block; }
 
-        /* 3. Lưới tập viết (CẤU TRÚC GỘP PINYIN MỚI) */
-        .v-practice { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
-        
+        /* 3. Lưới tập viết - Hỗ trợ nhiều dòng */
+        .v-practice { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
+        .practice-row { display: flex; gap: 8px; width: 100%; flex-wrap: nowrap; }
+
         .word-group { 
             display: flex; flex-direction: column; 
             border: 1.5px solid #555; width: max-content; 
@@ -141,7 +145,6 @@
         }
         .py-box:last-child { border-right: none; }
         
-        /* Hiệu ứng làm mờ chữ Pinyin và Chữ Hán ở ô đầu tiên */
         .py-box.trace-text { color: rgba(0,0,0,0.35); font-weight: bold; }
         .trace-text { color: rgba(0,0,0,0.25); }
 
@@ -169,6 +172,10 @@
     <label>Tên bài học:</label>
     <textarea id="lessonTitle" rows="2">第一课、
 Bài 1: AI小语，你好！</textarea>
+
+    <!-- Thêm ô chọn số dòng ở đây -->
+    <label>Số hàng tập viết (mỗi từ):</label>
+    <input type="number" id="numRows" value="1" min="1" max="10">
     
     <label>Danh sách từ vựng:</label>
     <div class="hint">Copy 3 cột từ Excel/Google Sheets dán vào đây.<br><b>Thứ tự:</b> Chữ Hán | Pinyin | Nghĩa</div>
@@ -220,7 +227,7 @@ Bài 1: AI小语，你好！</textarea>
         return html;
     }
 
-    function generateVocabHTML(line, index) {
+    function generateVocabHTML(line, index, numRows) {
         const parts = line.split(/\t|\|/);
         const word = (parts[0] || "").replace(/\s/g, ''); 
         const pinyinStr = (parts[1] || "").trim();
@@ -247,7 +254,6 @@ Bài 1: AI小语，你好！</textarea>
 
         const idxStr = index.toString().padStart(2, '0');
 
-        // THUẬT TOÁN ĐO LƯỜNG ĐỂ GỘP Ô PINYIN
         let colspans = [];
         if (pinyins.length === 0) {
             for(let i=0; i<N; i++) colspans.push(1);
@@ -271,38 +277,45 @@ Bài 1: AI小语，你好！</textarea>
         let groupCount = Math.floor(maxCells / N);
         if (groupCount < 1) groupCount = 1;
 
-        // Xây dựng khối HTML lưới viết
+        // Xây dựng khối HTML lưới viết (Lặp theo số hàng user nhập)
         let practiceHtml = `<div class="v-practice">`;
-        for (let i = 0; i < groupCount; i++) {
-            practiceHtml += `<div class="word-group">`;
+        for (let r = 0; r < numRows; r++) {
+            practiceHtml += `<div class="practice-row">`; // Mở đầu 1 hàng mới
             
-            // Render Hàng Pinyin
-            practiceHtml += `<div class="py-row">`;
-            if (pinyins.length === 0) {
-                for(let j=0; j<N; j++) practiceHtml += `<div class="py-box" style="flex: 1;"></div>`;
-            } else {
-                for(let j = 0; j < pinyins.length; j++) {
-                    const text = (i === 0) ? pinyins[j] : ''; // Chỉ hiện chữ Pinyin ở cụm đầu tiên
-                    const traceClass = (i === 0) ? 'trace-text' : ''; // Làm mờ chữ ở cụm đầu
-                    practiceHtml += `<div class="py-box ${traceClass}" style="flex: ${colspans[j]};">${text}</div>`;
-                }
-            }
-            practiceHtml += `</div>`;
-
-            // Render Hàng Chữ Hán
-            practiceHtml += `<div class="hz-row">`;
-            chars.forEach(char => {
-                if (i === 0) {
-                    practiceHtml += `<div class="tzg-box trace-text">${char}</div>`; // Ô chữ chìm để đồ
+            for (let i = 0; i < groupCount; i++) {
+                let isFirstOverall = (r === 0 && i === 0); // Chỉ in mờ ở ô đầu tiên của hàng đầu tiên
+                
+                practiceHtml += `<div class="word-group">`;
+                
+                // Render Hàng Pinyin
+                practiceHtml += `<div class="py-row">`;
+                if (pinyins.length === 0) {
+                    for(let j=0; j<N; j++) practiceHtml += `<div class="py-box" style="flex: 1;"></div>`;
                 } else {
-                    practiceHtml += `<div class="tzg-box"></div>`;
+                    for(let j = 0; j < pinyins.length; j++) {
+                        const text = isFirstOverall ? pinyins[j] : ''; 
+                        const traceClass = isFirstOverall ? 'trace-text' : ''; 
+                        practiceHtml += `<div class="py-box ${traceClass}" style="flex: ${colspans[j]};">${text}</div>`;
+                    }
                 }
-            });
-            practiceHtml += `</div>`;
+                practiceHtml += `</div>`;
 
-            practiceHtml += `</div>`; // Đóng word-group
+                // Render Hàng Chữ Hán
+                practiceHtml += `<div class="hz-row">`;
+                chars.forEach(char => {
+                    if (isFirstOverall) {
+                        practiceHtml += `<div class="tzg-box trace-text">${char}</div>`; 
+                    } else {
+                        practiceHtml += `<div class="tzg-box"></div>`;
+                    }
+                });
+                practiceHtml += `</div>`;
+
+                practiceHtml += `</div>`; // Đóng word-group
+            }
+            practiceHtml += `</div>`; // Đóng practice-row
         }
-        practiceHtml += `</div>`;
+        practiceHtml += `</div>`; // Đóng v-practice
 
         return `
         <div class="vocab-block">
@@ -343,6 +356,9 @@ Bài 1: AI小语，你好！</textarea>
             const vocabRaw = document.getElementById('vocabList').value.trim().split('\n');
             const validVocabs = vocabRaw.filter(line => line.includes('|') || line.includes('\t'));
             
+            // Lấy giá trị số hàng từ thẻ input (Mặc định là 1 nếu trống)
+            const numRowsInput = parseInt(document.getElementById('numRows').value) || 1;
+
             let allChars = [];
             validVocabs.forEach(line => {
                 const parts = line.split(/\t|\|/);
@@ -378,7 +394,9 @@ Bài 1: AI小语，你好！</textarea>
 
             for (let idx = 0; idx < validVocabs.length; idx++) {
                 const line = validVocabs[idx].trim();
-                const vocabHtml = generateVocabHTML(line, idx + 1); 
+                
+                // Truyền biến numRowsInput vào hàm render
+                const vocabHtml = generateVocabHTML(line, idx + 1, numRowsInput); 
                 
                 const tempDiv = document.createElement('div');
                 tempDiv.innerHTML = vocabHtml.trim();
