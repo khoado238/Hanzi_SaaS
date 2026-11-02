@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Công Cụ Luyện Viết Chữ Hán - Master (V46 - Nét đứt ô chữ mẫu)</title>
+    <title>Công Cụ Luyện Viết Chữ Hán - Master (V47 - Bật Tắt Ô Pinyin)</title>
     <style>
         /* ================= GIAO DIỆN CHUNG & LAYOUT ================= */
         body { 
@@ -143,7 +143,6 @@
         .v-left { display: inline-flex; border: 1.5px solid #333; border-radius: 2px; overflow: hidden; flex-shrink: 0; position: relative;}
         .big-chars { display: flex; }
         
-        /* CẬP NHẬT: Thêm lưới nét đứt cho ô chữ mẫu */
         .big-char { 
             width: 44px; height: 44px; font-size: 34px; font-family: "KaiTi", "Kaiti SC", STKaiti, serif; 
             display: flex; align-items: center; justify-content: center; border-right: 1.5px solid #333; 
@@ -261,6 +260,11 @@ Bài 1: AI小语，你好！</textarea>
     <input type="range" id="wmOpacity" min="0" max="0.15" step="0.005" value="0.035" 
            oninput="document.getElementById('wmOpacityVal').innerText = (this.value * 100).toFixed(1) + '%'; autoUpdate();">
 
+    <label style="display: flex; align-items: center; cursor: pointer; margin-top: 15px; font-weight: normal; color: #333;">
+        <input type="checkbox" id="showPinyinBox" checked onchange="autoUpdate()" style="width: 16px; height: 16px; margin-right: 8px; margin-top: 0; accent-color: #c62828;"> 
+        <b>Hiển thị ô tập viết Pinyin</b>
+    </label>
+
     <label>Số hàng tập viết (mỗi từ):</label>
     <input type="number" id="numRows" value="2" min="1" max="10" oninput="autoUpdate()">
     
@@ -316,7 +320,7 @@ Bài 1: AI小语，你好！</textarea>
         return html;
     }
 
-    function generateVocabHTML(line, index, numRows) {
+    function generateVocabHTML(line, index, numRows, showPinyinBox) {
         const parts = line.split(/\t|\|/);
         const word = (parts[0] || "").replace(/\s/g, ''); 
         const pinyinStr = (parts[1] || "").trim();
@@ -332,7 +336,6 @@ Bài 1: AI小语，你好！</textarea>
         let bigCharsHtml = '';
         
         chars.forEach(char => {
-            // Bao bọc ${char} trong thẻ span
             bigCharsHtml += `<div class="big-char"><span>${char}</span></div>`;
             if (/[，。！？、]/g.test(char)) return; 
             const data = hanziCache[char];
@@ -379,17 +382,20 @@ Bài 1: AI小语，你好！</textarea>
                 
                 practiceHtml += `<div class="word-group">`;
                 
-                practiceHtml += `<div class="py-row">`;
-                if (pinyins.length === 0) {
-                    for(let j=0; j<N; j++) practiceHtml += `<div class="py-box" style="flex: 1;"></div>`;
-                } else {
-                    for(let j = 0; j < pinyins.length; j++) {
-                        const text = isFirstOverall ? pinyins[j] : ''; 
-                        const traceClass = isFirstOverall ? 'trace-text' : ''; 
-                        practiceHtml += `<div class="py-box ${traceClass}" style="flex: ${colspans[j]};"><span>${text}</span></div>`;
+                // Chỉ xuất hàng Pinyin nếu showPinyinBox = true
+                if (showPinyinBox) {
+                    practiceHtml += `<div class="py-row">`;
+                    if (pinyins.length === 0) {
+                        for(let j=0; j<N; j++) practiceHtml += `<div class="py-box" style="flex: 1;"></div>`;
+                    } else {
+                        for(let j = 0; j < pinyins.length; j++) {
+                            const text = isFirstOverall ? pinyins[j] : ''; 
+                            const traceClass = isFirstOverall ? 'trace-text' : ''; 
+                            practiceHtml += `<div class="py-box ${traceClass}" style="flex: ${colspans[j]};"><span>${text}</span></div>`;
+                        }
                     }
+                    practiceHtml += `</div>`;
                 }
-                practiceHtml += `</div>`;
 
                 practiceHtml += `<div class="hz-row">`;
                 chars.forEach(char => {
@@ -448,6 +454,7 @@ Bài 1: AI小语，你好！</textarea>
             
             const numRowsInput = parseInt(document.getElementById('numRows').value) || 2;
             const wmOpacityInput = document.getElementById('wmOpacity').value; 
+            const showPinyinBox = document.getElementById('showPinyinBox').checked;
 
             let allChars = [];
             validVocabs.forEach(line => {
@@ -486,7 +493,8 @@ Bài 1: AI小语，你好！</textarea>
             for (let idx = 0; idx < validVocabs.length; idx++) {
                 const line = validVocabs[idx].trim();
                 
-                const vocabHtml = generateVocabHTML(line, idx + 1, numRowsInput); 
+                // Truyền trạng thái bật/tắt vào hàm render
+                const vocabHtml = generateVocabHTML(line, idx + 1, numRowsInput, showPinyinBox); 
                 
                 const tempDiv = document.createElement('div');
                 tempDiv.innerHTML = vocabHtml.trim();
