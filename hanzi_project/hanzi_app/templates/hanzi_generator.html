@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Công Cụ Luyện Viết Chữ Hán - Master (V48 - Đa nền tảng Template)</title>
+    <title>Công Cụ Luyện Viết Chữ Hán - Master (V49 - Hoàn thiện Template & Layout)</title>
     <style>
         /* ================= GIAO DIỆN CHUNG & LAYOUT ================= */
         body { 
@@ -235,10 +235,35 @@
         }
         .tzg-box.trace-text span { position: relative; z-index: 1; }
 
-        /* TĂNG CHIỀU CAO CHO PHẦN LUYỆN VIẾT TỰ DO */
+        /* TĂNG CHIỀU CAO LUYỆN VIẾT TỰ DO LÊN 25px */
         .v-free { display: flex; align-items: flex-end; margin-top: 5px; gap: 10px; }
         .free-label { font-size: 14px; color: #111; white-space: nowrap; font-family: "Times New Roman", serif; font-weight: bold;}
         .dotted-line { flex: 1; border-bottom: 1.5px dotted #999; height: 25px; margin-bottom: 5px;}
+
+        /* CSS KHU VỰC CÂU MẪU (Dành cho Template 4) */
+        .sample-text-section {
+            margin-bottom: 20px; 
+            page-break-inside: avoid;
+        }
+        .sample-text-title {
+            font-family: 'Arial', sans-serif;
+            font-weight: bold; 
+            font-size: 16px; 
+            color: #c62828; 
+            margin-bottom: 8px; 
+            border-bottom: 2px solid #eee; 
+            padding-bottom: 5px;
+        }
+        .sample-text-content {
+            font-family: 'KaiTi', 'Kaiti SC', STKaiti, serif; 
+            font-size: 26px; 
+            line-height: 1.6; 
+            padding: 12px 15px; 
+            border: 1.5px dashed #999; 
+            border-radius: 4px; 
+            color: #111;
+            white-space: pre-wrap;
+        }
     </style>
 </head>
 <body onload="toggleInputs(); generateSheet();">
@@ -249,7 +274,7 @@
     <label>Mẫu thiết kế (Template):</label>
     <select id="templateType" class="template-select" onchange="toggleInputs(); autoUpdate();">
         <option value="1">1. Từ vựng chi tiết (Hán + Pinyin + Nghĩa)</option>
-        <option value="2">2. Cụm từ cơ bản (Chỉ chữ Hán)</option>
+        <option value="2">2. Tách từng chữ Hán (Tự động tách)</option>
         <option value="3">3. Trang trắng luyện viết</option>
         <option value="4">4. Luyện viết Đoạn văn / Câu</option>
     </select>
@@ -270,7 +295,7 @@ Bài 1: AI小语，你好！</textarea>
     <!-- BLOCK 4: Dành cho Đoạn văn -->
     <div id="block-paragraph" style="display:none;">
         <label>Nội dung Đoạn văn / Câu:</label>
-        <div class="hint">Dán văn bản tiếng Trung vào đây. Hệ thống sẽ tự động dàn trang vào lưới chữ Hán mờ.</div>
+        <div class="hint">Dán văn bản tiếng Trung vào đây. Hệ thống sẽ tự động tạo phần câu mẫu và lưới đồ chữ bên dưới.</div>
         <textarea id="paragraphText" rows="8" oninput="autoUpdate()">你好，我叫小明。认识你很高兴！</textarea>
     </div>
 
@@ -323,8 +348,8 @@ Bài 1: AI小语，你好！</textarea>
         const hint = document.getElementById('vocabHint');
         if (type === '1') {
             hint.innerHTML = 'Copy 3 cột từ Excel dán vào đây.<br><b>Thứ tự:</b> Chữ Hán | Pinyin | Nghĩa';
-        } else {
-            hint.innerHTML = 'Dán cụm từ Hán (không cần pinyin/nghĩa).<br>Hệ thống tự nhận diện chữ để tạo ô.';
+        } else if (type === '2') {
+            hint.innerHTML = 'Dán chữ Hán, từ vựng hoặc cụm từ (dư pinyin cũng không sao).<br>Hệ thống tự động <b>tách từng chữ Hán</b> thành các mục riêng biệt.';
         }
     }
 
@@ -358,14 +383,16 @@ Bài 1: AI小语，你好！</textarea>
         return html;
     }
 
-    // Module: Template 3 & 4 (Tạo hàng lưới ngang 12 ô phân bố đều)
+    // ==========================================
+    // MODULE: Tạo dòng Lưới Trống (Template 3 & 4)
+    // ==========================================
     function createGridRow(chunk, showPinyinBox, isBlank = false) {
         let html = `<div class="practice-row" style="margin-bottom: 8px;">`;
         for(let i=0; i<12; i++) {
             let char = (!isBlank && chunk && i < chunk.length) ? chunk[i] : '';
             html += `<div class="word-group">`;
             if (showPinyinBox) {
-                html += `<div class="py-row"><div class="py-box" style="flex:1;"></div></div>`;
+                html += `<div class="py-row"><div class="py-box ${char ? 'trace-text' : ''}" style="flex:1;"><span></span></div></div>`;
             }
             html += `<div class="hz-row">
                         <div class="tzg-box ${char ? 'trace-text' : ''}">${char ? '<span>'+char+'</span>' : ''}</div>
@@ -376,24 +403,21 @@ Bài 1: AI小语，你好！</textarea>
         return html;
     }
 
-    // Module: Template 2 (Chỉ từ vựng Hán cơ bản)
-    function generateSimpleVocabHTML(line, index, numRows, showPinyinBox) {
-        const word = line.split(/\t|\|/)[0].replace(/\s/g, ''); 
-        if (!word) return '';
-        const chars = word.split(''); 
-        const N = chars.length;
+    // ==========================================
+    // MODULE: Template 2 (Chỉ chữ Hán đơn lẻ)
+    // ==========================================
+    function generateSimpleVocabHTML(char, index, numRows, showPinyinBox) {
+        if (!char) return '';
+        const N = 1;
 
         let strokeContentHtml = '';
-        let bigCharsHtml = '';
-        chars.forEach(char => {
-            bigCharsHtml += `<div class="big-char"><span>${char}</span></div>`;
-            if (!/[，。！？、：；（）《》“”‘’]/.test(char)) {
-                if (hanziCache[char]) strokeContentHtml += createStrokeHtml(hanziCache[char]);
-            }
-        });
+        let bigCharsHtml = `<div class="big-char"><span>${char}</span></div>`;
+        
+        const data = hanziCache[char];
+        if (data) strokeContentHtml += createStrokeHtml(data);
 
         const idxStr = index.toString().padStart(2, '0');
-        let groupCount = Math.floor((675 + 8) / (N * 44 + 3 + 8));
+        let groupCount = Math.floor((675 + 8) / (1 * 44 + 3 + 8));
         if (groupCount < 1) groupCount = 1;
 
         let practiceHtml = `<div class="v-practice">`;
@@ -405,14 +429,12 @@ Bài 1: AI小语，你好！</textarea>
                 
                 if (showPinyinBox) {
                     practiceHtml += `<div class="py-row">`;
-                    for(let j=0; j<N; j++) practiceHtml += `<div class="py-box" style="flex: 1;"></div>`;
+                    practiceHtml += `<div class="py-box" style="flex: 1;"></div>`;
                     practiceHtml += `</div>`;
                 }
 
                 practiceHtml += `<div class="hz-row">`;
-                chars.forEach(char => {
-                    practiceHtml += `<div class="tzg-box ${isFirstOverall ? 'trace-text' : ''}">${isFirstOverall ? '<span>'+char+'</span>' : ''}</div>`;
-                });
+                practiceHtml += `<div class="tzg-box ${isFirstOverall ? 'trace-text' : ''}">${isFirstOverall ? '<span>'+char+'</span>' : ''}</div>`;
                 practiceHtml += `</div></div>`; 
             }
             practiceHtml += `</div>`; 
@@ -424,14 +446,18 @@ Bài 1: AI小语，你好！</textarea>
             <div class="v-top-section">
                 <div class="v-badge">${idxStr}</div>
                 <div class="v-left"><div class="big-chars">${bigCharsHtml}</div></div>
-                <div class="v-right"><div class="v-strokes">${strokeContentHtml}</div></div>
+                <div class="v-right">
+                    <div class="v-strokes">${strokeContentHtml}</div>
+                </div>
             </div>
             ${practiceHtml}
             <div class="v-free"><span class="free-label">Luyện viết tự do:</span> <div class="dotted-line"></div></div>
         </div>`;
     }
 
-    // Module: Template 1 (Từ vựng Hán + Pinyin + Nghĩa)
+    // ==========================================
+    // MODULE: Template 1 (Hán + Pinyin + Nghĩa)
+    // ==========================================
     function generateVocabHTML(line, index, numRows, showPinyinBox) {
         const parts = line.split(/\t|\|/);
         const word = (parts[0] || "").replace(/\s/g, ''); 
@@ -478,14 +504,19 @@ Bài 1: AI小语，你好！</textarea>
             }
         }
 
-        let groupCount = Math.floor((675 + 8) / (N * 44 + 3 + 8));
+        const maxWidth = 675; 
+        const groupWidth = N * 44 + 3; 
+        const gap = 8; 
+        let groupCount = Math.floor((maxWidth + gap) / (groupWidth + gap));
         if (groupCount < 1) groupCount = 1;
 
         let practiceHtml = `<div class="v-practice">`;
         for (let r = 0; r < numRows; r++) {
             practiceHtml += `<div class="practice-row">`; 
+            
             for (let i = 0; i < groupCount; i++) {
                 let isFirstOverall = (r === 0 && i === 0); 
+                
                 practiceHtml += `<div class="word-group">`;
                 
                 if (showPinyinBox) {
@@ -495,7 +526,8 @@ Bài 1: AI小语，你好！</textarea>
                     } else {
                         for(let j = 0; j < pinyins.length; j++) {
                             const text = isFirstOverall ? pinyins[j] : ''; 
-                            practiceHtml += `<div class="py-box ${isFirstOverall ? 'trace-text' : ''}" style="flex: ${colspans[j]};"><span>${text}</span></div>`;
+                            const traceClass = isFirstOverall ? 'trace-text' : ''; 
+                            practiceHtml += `<div class="py-box ${traceClass}" style="flex: ${colspans[j]};"><span>${text}</span></div>`;
                         }
                     }
                     practiceHtml += `</div>`;
@@ -503,9 +535,14 @@ Bài 1: AI小语，你好！</textarea>
 
                 practiceHtml += `<div class="hz-row">`;
                 chars.forEach(char => {
-                    practiceHtml += `<div class="tzg-box ${isFirstOverall ? 'trace-text' : ''}">${isFirstOverall ? '<span>'+char+'</span>' : ''}</div>`;
+                    if (isFirstOverall) {
+                        practiceHtml += `<div class="tzg-box trace-text"><span>${char}</span></div>`; 
+                    } else {
+                        practiceHtml += `<div class="tzg-box"></div>`;
+                    }
                 });
-                practiceHtml += `</div></div>`; 
+                practiceHtml += `</div>`;
+                practiceHtml += `</div>`; 
             }
             practiceHtml += `</div>`; 
         }
@@ -515,7 +552,9 @@ Bài 1: AI小语，你好！</textarea>
         <div class="vocab-block">
             <div class="v-top-section">
                 <div class="v-badge">${idxStr}</div>
-                <div class="v-left"><div class="big-chars">${bigCharsHtml}</div></div>
+                <div class="v-left">
+                    <div class="big-chars">${bigCharsHtml}</div>
+                </div>
                 <div class="v-right">
                     <div class="info-row-1">
                         <span class="pinyin">[ ${pinyinStr} ]</span>
@@ -524,12 +563,17 @@ Bài 1: AI小语，你好！</textarea>
                     <div class="info-row-2">
                         <span class="meaning"><span class="meaning-label">Nghĩa:</span>${meaning}</span>
                     </div>
-                    <div class="v-strokes">${strokeContentHtml}</div>
+                    <div class="v-strokes">
+                        ${strokeContentHtml}
+                    </div>
                 </div>
             </div>
             ${practiceHtml}
-            <div class="v-free"><span class="free-label">Luyện viết tự do:</span> <div class="dotted-line"></div></div>
-        </div>`;
+            <div class="v-free">
+                <span class="free-label">Luyện viết tự do:</span> <div class="dotted-line"></div>
+            </div>
+        </div>
+        `;
     }
 
     async function generateSheet() {
@@ -558,6 +602,7 @@ Bài 1: AI小语，你好！</textarea>
                 allChars.push(...text.split(''));
             }
 
+            // Lọc ra các ký tự cần tải nét bút
             const uniqueChars = [...new Set(allChars.filter(c => !/[，。！？、：；（）《》“”‘’]/g.test(c)))];
             await Promise.all(uniqueChars.map(char => fetchHanziData(char)));
 
@@ -603,7 +648,7 @@ Bài 1: AI小语，你好！</textarea>
 
             if (template === '1') {
                 validVocabs.forEach((line, idx) => {
-                    const html = generateVocabHTML(line, idx + 1, numRowsInput, showPinyinBox);
+                    const html = generateVocabHTML(line, idx + 1, numRowsInput, showPinyinBox); 
                     if(!html) return;
                     const tempDiv = document.createElement('div');
                     tempDiv.innerHTML = html.trim();
@@ -611,14 +656,15 @@ Bài 1: AI小语，你好！</textarea>
                 });
             } 
             else if (template === '2') {
-                validVocabs.forEach((line, idx) => {
-                    const html = generateSimpleVocabHTML(line, idx + 1, numRowsInput, showPinyinBox);
+                // Tách từng chữ Hán để in riêng lẻ
+                uniqueChars.forEach((char, idx) => {
+                    const html = generateSimpleVocabHTML(char, idx + 1, numRowsInput, showPinyinBox); 
                     if(!html) return;
                     const tempDiv = document.createElement('div');
                     tempDiv.innerHTML = html.trim();
                     appendNodeWithPagination(tempDiv.firstElementChild);
                 });
-            } 
+            }
             else if (template === '3') {
                 const targetPages = parseInt(document.getElementById('numPages').value) || 1;
                 while(pageNum <= targetPages) {
@@ -642,23 +688,39 @@ Bài 1: AI小语，你好！</textarea>
                         }
                     }
                 }
-            } 
+            }
             else if (template === '4') {
-                const text = document.getElementById('paragraphText').value.replace(/[\n\r]/g, ''); 
-                const chars = text.split('');
+                const rawText = document.getElementById('paragraphText').value;
+                const textForGrid = rawText.replace(/[\n\r]/g, ''); 
+                
+                // Khối Câu mẫu
+                const sampleHtml = `
+                    <div class="sample-text-section">
+                        <div class="sample-text-title">Câu mẫu / Đoạn văn:</div>
+                        <div class="sample-text-content">${rawText}</div>
+                        <div class="sample-text-title" style="margin-top: 15px; border-bottom: none; color: #333;">Luyện viết:</div>
+                    </div>
+                `;
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = sampleHtml.trim();
+                appendNodeWithPagination(tempDiv.firstElementChild);
+
+                // Khối luyện viết (Dàn chữ liên tục)
+                const chars = textForGrid.split('');
                 const chunks = [];
                 for(let i=0; i<chars.length; i+=12) chunks.push(chars.slice(i, i+12));
                 
                 chunks.forEach((chunk) => {
                     const html = createGridRow(chunk, showPinyinBox, false);
-                    const tempDiv = document.createElement('div');
-                    tempDiv.innerHTML = html.trim();
-                    appendNodeWithPagination(tempDiv.firstElementChild);
+                    const tempDiv2 = document.createElement('div');
+                    tempDiv2.innerHTML = html.trim();
+                    appendNodeWithPagination(tempDiv2.firstElementChild);
                 });
             }
 
             statusText.innerText = "✅ Đã cập nhật xong!";
             statusText.style.color = "#4CAF50";
+            
             setTimeout(() => { statusText.innerText = ""; }, 2000);
 
         } catch (error) {
@@ -672,6 +734,7 @@ Bài 1: AI小语，你好！</textarea>
         const statusText = document.getElementById('statusText');
         statusText.innerText = "Đang chờ nhập...";
         statusText.style.color = "#666";
+
         clearTimeout(updateTimer);
         updateTimer = setTimeout(() => { generateSheet(); }, 600);
     }
