@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Công Cụ Luyện Viết Chữ Hán - Master (V28 - HSK 3.0 Layout)</title>
+    <title>Công Cụ Luyện Viết Chữ Hán - Master (V29 - HSK 3.0 Pro Layout)</title>
     <style>
         /* ================= GIAO DIỆN CHUNG & LAYOUT ================= */
         body { 
@@ -53,13 +53,10 @@
             position: relative; 
             width: 210mm; height: 297mm; 
             background: white; margin-bottom: 30px;
+            /* Lề đồng nhất cho mọi trang (Không còn so le) */
             padding: 12mm 15mm 25mm 15mm; 
             box-sizing: border-box; box-shadow: 0 4px 15px rgba(0,0,0,0.3);
         }
-
-        /* Lề in 2 mặt (So le) */
-        .a4-page:nth-child(odd) { padding-left: 20mm !important; padding-right: 10mm !important; }
-        .a4-page:nth-child(even) { padding-left: 10mm !important; padding-right: 20mm !important; }
 
         /* ================= WATERMARK BẢN QUYỀN ================= */
         .watermark-layer {
@@ -90,10 +87,10 @@
         .tables-container { display: flex; flex-direction: column; width: 100%; position: relative; z-index: 1; }
         .page-number { position: absolute; bottom: 10mm; left: 0; width: 100%; text-align: center; font-size: 14px; font-family: "Times New Roman", serif; color: #333; z-index: 1;}
 
-        /* ================= CẤU TRÚC BLOCK TỪ VỰNG MỚI (HSK 3.0 LAYOUT) ================= */
+        /* ================= CẤU TRÚC BLOCK TỪ VỰNG ================= */
         .vocab-block { display: flex; flex-direction: column; margin-bottom: 25px; padding-bottom: 15px; border-bottom: 1.5px solid #eee; page-break-inside: avoid; }
         
-        /* 1. Header Của Mỗi Từ (Chữ lớn, Pinyin, Nghĩa) */
+        /* 1. Header Của Mỗi Từ */
         .v-header { display: flex; gap: 15px; align-items: flex-start; margin-bottom: 10px; }
         .v-left { display: inline-flex; flex-direction: column; border: 1.5px solid #333; border-radius: 2px; overflow: hidden; }
         .big-chars { display: flex; }
@@ -104,14 +101,17 @@
         .big-char:last-child { border-right: none; }
         .v-idx { background: #ffe599; font-size: 13px; font-weight: bold; text-align: center; padding: 2px 0; border-top: 1.5px solid #333; }
         
+        /* Đã nâng cấp UI Pinyin và Nghĩa */
         .v-info { flex: 1; display: flex; flex-direction: column; gap: 4px; padding-top: 2px; }
         .info-row-1 { display: flex; justify-content: space-between; align-items: center; width: 100%; }
-        .pinyin { font-weight: bold; font-size: 16px; color: #111; font-family: "Arial", sans-serif; }
+        .pinyin { font-weight: bold; font-size: 17px; color: #c62828; font-family: "Arial", sans-serif; letter-spacing: 0.5px; } /* Màu đỏ đô, chữ to rõ */
         .total-strokes { font-size: 13px; font-style: italic; color: #555; }
+        
         .info-row-2 { display: flex; }
-        .meaning { font-weight: bold; font-size: 14px; color: #111; font-family: "Times New Roman", serif; }
+        .meaning-label { font-weight: bold; font-style: italic; color: #333; margin-right: 5px; }
+        .meaning { font-size: 15px; color: #222; font-family: "Times New Roman", serif; line-height: 1.4; }
 
-        /* 2. Thứ tự nét bút (Stroke Order) */
+        /* 2. Thứ tự nét bút */
         .v-strokes { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; }
         .stroke-char-row { display: flex; flex-wrap: wrap; }
         .tiny-tzg {
@@ -123,18 +123,27 @@
         .stroke-char-row .tiny-tzg:last-child { border-right: 1px solid #777; }
         .stroke-svg { width: 100%; height: 100%; display: block; }
 
-        /* 3. Lưới tập viết (Grouped Boxes) */
+        /* 3. Lưới tập viết CÓ Ô PINYIN */
         .v-practice { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
-        .word-group { display: flex; border: 1.5px solid #555; } /* Viền đậm cho mỗi cụm */
+        .word-group { display: flex; border: 1.5px solid #555; } /* Viền đậm bọc ngoài cụm */
+        
+        .char-col { display: flex; flex-direction: column; border-right: 1px solid #999; }
+        .word-group .char-col:last-child { border-right: none; }
+
+        .py-box {
+            height: 18px; 
+            border-bottom: 1px solid #999; /* Ngăn cách ô pinyin và ô chữ Hán */
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" shape-rendering="crispEdges"><line x1="0" y1="33.3%" x2="100%" y2="33.3%" stroke="%23b0b0b0" stroke-dasharray="1.5,3.5" stroke-width="0.8"/><line x1="0" y1="66.6%" x2="100%" y2="66.6%" stroke="%23b0b0b0" stroke-dasharray="1.5,3.5" stroke-width="0.8"/></svg>'); 
+            background-size: 100% 100%;
+        }
+
         .tzg-box {
             width: 44px; height: 44px; 
-            border-right: 1px solid #999; /* Viền nhạt ngăn cách chữ bên trong cụm */
             background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" shape-rendering="crispEdges"><line x1="50%" y1="0" x2="50%" y2="100%" stroke="%23e0e0e0" stroke-dasharray="2,2" stroke-width="1"/><line x1="0" y1="50%" x2="100%" y2="50%" stroke="%23e0e0e0" stroke-dasharray="2,2" stroke-width="1"/></svg>'); 
             background-size: 100% 100%;
             display: flex; align-items: center; justify-content: center;
             font-family: "KaiTi", "Kaiti SC", STKaiti, serif; font-size: 32px; color: #000;
         }
-        .word-group .tzg-box:last-child { border-right: none; }
         .trace-text { color: rgba(0,0,0,0.25); }
 
         /* 4. Dòng luyện viết tự do */
@@ -172,7 +181,6 @@ Bài 1: AI小语，你好！</textarea>
 <script>
     const hanziCache = {};
 
-    // Khởi tạo tải dữ liệu từ CDN
     async function fetchHanziData(char) {
         if (hanziCache[char]) return hanziCache[char]; 
         try {
@@ -186,7 +194,6 @@ Bài 1: AI小语，你好！</textarea>
         return null;
     }
 
-    // Vẽ SVG dãy nét bút cho 1 chữ (Hiển thị kiểu các ô nhỏ liền kề)
     function createStrokeHtml(data) {
         if (!data) return '';
         const strokes = data.strokes;
@@ -204,7 +211,6 @@ Bài 1: AI小语，你好！</textarea>
         return html;
     }
 
-    // Hàm tạo khối HTML cho 1 cụm từ vựng (Layout Mới)
     function generateVocabHTML(line, index) {
         const parts = line.split(/\t|\|/);
         const word = (parts[0] || "").replace(/\s/g, ''); 
@@ -229,31 +235,30 @@ Bài 1: AI小语，你好！</textarea>
             }
         });
 
-        // Định dạng chỉ số (01, 02...)
         const idxStr = index.toString().padStart(2, '0');
 
-        // Tính toán số lượng cụm (group) dựa trên độ rộng giấy A4 (~14 ô)
         const maxCells = 14; 
         let groupCount = Math.floor(maxCells / N);
         if (groupCount < 1) groupCount = 1;
 
-        // Sinh HTML cho lưới viết (Chia cụm theo số chữ Hán)
+        // Xây dựng khối HTML lưới viết (có chứa ô Pinyin bên trên)
         let practiceHtml = `<div class="v-practice">`;
         for (let i = 0; i < groupCount; i++) {
             practiceHtml += `<div class="word-group">`;
             chars.forEach(char => {
-                // Cụm đầu tiên luôn in mờ để đồ chữ (trace)
+                practiceHtml += `<div class="char-col">`;
+                practiceHtml += `<div class="py-box"></div>`; // Hàng Pinyin (4 ô ly)
                 if (i === 0) {
-                    practiceHtml += `<div class="tzg-box trace-text">${char}</div>`;
+                    practiceHtml += `<div class="tzg-box trace-text">${char}</div>`; // Ô chữ chìm (để tô)
                 } else {
-                    practiceHtml += `<div class="tzg-box"></div>`;
+                    practiceHtml += `<div class="tzg-box"></div>`; // Ô trống
                 }
+                practiceHtml += `</div>`;
             });
             practiceHtml += `</div>`;
         }
         practiceHtml += `</div>`;
 
-        // Lắp ráp toàn bộ UI Block
         return `
         <div class="vocab-block">
             <div class="v-header">
@@ -263,11 +268,11 @@ Bài 1: AI小语，你好！</textarea>
                 </div>
                 <div class="v-info">
                     <div class="info-row-1">
-                        <span class="pinyin">${pinyinStr}</span>
+                        <span class="pinyin">[ ${pinyinStr} ]</span>
                         <span class="total-strokes">Số nét: ${totalStrokes}</span>
                     </div>
                     <div class="info-row-2">
-                        <span class="meaning">Nghĩa: ${meaning}</span>
+                        <span class="meaning"><span class="meaning-label">Nghĩa:</span>${meaning}</span>
                     </div>
                 </div>
             </div>
@@ -293,7 +298,6 @@ Bài 1: AI小语，你好！</textarea>
             const vocabRaw = document.getElementById('vocabList').value.trim().split('\n');
             const validVocabs = vocabRaw.filter(line => line.includes('|') || line.includes('\t'));
             
-            // Tải trước dữ liệu SVG
             let allChars = [];
             validVocabs.forEach(line => {
                 const parts = line.split(/\t|\|/);
@@ -303,7 +307,6 @@ Bài 1: AI小语，你好！</textarea>
             const uniqueChars = [...new Set(allChars.filter(c => !/[，。！？、]/.test(c)))];
             await Promise.all(uniqueChars.map(char => fetchHanziData(char)));
 
-            // DOM & Chia trang
             const outputContainer = document.getElementById('outputContainer');
             outputContainer.innerHTML = '';
 
@@ -330,7 +333,6 @@ Bài 1: AI小语，你好！</textarea>
 
             for (let idx = 0; idx < validVocabs.length; idx++) {
                 const line = validVocabs[idx].trim();
-                // Sử dụng hàm render mới, truyền thêm index (bắt đầu từ 1)
                 const vocabHtml = generateVocabHTML(line, idx + 1); 
                 
                 const tempDiv = document.createElement('div');
@@ -342,7 +344,6 @@ Bài 1: AI小语，你好！</textarea>
                 const pageRect = currentPage.getBoundingClientRect();
                 const tablesRect = tablesContainer.getBoundingClientRect();
                 
-                // Thuật toán tách trang
                 if (tablesRect.bottom > pageRect.bottom - 80 && tablesContainer.children.length > 1) {
                     tablesContainer.removeChild(vocabNode);
                     currentPage.querySelector('.page-number').innerText = `- ${pageNum} -`;
@@ -356,7 +357,6 @@ Bài 1: AI小语，你好！</textarea>
                 }
             }
             
-            // Đánh số trang cho trang cuối
             if (currentPage) {
                 currentPage.querySelector('.page-number').innerText = `- ${pageNum} -`;
             }
