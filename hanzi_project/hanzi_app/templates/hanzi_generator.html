@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Công Cụ Luyện Viết Chữ Hán - Master (V38 - Thêm ngăn cách mục)</title>
+    <title>Công Cụ Luyện Viết Chữ Hán - Master (V39 - Vạch liền ngăn cách)</title>
     <style>
         /* ================= GIAO DIỆN CHUNG & LAYOUT ================= */
         body { 
@@ -95,12 +95,26 @@
         .vocab-block { 
             display: flex; flex-direction: column; 
             margin-bottom: 25px; padding-bottom: 20px; 
-            border-bottom: 1.5px dashed #cccccc; /* Đường kẻ đứt ngăn cách rõ ràng */
+            position: relative; /* Giữ khung cho đường kẻ ::after */
             page-break-inside: avoid; 
         }
+        
+        /* CẬP NHẬT: Vạch liền ngăn cách thu gọn ở giữa (80% chiều ngang) */
+        .vocab-block::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 10%; /* Căn lề trái 10% (để đường kẻ nằm giữa) */
+            width: 80%; /* Đường kẻ dài 80% */
+            border-bottom: 1.5px solid #d0d0d0; /* Đổi thành vạch liền (solid) */
+        }
+        
         /* Ẩn đường kẻ ở mục từ vựng cuối cùng của mỗi trang */
+        .vocab-block:last-child::after {
+            display: none;
+        }
+        
         .vocab-block:last-child {
-            border-bottom: none;
             margin-bottom: 10px;
             padding-bottom: 0;
         }
