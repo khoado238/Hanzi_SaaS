@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Công Cụ Luyện Viết Chữ Hán - Master (V37 - Fixed A4 Size)</title>
+    <title>Công Cụ Luyện Viết Chữ Hán - Master (V38 - Thêm ngăn cách mục)</title>
     <style>
         /* ================= GIAO DIỆN CHUNG & LAYOUT ================= */
         body { 
@@ -55,8 +55,8 @@
             position: relative; 
             width: 210mm; 
             height: 297mm; 
-            min-height: 297mm; /* Khóa cứng chiều cao A4 */
-            flex-shrink: 0;    /* Cấm thu nhỏ trang khi Xem Trước */
+            min-height: 297mm; 
+            flex-shrink: 0;    
             background: white; margin-bottom: 30px;
             padding: 12mm 15mm 25mm 15mm; 
             box-sizing: border-box; box-shadow: 0 4px 15px rgba(0,0,0,0.3);
@@ -92,7 +92,18 @@
         .page-number { position: absolute; bottom: 10mm; left: 0; width: 100%; text-align: center; font-size: 14px; font-family: "Times New Roman", serif; color: #333; z-index: 1;}
 
         /* ================= CẤU TRÚC BLOCK TỪ VỰNG ================= */
-        .vocab-block { display: flex; flex-direction: column; margin-bottom: 25px; padding-bottom: 15px; border-bottom: 1.5px solid #eee; page-break-inside: avoid; }
+        .vocab-block { 
+            display: flex; flex-direction: column; 
+            margin-bottom: 25px; padding-bottom: 20px; 
+            border-bottom: 1.5px dashed #cccccc; /* Đường kẻ đứt ngăn cách rõ ràng */
+            page-break-inside: avoid; 
+        }
+        /* Ẩn đường kẻ ở mục từ vựng cuối cùng của mỗi trang */
+        .vocab-block:last-child {
+            border-bottom: none;
+            margin-bottom: 10px;
+            padding-bottom: 0;
+        }
         
         .v-top-section { display: flex; gap: 20px; align-items: flex-start; margin-bottom: 12px; }
         
