@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Công Cụ Luyện Viết Chữ Hán - Master (V29 - HSK 3.0 Pro Layout)</title>
+    <title>Công Cụ Luyện Viết Chữ Hán - Master (V30 - Auto Merge Pinyin)</title>
     <style>
         /* ================= GIAO DIỆN CHUNG & LAYOUT ================= */
         body { 
@@ -53,7 +53,6 @@
             position: relative; 
             width: 210mm; height: 297mm; 
             background: white; margin-bottom: 30px;
-            /* Lề đồng nhất cho mọi trang (Không còn so le) */
             padding: 12mm 15mm 25mm 15mm; 
             box-sizing: border-box; box-shadow: 0 4px 15px rgba(0,0,0,0.3);
         }
@@ -101,10 +100,9 @@
         .big-char:last-child { border-right: none; }
         .v-idx { background: #ffe599; font-size: 13px; font-weight: bold; text-align: center; padding: 2px 0; border-top: 1.5px solid #333; }
         
-        /* Đã nâng cấp UI Pinyin và Nghĩa */
         .v-info { flex: 1; display: flex; flex-direction: column; gap: 4px; padding-top: 2px; }
         .info-row-1 { display: flex; justify-content: space-between; align-items: center; width: 100%; }
-        .pinyin { font-weight: bold; font-size: 17px; color: #c62828; font-family: "Arial", sans-serif; letter-spacing: 0.5px; } /* Màu đỏ đô, chữ to rõ */
+        .pinyin { font-weight: bold; font-size: 17px; color: #c62828; font-family: "Arial", sans-serif; letter-spacing: 0.5px; } 
         .total-strokes { font-size: 13px; font-style: italic; color: #555; }
         
         .info-row-2 { display: flex; }
@@ -123,28 +121,39 @@
         .stroke-char-row .tiny-tzg:last-child { border-right: 1px solid #777; }
         .stroke-svg { width: 100%; height: 100%; display: block; }
 
-        /* 3. Lưới tập viết CÓ Ô PINYIN */
+        /* 3. Lưới tập viết (CẤU TRÚC GỘP PINYIN MỚI) */
         .v-practice { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
-        .word-group { display: flex; border: 1.5px solid #555; } /* Viền đậm bọc ngoài cụm */
         
-        .char-col { display: flex; flex-direction: column; border-right: 1px solid #999; }
-        .word-group .char-col:last-child { border-right: none; }
+        .word-group { 
+            display: flex; flex-direction: column; 
+            border: 1.5px solid #555; width: max-content; 
+        }
+        .py-row { display: flex; width: 100%; border-bottom: 1px solid #999; }
+        .hz-row { display: flex; width: 100%; }
 
         .py-box {
-            height: 18px; 
-            border-bottom: 1px solid #999; /* Ngăn cách ô pinyin và ô chữ Hán */
+            height: 20px; 
             background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" shape-rendering="crispEdges"><line x1="0" y1="33.3%" x2="100%" y2="33.3%" stroke="%23b0b0b0" stroke-dasharray="1.5,3.5" stroke-width="0.8"/><line x1="0" y1="66.6%" x2="100%" y2="66.6%" stroke="%23b0b0b0" stroke-dasharray="1.5,3.5" stroke-width="0.8"/></svg>'); 
             background-size: 100% 100%;
+            border-right: 1px solid #999;
+            display: flex; align-items: center; justify-content: center;
+            font-family: "Arial", sans-serif; font-size: 12px; color: #000;
         }
+        .py-box:last-child { border-right: none; }
+        
+        /* Hiệu ứng làm mờ chữ Pinyin và Chữ Hán ở ô đầu tiên */
+        .py-box.trace-text { color: rgba(0,0,0,0.35); font-weight: bold; }
+        .trace-text { color: rgba(0,0,0,0.25); }
 
         .tzg-box {
             width: 44px; height: 44px; 
+            border-right: 1px solid #999;
             background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" shape-rendering="crispEdges"><line x1="50%" y1="0" x2="50%" y2="100%" stroke="%23e0e0e0" stroke-dasharray="2,2" stroke-width="1"/><line x1="0" y1="50%" x2="100%" y2="50%" stroke="%23e0e0e0" stroke-dasharray="2,2" stroke-width="1"/></svg>'); 
             background-size: 100% 100%;
             display: flex; align-items: center; justify-content: center;
             font-family: "KaiTi", "Kaiti SC", STKaiti, serif; font-size: 32px; color: #000;
         }
-        .trace-text { color: rgba(0,0,0,0.25); }
+        .tzg-box:last-child { border-right: none; }
 
         /* 4. Dòng luyện viết tự do */
         .v-free { display: flex; align-items: flex-end; margin-top: 5px; gap: 10px; }
@@ -218,6 +227,7 @@ Bài 1: AI小语，你好！</textarea>
         const meaning = (parts[2] || "").trim(); 
         
         const chars = word.split(''); 
+        const pinyins = pinyinStr.split(/\s+/).filter(Boolean); 
         const N = chars.length;
         if (N === 0) return '';
 
@@ -237,25 +247,60 @@ Bài 1: AI小语，你好！</textarea>
 
         const idxStr = index.toString().padStart(2, '0');
 
+        // THUẬT TOÁN ĐO LƯỜNG ĐỂ GỘP Ô PINYIN
+        let colspans = [];
+        if (pinyins.length === 0) {
+            for(let i=0; i<N; i++) colspans.push(1);
+        } else {
+            let remainingN = N;
+            let remainingLen = pinyins.join('').length;
+            for (let i = 0; i < pinyins.length; i++) {
+                if (i === pinyins.length - 1) {
+                    colspans.push(remainingN);
+                } else {
+                    let cs = Math.max(1, Math.round((pinyins[i].length / remainingLen) * remainingN));
+                    cs = Math.min(cs, remainingN - (pinyins.length - 1 - i));
+                    colspans.push(cs);
+                    remainingN -= cs;
+                    remainingLen -= pinyins[i].length;
+                }
+            }
+        }
+
         const maxCells = 14; 
         let groupCount = Math.floor(maxCells / N);
         if (groupCount < 1) groupCount = 1;
 
-        // Xây dựng khối HTML lưới viết (có chứa ô Pinyin bên trên)
+        // Xây dựng khối HTML lưới viết
         let practiceHtml = `<div class="v-practice">`;
         for (let i = 0; i < groupCount; i++) {
             practiceHtml += `<div class="word-group">`;
-            chars.forEach(char => {
-                practiceHtml += `<div class="char-col">`;
-                practiceHtml += `<div class="py-box"></div>`; // Hàng Pinyin (4 ô ly)
-                if (i === 0) {
-                    practiceHtml += `<div class="tzg-box trace-text">${char}</div>`; // Ô chữ chìm (để tô)
-                } else {
-                    practiceHtml += `<div class="tzg-box"></div>`; // Ô trống
+            
+            // Render Hàng Pinyin
+            practiceHtml += `<div class="py-row">`;
+            if (pinyins.length === 0) {
+                for(let j=0; j<N; j++) practiceHtml += `<div class="py-box" style="flex: 1;"></div>`;
+            } else {
+                for(let j = 0; j < pinyins.length; j++) {
+                    const text = (i === 0) ? pinyins[j] : ''; // Chỉ hiện chữ Pinyin ở cụm đầu tiên
+                    const traceClass = (i === 0) ? 'trace-text' : ''; // Làm mờ chữ ở cụm đầu
+                    practiceHtml += `<div class="py-box ${traceClass}" style="flex: ${colspans[j]};">${text}</div>`;
                 }
-                practiceHtml += `</div>`;
+            }
+            practiceHtml += `</div>`;
+
+            // Render Hàng Chữ Hán
+            practiceHtml += `<div class="hz-row">`;
+            chars.forEach(char => {
+                if (i === 0) {
+                    practiceHtml += `<div class="tzg-box trace-text">${char}</div>`; // Ô chữ chìm để đồ
+                } else {
+                    practiceHtml += `<div class="tzg-box"></div>`;
+                }
             });
             practiceHtml += `</div>`;
+
+            practiceHtml += `</div>`; // Đóng word-group
         }
         practiceHtml += `</div>`;
 
