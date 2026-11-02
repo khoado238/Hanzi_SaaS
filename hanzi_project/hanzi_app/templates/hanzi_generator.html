@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Công Cụ Luyện Viết Chữ Hán - Master (V35 - Fix Trace & Justify)</title>
+    <title>Công Cụ Luyện Viết Chữ Hán - Master (V36 - Watermark Opacity)</title>
     <style>
         /* ================= GIAO DIỆN CHUNG & LAYOUT ================= */
         body { 
@@ -20,6 +20,9 @@
         .left-panel label { font-weight: bold; margin-top: 15px; display: block; color: #333; }
         .left-panel textarea { width: 100%; padding: 10px; margin-top: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; resize: vertical; }
         .left-panel input[type="number"] { width: 100%; padding: 10px; margin-top: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; }
+        
+        /* Style cho thanh trượt Slider */
+        .left-panel input[type="range"] { width: 100%; margin-top: 8px; cursor: pointer; accent-color: #c62828; }
 
         .btn-group { display: flex; flex-direction: column; gap: 10px; margin-top: 25px; }
         button { padding: 12px 20px; border: none; cursor: pointer; font-weight: bold; border-radius: 6px; font-size: 15px; transition: 0.2s; color: white;}
@@ -73,7 +76,8 @@
             font-size: 110px;
             font-family: "Times New Roman", serif;
             font-weight: bold;
-            color: rgba(0, 0, 0, 0.035);
+            /* Truyền biến CSS để JS có thể thay đổi mượt mà */
+            color: rgba(0, 0, 0, var(--wm-opacity, 0.035));
             white-space: nowrap;
             user-select: none;
         }
@@ -121,14 +125,8 @@
         .stroke-char-row .tiny-tzg:last-child { border-right: 1px solid #777; }
         .stroke-svg { width: 100%; height: 100%; display: block; }
 
-        /* Lưới tập viết - CĂN ĐỀU 2 BÊN (SPACE-BETWEEN) ĐỂ LẤP KÍN HÀNG */
         .v-practice { display: flex; flex-direction: column; gap: 10px; margin-bottom: 12px; }
-        .practice-row { 
-            display: flex; 
-            width: 100%; 
-            flex-wrap: nowrap; 
-            justify-content: space-between; /* Lệnh thần thánh giúp dàn đều các cụm chữ */
-        }
+        .practice-row { display: flex; width: 100%; flex-wrap: nowrap; justify-content: space-between; }
 
         .word-group { 
             display: flex; flex-direction: column; 
@@ -156,11 +154,9 @@
             background-size: 100% 100%;
             display: flex; align-items: center; justify-content: center;
             font-family: "KaiTi", "Kaiti SC", STKaiti, serif; font-size: 32px; 
-            color: #000; /* Màu mặc định */
+            color: #000;
         }
         .tzg-box:last-child { border-right: none; }
-
-        /* FIX 1: Nâng cao độ ưu tiên để lớp trace-text ghi đè được màu đen của ô chữ */
         .tzg-box.trace-text { color: rgba(0,0,0,0.25) !important; }
 
         .v-free { display: flex; align-items: flex-end; margin-top: 5px; gap: 10px; }
@@ -176,6 +172,14 @@
     <label>Tên bài học:</label>
     <textarea id="lessonTitle" rows="2" oninput="autoUpdate()">第一课、
 Bài 1: AI小语，你好！</textarea>
+
+    <!-- Tích hợp thanh trượt độ đậm Watermark -->
+    <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: 15px;">
+        <label style="margin-top: 0;">Độ đậm Watermark:</label>
+        <span id="wmOpacityVal" style="font-size: 13px; font-weight: bold; color: #c62828;">3.5%</span>
+    </div>
+    <input type="range" id="wmOpacity" min="0" max="0.15" step="0.005" value="0.035" 
+           oninput="document.getElementById('wmOpacityVal').innerText = (this.value * 100).toFixed(1) + '%'; autoUpdate();">
 
     <label>Số hàng tập viết (mỗi từ):</label>
     <input type="number" id="numRows" value="1" min="1" max="10" oninput="autoUpdate()">
@@ -278,8 +282,7 @@ Bài 1: AI小语，你好！</textarea>
             }
         }
 
-        // FIX 2: Thuật toán đo lường chính xác số cụm từ tối đa trên một hàng ngang (A4)
-        const maxWidth = 675; // Bề rộng nội dung khả dụng
+        const maxWidth = 675; 
         const groupWidth = N * 44 + 3; 
         const gap = 8; 
         
@@ -363,6 +366,8 @@ Bài 1: AI小语，你好！</textarea>
             const validVocabs = vocabRaw.filter(line => line.includes('|') || line.includes('\t'));
             
             const numRowsInput = parseInt(document.getElementById('numRows').value) || 1;
+            // Lấy giá trị thanh trượt Opacity
+            const wmOpacityInput = document.getElementById('wmOpacity').value; 
 
             let allChars = [];
             validVocabs.forEach(line => {
@@ -379,6 +384,8 @@ Bài 1: AI小语，你好！</textarea>
             function createPageElement() {
                 const page = document.createElement('div');
                 page.className = 'a4-page';
+                // Gán biến CSS để tuỳ chỉnh độ mờ Watermark
+                page.style.setProperty('--wm-opacity', wmOpacityInput);
                 page.innerHTML = `
                     <div class="watermark-layer"></div>
                     <div class="header-title">${titleHtml}</div>
