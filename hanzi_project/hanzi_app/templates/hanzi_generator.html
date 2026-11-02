@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Công Cụ Luyện Viết Chữ Hán - Master (V27 - Auto Pagination)</title>
+    <title>Công Cụ Luyện Viết Chữ Hán - Master (V28 - HSK 3.0 Layout)</title>
     <style>
         /* ================= GIAO DIỆN CHUNG & LAYOUT ================= */
         body { 
@@ -45,7 +45,6 @@
                 page-break-after: always; 
             }
             .a4-page:last-child { page-break-after: auto; }
-            .word-table { page-break-inside: avoid; }
         }
         
         /* ================= KHUNG TRANG A4 ================= */
@@ -57,6 +56,10 @@
             padding: 12mm 15mm 25mm 15mm; 
             box-sizing: border-box; box-shadow: 0 4px 15px rgba(0,0,0,0.3);
         }
+
+        /* Lề in 2 mặt (So le) */
+        .a4-page:nth-child(odd) { padding-left: 20mm !important; padding-right: 10mm !important; }
+        .a4-page:nth-child(even) { padding-left: 10mm !important; padding-right: 20mm !important; }
 
         /* ================= WATERMARK BẢN QUYỀN ================= */
         .watermark-layer {
@@ -82,57 +85,62 @@
 
         /* HEADER VÀ STUDENT INFO */
         .header-title { text-align: center; font-size: 26px; font-weight: bold; margin-bottom: 12px; font-family: "Times New Roman", "KaiTi", serif; line-height: 1.4; position: relative; z-index: 1;}
-        .student-info { display: flex; justify-content: space-between; font-size: 17px; font-family: "KaiTi", "Kaiti SC", STKaiti, serif; margin-bottom: 4px; padding: 0 4px; font-weight: bold; position: relative; z-index: 1;}
+        .student-info { display: flex; justify-content: space-between; font-size: 17px; font-family: "KaiTi", "Kaiti SC", STKaiti, serif; margin-bottom: 15px; padding: 0 4px; font-weight: bold; position: relative; z-index: 1; border-bottom: 2px solid #e0e0e0; padding-bottom: 5px;}
         
-        /* KHUNG CHỨA BẢNG TỪ VỰNG */
         .tables-container { display: flex; flex-direction: column; width: 100%; position: relative; z-index: 1; }
-
-        /* SỐ TRANG CỐ ĐỊNH */
         .page-number { position: absolute; bottom: 10mm; left: 0; width: 100%; text-align: center; font-size: 14px; font-family: "Times New Roman", serif; color: #333; z-index: 1;}
-        
-        /* ================= BỐ CỤC BẢNG LƯỚI ================= */
-        .word-table { width: 100%; border-collapse: collapse; margin-bottom: 10px; table-layout: fixed; position: relative; z-index: 1;}
-        .word-table td { border: 1px solid #333; padding: 0; text-align: center; vertical-align: middle; box-sizing: border-box; }
 
-        .py-cell { height: 22px; font-size: 13px; font-family: "Arial", sans-serif; background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" shape-rendering="crispEdges"><line x1="0" y1="33.3%" x2="100%" y2="33.3%" stroke="%23b0b0b0" stroke-dasharray="1.5,3.5" stroke-width="0.8"/><line x1="0" y1="66.6%" x2="100%" y2="66.6%" stroke="%23b0b0b0" stroke-dasharray="1.5,3.5" stroke-width="0.8"/></svg>'); background-size: 100% 100%; }
-        .tzg-cell { height: 48px; font-size: 34px; font-family: "KaiTi", "Kaiti SC", STKaiti, serif; background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" shape-rendering="crispEdges"><line x1="50%" y1="0" x2="50%" y2="100%" stroke="%23b0b0b0" stroke-dasharray="1.5,3.5" stroke-width="0.8"/><line x1="0" y1="50%" x2="100%" y2="50%" stroke="%23b0b0b0" stroke-dasharray="1.5,3.5" stroke-width="0.8"/></svg>'); background-size: 100% 100%; }
+        /* ================= CẤU TRÚC BLOCK TỪ VỰNG MỚI (HSK 3.0 LAYOUT) ================= */
+        .vocab-block { display: flex; flex-direction: column; margin-bottom: 25px; padding-bottom: 15px; border-bottom: 1.5px solid #eee; page-break-inside: avoid; }
         
-        .text-black { color: #000; }
-        .text-gray { color: #d0d0d0; }
+        /* 1. Header Của Mỗi Từ (Chữ lớn, Pinyin, Nghĩa) */
+        .v-header { display: flex; gap: 15px; align-items: flex-start; margin-bottom: 10px; }
+        .v-left { display: inline-flex; flex-direction: column; border: 1.5px solid #333; border-radius: 2px; overflow: hidden; }
+        .big-chars { display: flex; }
+        .big-char { 
+            width: 44px; height: 44px; font-size: 34px; font-family: "KaiTi", "Kaiti SC", STKaiti, serif; 
+            display: flex; align-items: center; justify-content: center; border-right: 1.5px solid #333; 
+        }
+        .big-char:last-child { border-right: none; }
+        .v-idx { background: #ffe599; font-size: 13px; font-weight: bold; text-align: center; padding: 2px 0; border-top: 1.5px solid #333; }
+        
+        .v-info { flex: 1; display: flex; flex-direction: column; gap: 4px; padding-top: 2px; }
+        .info-row-1 { display: flex; justify-content: space-between; align-items: center; width: 100%; }
+        .pinyin { font-weight: bold; font-size: 16px; color: #111; font-family: "Arial", sans-serif; }
+        .total-strokes { font-size: 13px; font-style: italic; color: #555; }
+        .info-row-2 { display: flex; }
+        .meaning { font-weight: bold; font-size: 14px; color: #111; font-family: "Times New Roman", serif; }
 
-        /* ================= KHU VỰC HƯỚNG DẪN NÉT VÀ NGHĨA ================= */
-        /* Giảm padding dọc (từ 6px xuống 2px) để mở rộng không gian chứa chữ */
-        .stroke-cell { background: #fff; vertical-align: middle !important; padding: 2px 10px !important; }
-        .stroke-cell-content { display: flex; justify-content: space-between; align-items: center; width: 100%; height: 100%; gap: 15px; }
-        
-        .stroke-orders { 
-            flex: 1 1 auto; display: flex; flex-direction: column; justify-content: center; gap: 6px; 
+        /* 2. Thứ tự nét bút (Stroke Order) */
+        .v-strokes { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; }
+        .stroke-char-row { display: flex; flex-wrap: wrap; }
+        .tiny-tzg {
+            width: 24px; height: 24px; 
+            border: 1px solid #777; border-right: none;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" shape-rendering="crispEdges"><line x1="50%" y1="0" x2="50%" y2="100%" stroke="%23e0e0e0" stroke-dasharray="1.5,1.5" stroke-width="0.6"/><line x1="0" y1="50%" x2="100%" y2="50%" stroke="%23e0e0e0" stroke-dasharray="1.5,1.5" stroke-width="0.6"/></svg>'); 
+            background-size: 100% 100%;
         }
-        
-        .stroke-row { display: flex; align-items: flex-start; min-height: 24px; }
-        
-        .stroke-label { 
-            font-size: 14px; font-weight: bold; width: 42px; flex-shrink: 0; 
-            white-space: nowrap; font-family: "KaiTi", "Kaiti SC", STKaiti, serif; 
-            margin-top: 3px; 
-        }
-        
-        .stroke-list { 
-            display: flex; flex-wrap: wrap; gap: 4px; align-items: center; 
-        }
-        
-        .stroke-svg { 
-            width: 24px; height: 24px; flex-shrink: 0; 
-        }
+        .stroke-char-row .tiny-tzg:last-child { border-right: 1px solid #777; }
+        .stroke-svg { width: 100%; height: 100%; display: block; }
 
-        .meaning-text { 
-            flex: 0 1 auto; max-width: 280px; min-width: 50px; font-family: "Times New Roman", serif; 
-            font-size: 15px; /* Cố định 15px to rõ ràng */
-            font-weight: bold; color: #000000; padding: 0 5px 0 10px; border-left: 1.5px dashed #ccc; 
-            text-align: left; line-height: 1.25; text-wrap: pretty;
-            display: -webkit-box; -webkit-line-clamp: 6; /* Cho phép rớt tối đa 6 dòng */
-            -webkit-box-orient: vertical; overflow: hidden;
+        /* 3. Lưới tập viết (Grouped Boxes) */
+        .v-practice { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+        .word-group { display: flex; border: 1.5px solid #555; } /* Viền đậm cho mỗi cụm */
+        .tzg-box {
+            width: 44px; height: 44px; 
+            border-right: 1px solid #999; /* Viền nhạt ngăn cách chữ bên trong cụm */
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" shape-rendering="crispEdges"><line x1="50%" y1="0" x2="50%" y2="100%" stroke="%23e0e0e0" stroke-dasharray="2,2" stroke-width="1"/><line x1="0" y1="50%" x2="100%" y2="50%" stroke="%23e0e0e0" stroke-dasharray="2,2" stroke-width="1"/></svg>'); 
+            background-size: 100% 100%;
+            display: flex; align-items: center; justify-content: center;
+            font-family: "KaiTi", "Kaiti SC", STKaiti, serif; font-size: 32px; color: #000;
         }
+        .word-group .tzg-box:last-child { border-right: none; }
+        .trace-text { color: rgba(0,0,0,0.25); }
+
+        /* 4. Dòng luyện viết tự do */
+        .v-free { display: flex; align-items: flex-end; margin-top: 5px; gap: 10px; }
+        .free-label { font-size: 14px; color: #111; white-space: nowrap; font-family: "Times New Roman", serif; font-weight: bold;}
+        .dotted-line { flex: 1; border-bottom: 1.5px dotted #999; height: 10px; margin-bottom: 3px;}
     </style>
 </head>
 <body>
@@ -142,20 +150,14 @@
     
     <label>Tên bài học:</label>
     <textarea id="lessonTitle" rows="2">第一课、
-Bài 1:</textarea>
+Bài 1: AI小语，你好！</textarea>
     
     <label>Danh sách từ vựng:</label>
     <div class="hint">Copy 3 cột từ Excel/Google Sheets dán vào đây.<br><b>Thứ tự:</b> Chữ Hán | Pinyin | Nghĩa</div>
-    <textarea id="vocabList" rows="12">不客气   bú kèqi Đừng khách sáo
-好  hǎo Tốt, khỏe
-学生    xuéshēng    Học sinh
-您好    nínhǎo  Chào ngài
-请坐    qǐngzuò Mời ngồi
-对不起  duì bu qǐ   Xin lỗi
-没关系  méi guān xi Không sao, không có gì
-没事    méishì  Không sao, không có gì
-打篮球 dǎ lánqiú chơi bóng rổ
-吧  ba  đi, nào, nhé... (trợ từ ngữ khí được dùng ở cuối câu đề nghị, yêu cầu hay mệnh lệnh)</textarea>
+    <textarea id="vocabList" rows="12">你好	nǐhǎo	xin chào; chào bạn
+大家	dàjiā	mọi người
+好	hǎo	tốt; khỏe
+不客气	bú kèqi	đừng khách sáo</textarea>
     
     <div class="btn-group">
         <button id="btn-generate" onclick="generateSheet()">🔄 Cập nhật Xem Trước</button>
@@ -168,9 +170,9 @@ Bài 1:</textarea>
 </div>
 
 <script>
-    const TOTAL_COLS = 14; 
     const hanziCache = {};
 
+    // Khởi tạo tải dữ liệu từ CDN
     async function fetchHanziData(char) {
         if (hanziCache[char]) return hanziCache[char]; 
         try {
@@ -184,97 +186,100 @@ Bài 1:</textarea>
         return null;
     }
 
+    // Vẽ SVG dãy nét bút cho 1 chữ (Hiển thị kiểu các ô nhỏ liền kề)
     function createStrokeHtml(data) {
-        if (!data) return `<span style="font-size:12px; color:red;">[Lỗi]</span>`;
+        if (!data) return '';
         const strokes = data.strokes;
-        let html = `<div class="stroke-label">${strokes.length}画</div><div class="stroke-list">`;
+        let html = `<div class="stroke-char-row">`;
         for (let i = 0; i < strokes.length; i++) {
-            html += `<svg viewBox="0 0 1024 1024" class="stroke-svg">`;
+            html += `<div class="tiny-tzg"><svg viewBox="0 0 1024 1024" class="stroke-svg">`;
             html += `<g transform="scale(1, -1) translate(0, -900)">`;
             for (let j = 0; j <= i; j++) {
                 const strokeColor = (j === i) ? "#f25c54" : "#000000"; 
                 html += `<path d="${strokes[j]}" fill="${strokeColor}"></path>`;
             }
-            html += `</g></svg>`;
+            html += `</g></svg></div>`;
         }
         html += `</div>`;
         return html;
     }
 
-    function generateTableHTML(line) {
+    // Hàm tạo khối HTML cho 1 cụm từ vựng (Layout Mới)
+    function generateVocabHTML(line, index) {
         const parts = line.split(/\t|\|/);
         const word = (parts[0] || "").replace(/\s/g, ''); 
         const pinyinStr = (parts[1] || "").trim();
         const meaning = (parts[2] || "").trim(); 
         
         const chars = word.split(''); 
-        const pinyins = pinyinStr.split(/\s+/).filter(Boolean); 
         const N = chars.length;
-        const M = TOTAL_COLS - N;
+        if (N === 0) return '';
 
-        let colspans = [];
-        if (pinyins.length === 0) {
-            for(let i=0; i<N; i++) colspans.push(1);
-        } else {
-            let remainingN = N;
-            let remainingLen = pinyins.join('').length;
-            for (let i = 0; i < pinyins.length; i++) {
-                if (i === pinyins.length - 1) {
-                    colspans.push(remainingN);
-                } else {
-                    let cs = Math.max(1, Math.round((pinyins[i].length / remainingLen) * remainingN));
-                    cs = Math.min(cs, remainingN - (pinyins.length - 1 - i));
-                    colspans.push(cs);
-                    remainingN -= cs;
-                    remainingLen -= pinyins[i].length;
-                }
-            }
-        }
-
-        let tableHtml = `<table class="word-table"><tbody><tr>`;
-        for(let i = 0; i < pinyins.length; i++) {
-            tableHtml += `<td colspan="${colspans[i]}" class="py-cell text-black">${pinyins[i]}</td>`;
-        }
-        if(pinyins.length === 0) {
-            for(let i=0; i<N; i++) tableHtml += `<td class="py-cell text-black"></td>`;
-        }
-        
+        let totalStrokes = 0;
         let strokeContentHtml = '';
-        for (let c = 0; c < chars.length; c++) {
-            const char = chars[c];
-            if (/[，。！？、]/g.test(char)) continue; 
+        let bigCharsHtml = '';
+        
+        chars.forEach(char => {
+            bigCharsHtml += `<div class="big-char">${char}</div>`;
+            if (/[，。！？、]/g.test(char)) return; 
             const data = hanziCache[char];
-            strokeContentHtml += `<div class="stroke-row">${createStrokeHtml(data)}</div>`;
-        }
+            if (data) {
+                totalStrokes += data.strokes.length;
+                strokeContentHtml += createStrokeHtml(data);
+            }
+        });
 
-        // Đã gỡ bỏ thuật toán bóp font size ở đây
-        // Chữ sẽ luôn hiển thị to, nếu dài sẽ rớt xuống tận 6 dòng (nhờ CSS -webkit-line-clamp)
-        tableHtml += `<td rowspan="2" colspan="${M}" class="stroke-cell">
-            <div class="stroke-cell-content">
-                <div class="stroke-orders">${strokeContentHtml}</div>
-                ${meaning ? `<div class="meaning-text">${meaning}</div>` : ''}
+        // Định dạng chỉ số (01, 02...)
+        const idxStr = index.toString().padStart(2, '0');
+
+        // Tính toán số lượng cụm (group) dựa trên độ rộng giấy A4 (~14 ô)
+        const maxCells = 14; 
+        let groupCount = Math.floor(maxCells / N);
+        if (groupCount < 1) groupCount = 1;
+
+        // Sinh HTML cho lưới viết (Chia cụm theo số chữ Hán)
+        let practiceHtml = `<div class="v-practice">`;
+        for (let i = 0; i < groupCount; i++) {
+            practiceHtml += `<div class="word-group">`;
+            chars.forEach(char => {
+                // Cụm đầu tiên luôn in mờ để đồ chữ (trace)
+                if (i === 0) {
+                    practiceHtml += `<div class="tzg-box trace-text">${char}</div>`;
+                } else {
+                    practiceHtml += `<div class="tzg-box"></div>`;
+                }
+            });
+            practiceHtml += `</div>`;
+        }
+        practiceHtml += `</div>`;
+
+        // Lắp ráp toàn bộ UI Block
+        return `
+        <div class="vocab-block">
+            <div class="v-header">
+                <div class="v-left">
+                    <div class="big-chars">${bigCharsHtml}</div>
+                    <div class="v-idx">${idxStr}</div>
+                </div>
+                <div class="v-info">
+                    <div class="info-row-1">
+                        <span class="pinyin">${pinyinStr}</span>
+                        <span class="total-strokes">Số nét: ${totalStrokes}</span>
+                    </div>
+                    <div class="info-row-2">
+                        <span class="meaning">Nghĩa: ${meaning}</span>
+                    </div>
+                </div>
             </div>
-        </td></tr><tr>`;
-
-        chars.forEach((char) => { tableHtml += `<td class="tzg-cell text-black">${char}</td>`; });
-        tableHtml += `</tr>`;
-
-        for (let r = 0; r < 2; r++) {
-            tableHtml += `<tr>`;
-            for(let i = 0; i < pinyins.length; i++) {
-                tableHtml += `<td colspan="${colspans[i]}" class="py-cell text-gray">${pinyins[i]}</td>`;
-            }
-            if(pinyins.length === 0) {
-                for(let i=0; i<N; i++) tableHtml += `<td class="py-cell"></td>`;
-            }
-            for (let g = 0; g < M; g++) { tableHtml += `<td class="py-cell"></td>`; }
-            tableHtml += `</tr><tr>`;
-            chars.forEach((char) => { tableHtml += `<td class="tzg-cell text-gray">${char}</td>`; });
-            for (let g = 0; g < M; g++) { tableHtml += `<td class="tzg-cell"></td>`; }
-            tableHtml += `</tr>`;
-        }
-        tableHtml += `</tbody></table>`;
-        return tableHtml;
+            <div class="v-strokes">
+                ${strokeContentHtml}
+            </div>
+            ${practiceHtml}
+            <div class="v-free">
+                <span class="free-label">Luyện viết tự do:</span> <div class="dotted-line"></div>
+            </div>
+        </div>
+        `;
     }
 
     async function generateSheet() {
@@ -288,6 +293,7 @@ Bài 1:</textarea>
             const vocabRaw = document.getElementById('vocabList').value.trim().split('\n');
             const validVocabs = vocabRaw.filter(line => line.includes('|') || line.includes('\t'));
             
+            // Tải trước dữ liệu SVG
             let allChars = [];
             validVocabs.forEach(line => {
                 const parts = line.split(/\t|\|/);
@@ -297,6 +303,7 @@ Bài 1:</textarea>
             const uniqueChars = [...new Set(allChars.filter(c => !/[，。！？、]/.test(c)))];
             await Promise.all(uniqueChars.map(char => fetchHanziData(char)));
 
+            // DOM & Chia trang
             const outputContainer = document.getElementById('outputContainer');
             outputContainer.innerHTML = '';
 
@@ -323,19 +330,21 @@ Bài 1:</textarea>
 
             for (let idx = 0; idx < validVocabs.length; idx++) {
                 const line = validVocabs[idx].trim();
-                const tableHtml = generateTableHTML(line);
+                // Sử dụng hàm render mới, truyền thêm index (bắt đầu từ 1)
+                const vocabHtml = generateVocabHTML(line, idx + 1); 
                 
                 const tempDiv = document.createElement('div');
-                tempDiv.innerHTML = tableHtml.trim();
-                const tableNode = tempDiv.firstElementChild;
+                tempDiv.innerHTML = vocabHtml.trim();
+                const vocabNode = tempDiv.firstElementChild;
                 
-                tablesContainer.appendChild(tableNode);
+                tablesContainer.appendChild(vocabNode);
                 
                 const pageRect = currentPage.getBoundingClientRect();
                 const tablesRect = tablesContainer.getBoundingClientRect();
                 
+                // Thuật toán tách trang
                 if (tablesRect.bottom > pageRect.bottom - 80 && tablesContainer.children.length > 1) {
-                    tablesContainer.removeChild(tableNode);
+                    tablesContainer.removeChild(vocabNode);
                     currentPage.querySelector('.page-number').innerText = `- ${pageNum} -`;
                     
                     pageNum++; 
@@ -343,10 +352,11 @@ Bài 1:</textarea>
                     outputContainer.appendChild(currentPage);
                     tablesContainer = currentPage.querySelector('.tables-container');
                     
-                    tablesContainer.appendChild(tableNode); 
+                    tablesContainer.appendChild(vocabNode); 
                 }
             }
             
+            // Đánh số trang cho trang cuối
             if (currentPage) {
                 currentPage.querySelector('.page-number').innerText = `- ${pageNum} -`;
             }
