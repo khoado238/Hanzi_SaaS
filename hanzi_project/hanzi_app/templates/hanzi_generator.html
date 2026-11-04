@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Công Cụ Luyện Viết Chữ Hán - Master (V55 - Hỗ trợ gõ Tab thủ công)</title>
+    <title>Công Cụ Luyện Viết Chữ Hán - Master (V56 - Tối ưu In nét đứt & Layout Nghĩa)</title>
     <style>
         /* ================= GIAO DIỆN CHUNG & LAYOUT ================= */
         body { 
@@ -10,7 +10,7 @@
             display: flex; height: 100vh; overflow: hidden; background-color: #525659;
         }
         
-        /* ================= BẢNG ĐIỀU KHIỂN BÊN TRÁI (UI LÀM MỚI) ================= */
+        /* ================= BẢNG ĐIỀU KHIỂN BÊN TRÁI ================= */
         .left-panel {
             width: 420px; background: #f4f6f8; box-sizing: border-box;
             border-right: 1px solid #ddd; box-shadow: 2px 0 10px rgba(0,0,0,0.1);
@@ -26,7 +26,6 @@
 
         .panel-body { padding: 15px; display: flex; flex-direction: column; gap: 15px; }
 
-        /* Card UI cho từng nhóm chức năng */
         .ui-card {
             background: #ffffff; padding: 15px; border-radius: 8px;
             border: 1px solid #e0e0e0; box-shadow: 0 2px 4px rgba(0,0,0,0.02);
@@ -36,7 +35,6 @@
             margin-bottom: 12px; border-bottom: 1px solid #eee; padding-bottom: 5px;
         }
 
-        /* Elements Styling */
         label { font-weight: 600; font-size: 14px; display: block; color: #333; margin-bottom: 6px;}
         .input-group { margin-bottom: 12px; }
         .input-group:last-child { margin-bottom: 0; }
@@ -52,10 +50,8 @@
         textarea { resize: vertical; min-height: 80px; }
         
         .template-select { font-weight: bold; color: #c62828; background-color: #fff9f9; cursor: pointer;}
-        
         .hint { font-size: 12px; color: #6b7280; margin-bottom: 8px; line-height: 1.4; padding: 8px; background: #f9fafb; border-radius: 4px; border-left: 3px solid #9ca3af;}
 
-        /* Modern Toggle Switch */
         .toggle-container { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
         .toggle-label { font-weight: 600; font-size: 14px; color: #333; margin: 0;}
         .switch { position: relative; display: inline-block; width: 44px; height: 24px; }
@@ -65,11 +61,9 @@
         input:checked + .slider { background-color: #c62828; }
         input:checked + .slider:before { transform: translateX(20px); }
 
-        /* Range Slider Styling */
         .range-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 5px;}
         input[type="range"] { width: 100%; cursor: pointer; accent-color: #c62828; margin: 0;}
 
-        /* Footer & Print Button */
         .panel-footer { padding: 15px; background: #fff; border-top: 1px solid #e0e0e0; position: sticky; bottom: 0; z-index: 20;}
         #btn-print { 
             width: 100%; padding: 14px; border: none; cursor: pointer; font-weight: bold; 
@@ -83,7 +77,6 @@
         /* ================= KHU VỰC XEM TRƯỚC (BÊN PHẢI) ================= */
         .right-panel { flex: 1; padding: 30px 20px; overflow-y: auto; display: flex; flex-direction: column; align-items: center; }
 
-        /* ================= CÀI ĐẶT IN ẤN & A4 LÕI (GIỮ NGUYÊN) ================= */
         @page { size: A4; margin: 0; } 
         @media print {
             body { display: block; background: white; height: auto; overflow: visible; }
@@ -132,6 +125,7 @@
         .v-left { display: inline-flex; border: 1.5px solid #333; border-radius: 2px; overflow: hidden; flex-shrink: 0; position: relative;}
         .big-chars { display: flex; }
         
+        /* CẬP NHẬT SVG ĐẬM HƠN: #888888, width=1.2 */
         .big-char { 
             width: 44px; height: 44px; font-size: 34px; font-family: "KaiTi", "Kaiti SC", STKaiti, serif; 
             display: flex; align-items: center; justify-content: center; border-right: 1.5px solid #333; 
@@ -140,25 +134,27 @@
         .big-char:last-child { border-right: none; }
         .big-char::before {
             content: ""; position: absolute; top: 0; left: 0; right: 0; bottom: 0; z-index: 0;
-            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" shape-rendering="crispEdges"><line x1="50%" y1="0" x2="50%" y2="100%" stroke="%23b0b0b0" stroke-dasharray="2,2.5" stroke-width="0.8"/><line x1="0" y1="50%" x2="100%" y2="50%" stroke="%23b0b0b0" stroke-dasharray="2,2.5" stroke-width="0.8"/></svg>');
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" shape-rendering="crispEdges"><line x1="50%" y1="0" x2="50%" y2="100%" stroke="%23888888" stroke-dasharray="2,2.5" stroke-width="1.2"/><line x1="0" y1="50%" x2="100%" y2="50%" stroke="%23888888" stroke-dasharray="2,2.5" stroke-width="1.2"/></svg>');
             background-size: 100% 100%; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important;
         }
         .big-char span { position: relative; z-index: 1; }
         
         .v-right { flex: 1; display: flex; flex-direction: column; gap: 4px; justify-content: flex-start; min-width: 0; padding-left: 5px;}
-        .info-row-1 { display: flex; justify-content: space-between; align-items: center; width: 100%; }
+        
+        /* CẬP NHẬT LAYOUT PHẦN NGHĨA VÀ PINYIN */
+        .info-row-1 { display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 4px;}
+        .word-details { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
         .pinyin { font-weight: bold; font-size: 17px; color: #c62828; font-family: "Arial", sans-serif; letter-spacing: 0.5px; } 
-        .total-strokes { font-size: 13px; font-style: italic; color: #555; }
-        .info-row-2 { display: flex; margin-bottom: 2px;}
-        .meaning-label { font-weight: bold; font-style: italic; color: #333; margin-right: 5px; }
-        .meaning { font-size: 15px; color: #222; font-family: "Times New Roman", serif; line-height: 1.4; }
+        .meaning { font-size: 14px; color: #1f2937; font-family: "Segoe UI", Arial, sans-serif; font-style: italic; background-color: #f3f4f6; padding: 2px 8px; border-radius: 4px; border: 1px solid #e5e7eb; }
+        .total-strokes { font-size: 13px; font-style: italic; color: #555; white-space: nowrap;}
 
         .v-strokes { display: flex; flex-direction: column; gap: 4px; }
         .stroke-char-row { display: flex; flex-wrap: wrap; gap: 2px;}
         
+        /* CẬP NHẬT SVG ĐẬM HƠN: #888888, width=1 */
         .tiny-tzg {
             width: 24px; height: 24px; border: 1px solid #777;
-            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" shape-rendering="crispEdges"><line x1="50%" y1="0" x2="50%" y2="100%" stroke="%23b0b0b0" stroke-dasharray="1.5,1.5" stroke-width="0.6"/><line x1="0" y1="50%" x2="100%" y2="50%" stroke="%23b0b0b0" stroke-dasharray="1.5,1.5" stroke-width="0.6"/></svg>'); 
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" shape-rendering="crispEdges"><line x1="50%" y1="0" x2="50%" y2="100%" stroke="%23888888" stroke-dasharray="1.5,1.5" stroke-width="1"/><line x1="0" y1="50%" x2="100%" y2="50%" stroke="%23888888" stroke-dasharray="1.5,1.5" stroke-width="1"/></svg>'); 
             background-size: 100% 100%; -webkit-print-color-adjust: exact; print-color-adjust: exact;
         }
         .stroke-svg { width: 100%; height: 100%; display: block; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
@@ -169,9 +165,10 @@
         .py-row { display: flex; width: 100%; border-bottom: 1px solid #999; }
         .hz-row { display: flex; width: 100%; }
 
+        /* CẬP NHẬT SVG ĐẬM HƠN: #999999, width=1 */
         .py-box {
             height: 18px; 
-            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" shape-rendering="crispEdges"><line x1="0" y1="33.3%" x2="100%" y2="33.3%" stroke="%23c0c0c0" stroke-dasharray="1.5,2.5" stroke-width="0.8"/><line x1="0" y1="66.6%" x2="100%" y2="66.6%" stroke="%23c0c0c0" stroke-dasharray="1.5,2.5" stroke-width="0.8"/></svg>'); 
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" shape-rendering="crispEdges"><line x1="0" y1="33.3%" x2="100%" y2="33.3%" stroke="%23999999" stroke-dasharray="1.5,2.5" stroke-width="1"/><line x1="0" y1="66.6%" x2="100%" y2="66.6%" stroke="%23999999" stroke-dasharray="1.5,2.5" stroke-width="1"/></svg>'); 
             background-size: 100% 100%; border-right: 1px solid #999; display: flex; align-items: center; justify-content: center;
             font-family: "Arial", sans-serif; font-size: 12px; color: #000;
         }
@@ -181,14 +178,15 @@
         .py-box.solid-text { color: rgba(0,0,0,1) !important; }
         .py-box.trace-text::before, .py-box.solid-text::before {
             content: ""; position: absolute; top: 0; left: 0; right: 0; bottom: 0; z-index: 0;
-            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" shape-rendering="crispEdges"><line x1="0" y1="33.3%" x2="100%" y2="33.3%" stroke="%23c0c0c0" stroke-dasharray="1.5,2.5" stroke-width="0.8"/><line x1="0" y1="66.6%" x2="100%" y2="66.6%" stroke="%23c0c0c0" stroke-dasharray="1.5,2.5" stroke-width="0.8"/></svg>'); 
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" shape-rendering="crispEdges"><line x1="0" y1="33.3%" x2="100%" y2="33.3%" stroke="%23999999" stroke-dasharray="1.5,2.5" stroke-width="1"/><line x1="0" y1="66.6%" x2="100%" y2="66.6%" stroke="%23999999" stroke-dasharray="1.5,2.5" stroke-width="1"/></svg>'); 
             background-size: 100% 100%; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important;
         }
         .py-box.trace-text span, .py-box.solid-text span { position: relative; z-index: 1; }
 
+        /* CẬP NHẬT SVG ĐẬM HƠN: #888888, width=1.2 */
         .tzg-box {
             width: 44px; height: 44px; border-right: 1px solid #999;
-            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" shape-rendering="crispEdges"><line x1="50%" y1="0" x2="50%" y2="100%" stroke="%23b0b0b0" stroke-dasharray="2,2.5" stroke-width="0.8"/><line x1="0" y1="50%" x2="100%" y2="50%" stroke="%23b0b0b0" stroke-dasharray="2,2.5" stroke-width="0.8"/></svg>'); 
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" shape-rendering="crispEdges"><line x1="50%" y1="0" x2="50%" y2="100%" stroke="%23888888" stroke-dasharray="2,2.5" stroke-width="1.2"/><line x1="0" y1="50%" x2="100%" y2="50%" stroke="%23888888" stroke-dasharray="2,2.5" stroke-width="1.2"/></svg>'); 
             background-size: 100% 100%; display: flex; align-items: center; justify-content: center;
             font-family: "KaiTi", "Kaiti SC", STKaiti, serif; font-size: 32px; color: #000;
         }
@@ -198,14 +196,14 @@
         .tzg-box.solid-text { color: rgba(0,0,0,1) !important; }
         .tzg-box.trace-text::before, .tzg-box.solid-text::before {
             content: ""; position: absolute; top: 0; left: 0; right: 0; bottom: 0; z-index: 0;
-            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" shape-rendering="crispEdges"><line x1="50%" y1="0" x2="50%" y2="100%" stroke="%23b0b0b0" stroke-dasharray="2,2.5" stroke-width="0.8"/><line x1="0" y1="50%" x2="100%" y2="50%" stroke="%23b0b0b0" stroke-dasharray="2,2.5" stroke-width="0.8"/></svg>'); 
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" shape-rendering="crispEdges"><line x1="50%" y1="0" x2="50%" y2="100%" stroke="%23888888" stroke-dasharray="2,2.5" stroke-width="1.2"/><line x1="0" y1="50%" x2="100%" y2="50%" stroke="%23888888" stroke-dasharray="2,2.5" stroke-width="1.2"/></svg>'); 
             background-size: 100% 100%; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important;
         }
         .tzg-box.trace-text span, .tzg-box.solid-text span, .tzg-box.trace-text svg { position: relative; z-index: 1; }
 
         .v-free { display: flex; align-items: flex-end; margin-top: 5px; gap: 10px; }
         .free-label { font-size: 14px; color: #111; white-space: nowrap; font-family: "Times New Roman", serif; font-weight: bold;}
-        .dotted-line { flex: 1; border-bottom: 1.5px dotted #999; height: 25px; margin-bottom: 5px;}
+        .dotted-line { flex: 1; border-bottom: 1.5px dotted #777; height: 25px; margin-bottom: 5px;}
         .sample-text-title { font-family: 'Arial', sans-serif; font-weight: bold; font-size: 16px; color: #c62828; margin-bottom: 12px; border-bottom: 2px solid #eee; padding-bottom: 5px;}
     </style>
 </head>
@@ -309,20 +307,14 @@ Bài 1: AI小语，你好！</textarea>
     const hanziCache = {};
     let updateTimer = null; 
 
-    // CHỨC NĂNG MỚI: Bắt sự kiện phím Tab trong ô textarea
+    // Bắt sự kiện phím Tab trong ô textarea
     document.getElementById('vocabList').addEventListener('keydown', function(e) {
         if (e.key === 'Tab') {
             e.preventDefault();
             var start = this.selectionStart;
             var end = this.selectionEnd;
-
-            // Chèn ký tự \t (Tab) vào vị trí con trỏ
             this.value = this.value.substring(0, start) + "\t" + this.value.substring(end);
-            
-            // Đặt lại con trỏ chuột ngay sau ký tự Tab vừa chèn
             this.selectionStart = this.selectionEnd = start + 1;
-            
-            // Kích hoạt render lại
             autoUpdate();
         }
     });
@@ -387,9 +379,6 @@ Bài 1: AI小语，你好！</textarea>
         return html;
     }
 
-    // ==========================================
-    // MODULE: Tạo dòng Lưới
-    // ==========================================
     function createGridRow(chunk, showPinyinBox, mode = 'trace') {
         let html = `<div class="practice-row" style="margin-bottom: 8px;">`;
         for(let i=0; i<12; i++) {
@@ -404,9 +393,6 @@ Bài 1: AI小语，你好！</textarea>
         return html;
     }
 
-    // ==========================================
-    // MODULE: Template 2 (Mỗi nét 1 hàng)
-    // ==========================================
     function generateSingleStrokePracticeNodes(char, index, numRowsPerStroke, showPinyinBox) {
         if (!char) return [];
         const data = hanziCache[char];
@@ -454,9 +440,6 @@ Bài 1: AI小语，你好！</textarea>
         return nodes;
     }
 
-    // ==========================================
-    // MODULE: Template 3 (Chữ Hán đơn lẻ)
-    // ==========================================
     function generateSimpleVocabHTML(char, index, numRows, showPinyinBox) {
         if (!char) return '';
         let strokeContentHtml = '';
@@ -492,9 +475,6 @@ Bài 1: AI小语，你好！</textarea>
         </div>`;
     }
 
-    // ==========================================
-    // MODULE: Template 1 (Từ vựng Đầy đủ)
-    // ==========================================
     function generateVocabHTML(line, index, numRows, showPinyinBox) {
         const parts = line.split(/\t|\|/);
         const word = (parts[0] || "").replace(/\s/g, ''); 
@@ -563,14 +543,20 @@ Bài 1: AI小语，你好！</textarea>
         }
         practiceHtml += `</div>`; 
 
+        // Giao diện đã loại bỏ chữ "Nghĩa:" và dùng Badge highlight
         return `
         <div class="vocab-block">
             <div class="v-top-section">
                 <div class="v-badge">${idxStr}</div>
                 <div class="v-left"><div class="big-chars">${bigCharsHtml}</div></div>
                 <div class="v-right">
-                    <div class="info-row-1"><span class="pinyin">[ ${pinyinStr} ]</span><span class="total-strokes">Số nét: ${totalStrokes}</span></div>
-                    <div class="info-row-2"><span class="meaning"><span class="meaning-label">Nghĩa:</span>${meaning}</span></div>
+                    <div class="info-row-1">
+                        <div class="word-details">
+                            <span class="pinyin">[ ${pinyinStr} ]</span>
+                            ${meaning ? `<span class="meaning">${meaning}</span>` : ''}
+                        </div>
+                        <span class="total-strokes">Số nét: ${totalStrokes}</span>
+                    </div>
                     <div class="v-strokes">${strokeContentHtml}</div>
                 </div>
             </div>
