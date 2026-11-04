@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Công Cụ Luyện Viết Chữ Hán - Master (V63 - Clean Layout & Smart Badges)</title>
+    <title>Công Cụ Luyện Viết Chữ Hán - Master (V64 - Tối giản Nhãn Số Nét)</title>
     <style>
         /* ================= GIAO DIỆN CHUNG & LAYOUT ================= */
         body { 
@@ -149,13 +149,10 @@
         .v-strokes { display: flex; flex-direction: column; gap: 6px; }
         .stroke-char-row { display: flex; flex-wrap: wrap; gap: 2px; align-items: center; }
         
-        /* CSS MỚI: NHÃN HIỂN THỊ SỐ NÉT ĐỒNG BỘ */
+        /* CẬP NHẬT: Badge Số Nét tối giản */
         .stroke-char-label {
-            display: flex; align-items: center; gap: 6px; margin-right: 8px;
+            display: flex; align-items: center; justify-content: center; gap: 6px; margin-right: 8px;
             background-color: #f3f4f6; border: 1px solid #e5e7eb; border-radius: 4px; padding: 2px 8px; height: 20px;
-        }
-        .scl-char {
-            font-family: "KaiTi", "Kaiti SC", STKaiti, serif; font-size: 18px; color: #111; font-weight: bold;
         }
         .scl-count {
             font-family: 'Segoe UI', Arial, sans-serif; font-size: 13px; color: #555; font-weight: bold;
@@ -364,7 +361,7 @@ Bài 1: AI小语，你好！</textarea>
         return null;
     }
 
-    // CẬP NHẬT: Nhãn ghi Số Nét chuyên nghiệp, font xám trơn, không màu đỏ
+    // CẬP NHẬT: Nhãn ghi Số Nét tối giản, loại bỏ chữ Hán theo yêu cầu
     function createStrokeHtml(char, data) {
         if (!data) return '';
         const strokes = data.strokes;
@@ -372,7 +369,6 @@ Bài 1: AI小语，你好！</textarea>
         
         html += `
         <div class="stroke-char-label">
-            <span class="scl-char">${char}</span>
             <span class="scl-count">${strokes.length} 画</span>
         </div>`;
         
