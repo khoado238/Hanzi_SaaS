@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Công Cụ Luyện Viết Chữ Hán - Master (V64 - Tối giản Nhãn Số Nét)</title>
+    <title>Công Cụ Luyện Viết Chữ Hán - Master (V65 - Giao diện Phẳng Tối Giản)</title>
     <style>
         /* ================= GIAO DIỆN CHUNG & LAYOUT ================= */
         body { 
@@ -111,8 +111,6 @@
 
         /* ================= CẤU TRÚC BLOCK TỪ VỰNG ================= */
         .vocab-block { display: flex; flex-direction: column; margin-bottom: 15px; padding-bottom: 15px; position: relative; page-break-inside: avoid; }
-        .vocab-block::after { content: ""; position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: 30%; border-bottom: 2px solid #c62828; border-radius: 2px; }
-        .vocab-block:last-child::after { display: none; }
         .vocab-block:last-child { margin-bottom: 0px; padding-bottom: 0; }
         
         .v-top-section { display: flex; gap: 15px; align-items: flex-start; margin-bottom: 8px; position: relative;}
@@ -144,15 +142,16 @@
         .info-row-1 { display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 4px;}
         .word-details { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
         .pinyin { font-weight: bold; font-size: 17px; color: #c62828; font-family: "Arial", sans-serif; letter-spacing: 0.5px; } 
-        .meaning { font-size: 14px; color: #1f2937; font-family: "Segoe UI", Arial, sans-serif; font-style: italic; font-weight: bold; background-color: #f3f4f6; padding: 2px 8px; border-radius: 4px; border: 1px solid #e5e7eb; }
+        /* CẬP NHẬT: Loại bỏ khối hộp của Nghĩa Tiếng Việt */
+        .meaning { font-size: 14px; color: #1f2937; font-family: "Segoe UI", Arial, sans-serif; font-style: italic; font-weight: bold; padding: 2px 4px; }
         
         .v-strokes { display: flex; flex-direction: column; gap: 6px; }
         .stroke-char-row { display: flex; flex-wrap: wrap; gap: 2px; align-items: center; }
         
-        /* CẬP NHẬT: Badge Số Nét tối giản */
+        /* CẬP NHẬT: Loại bỏ khối hộp của Nhãn Số Nét */
         .stroke-char-label {
             display: flex; align-items: center; justify-content: center; gap: 6px; margin-right: 8px;
-            background-color: #f3f4f6; border: 1px solid #e5e7eb; border-radius: 4px; padding: 2px 8px; height: 20px;
+            padding: 2px 4px; height: 20px;
         }
         .scl-count {
             font-family: 'Segoe UI', Arial, sans-serif; font-size: 13px; color: #555; font-weight: bold;
@@ -306,7 +305,6 @@ Bài 1: AI小语，你好！</textarea>
     const hanziCache = {};
     let updateTimer = null; 
 
-    // Cho phép nhập liệu bằng Tab trong ô TextBox
     document.getElementById('vocabList').addEventListener('keydown', function(e) {
         if (e.key === 'Tab') {
             e.preventDefault();
@@ -361,7 +359,6 @@ Bài 1: AI小语，你好！</textarea>
         return null;
     }
 
-    // CẬP NHẬT: Nhãn ghi Số Nét tối giản, loại bỏ chữ Hán theo yêu cầu
     function createStrokeHtml(char, data) {
         if (!data) return '';
         const strokes = data.strokes;
@@ -399,7 +396,6 @@ Bài 1: AI小语，你好！</textarea>
         return html;
     }
 
-    // MODULE: Template 2 (Mỗi nét 1 hàng)
     function generateSingleStrokePracticeNodes(char, index, numRowsPerStroke, showPinyinBox) {
         if (!char) return [];
         const data = hanziCache[char];
@@ -454,7 +450,6 @@ Bài 1: AI小语，你好！</textarea>
         return nodes;
     }
 
-    // MODULE: Template 3 (Chữ Hán đơn lẻ)
     function generateSimpleVocabHTML(char, index, numRows, showPinyinBox) {
         if (!char) return '';
         let strokeContentHtml = '';
@@ -494,7 +489,6 @@ Bài 1: AI小语，你好！</textarea>
         </div>`;
     }
 
-    // MODULE: Template 1 (Từ vựng Đầy đủ)
     function generateVocabHTML(line, index, numRows, showPinyinBox) {
         const parts = line.split(/\t|\|/);
         const word = (parts[0] || "").replace(/\s/g, ''); 
