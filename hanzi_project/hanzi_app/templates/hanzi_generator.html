@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Công Cụ Luyện Viết Chữ Hán - Master (V60 - Full Width Alignment)</title>
+    <title>Công Cụ Luyện Viết Chữ Hán - Master (V61 - Chuẩn mực Giáo trình)</title>
     <style>
         /* ================= GIAO DIỆN CHUNG & LAYOUT ================= */
         body { 
@@ -74,7 +74,7 @@
         .status-text { font-size: 13px; color: #4CAF50; font-weight: bold; text-align: center; height: 15px; margin-bottom: 10px; }
 
         /* ================= KHU VỰC XEM TRƯỚC (BÊN PHẢI) ================= */
-        .right-panel { flex: 1; padding: 30px 280px 30px 20px; overflow-y: auto; overflow-x: auto; display: flex; flex-direction: column; align-items: center; }
+        .right-panel { flex: 1; padding: 30px 20px; overflow-y: auto; overflow-x: auto; display: flex; flex-direction: column; align-items: center; }
 
         @page { size: A4; margin: 0; } 
         @media print {
@@ -115,22 +115,6 @@
         .vocab-block:last-child::after { display: none; }
         .vocab-block:last-child { margin-bottom: 0px; padding-bottom: 0; }
         
-        .block-controls {
-            position: absolute; top: 12px; left: calc(100% + 70px); 
-            display: flex; background: #fff; border: 1.5px solid #c62828; border-radius: 6px; 
-            overflow: hidden; z-index: 50; box-shadow: 0 2px 8px rgba(0,0,0,0.15); width: max-content;
-        }
-        .block-controls button {
-            background: #ffebee; color: #c62828; border: none; padding: 4px 12px;
-            cursor: pointer; font-size: 16px; font-weight: bold; transition: 0.2s; font-family: monospace;
-        }
-        .block-controls button:hover { background: #ffcdd2; }
-        .block-controls span {
-            font-size: 13px; padding: 0 10px; color: #c62828; font-weight: bold;
-            display: flex; align-items: center; border-left: 1.5px solid #c62828; border-right: 1.5px solid #c62828;
-            background: #fff; white-space: nowrap;
-        }
-
         .v-top-section { display: flex; gap: 15px; align-items: flex-start; margin-bottom: 8px; position: relative;}
         .v-badge {
             position: absolute; top: -5px; left: -12px; background-color: #c62828; color: white;
@@ -162,11 +146,18 @@
         .pinyin { font-weight: bold; font-size: 17px; color: #c62828; font-family: "Arial", sans-serif; letter-spacing: 0.5px; } 
         .meaning { font-size: 14px; color: #1f2937; font-family: "Segoe UI", Arial, sans-serif; font-style: italic; font-weight: bold; background-color: #f3f4f6; padding: 2px 8px; border-radius: 4px; border: 1px solid #e5e7eb; }
         
-        .total-strokes { font-size: 13px; font-style: italic; color: #555; white-space: nowrap;}
-
-        .v-strokes { display: flex; flex-direction: column; gap: 4px; }
-        .stroke-char-row { display: flex; flex-wrap: wrap; gap: 2px;}
+        .v-strokes { display: flex; flex-direction: column; gap: 6px; }
+        .stroke-char-row { display: flex; flex-wrap: wrap; gap: 2px; align-items: center; }
         
+        /* CSS Ghi số nét đầu dòng */
+        .stroke-char-label {
+            font-family: 'KaiTi', 'Kaiti SC', STKaiti, serif; font-size: 22px; font-weight: bold; color: #c62828;
+            display: flex; align-items: baseline; gap: 4px; margin-right: 12px; min-width: 50px;
+        }
+        .stroke-char-label span {
+            font-family: 'Segoe UI', Arial, sans-serif; font-size: 13px; font-weight: 600; color: #666;
+        }
+
         .tiny-tzg {
             width: 24px; height: 24px; border: 1px solid #777;
             background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" shape-rendering="crispEdges"><line x1="50%" y1="0" x2="50%" y2="100%" stroke="%23888888" stroke-dasharray="1.5,1.5" stroke-width="1"/><line x1="0" y1="50%" x2="100%" y2="50%" stroke="%23888888" stroke-dasharray="1.5,1.5" stroke-width="1"/></svg>'); 
@@ -176,15 +167,16 @@
 
         .v-practice { display: flex; flex-direction: column; gap: 6px; margin-bottom: 6px; }
         
-        /* CẬP NHẬT TRỌNG TÂM: Lưới viết dàn đều (Space-between) sát 2 mép */
+        /* CẬP NHẬT: Không còn gap, dùng space-between để dàn mép hoàn hảo */
         .practice-row { display: flex; width: 100%; flex-wrap: nowrap; justify-content: space-between; }
         
         .word-group { display: flex; flex-direction: column; border: 1.5px solid #555; width: max-content; }
         .py-row { display: flex; width: 100%; border-bottom: 1px solid #999; }
         .hz-row { display: flex; width: 100%; }
 
+        /* Khôi phục kích thước cứng để dàn dòng Space-between đẹp mắt */
         .py-box {
-            height: var(--py-height, 18px); 
+            height: 18px; 
             background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" shape-rendering="crispEdges"><line x1="0" y1="33.3%" x2="100%" y2="33.3%" stroke="%23999999" stroke-dasharray="1.5,2.5" stroke-width="1"/><line x1="0" y1="66.6%" x2="100%" y2="66.6%" stroke="%23999999" stroke-dasharray="1.5,2.5" stroke-width="1"/></svg>'); 
             background-size: 100% 100%; border-right: 1px solid #999; display: flex; align-items: center; justify-content: center;
             font-family: "Arial", sans-serif; font-size: 12px; color: #000;
@@ -201,10 +193,10 @@
         .py-box.trace-text span, .py-box.solid-text span { position: relative; z-index: 1; }
 
         .tzg-box {
-            width: var(--box-size, 44px); height: var(--box-size, 44px); border-right: 1px solid #999;
+            width: 44px; height: 44px; border-right: 1px solid #999;
             background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" shape-rendering="crispEdges"><line x1="50%" y1="0" x2="50%" y2="100%" stroke="%23888888" stroke-dasharray="2,2.5" stroke-width="1.2"/><line x1="0" y1="50%" x2="100%" y2="50%" stroke="%23888888" stroke-dasharray="2,2.5" stroke-width="1.2"/></svg>'); 
             background-size: 100% 100%; display: flex; align-items: center; justify-content: center;
-            font-family: "KaiTi", "Kaiti SC", STKaiti, serif; font-size: calc(var(--box-size, 44px) * 0.72); color: #000;
+            font-family: "KaiTi", "Kaiti SC", STKaiti, serif; font-size: 32px; color: #000;
         }
         .tzg-box:last-child { border-right: none; }
         .tzg-box.trace-text, .tzg-box.solid-text { position: relative; background-image: none !important; }
@@ -217,8 +209,7 @@
         }
         .tzg-box.trace-text span, .tzg-box.solid-text span, .tzg-box.trace-text svg { position: relative; z-index: 1; }
 
-        .v-free { display: flex; align-items: flex-end; margin-top: 5px; gap: 10px; }
-        .free-label { font-size: 14px; color: #111; white-space: nowrap; font-family: "Times New Roman", serif; font-weight: bold;}
+        .v-free { display: flex; align-items: flex-end; margin-top: 5px; gap: 10px; width: 100%; }
         .dotted-line { flex: 1; border-bottom: 1.5px dotted #777; height: 25px; margin-bottom: 5px;}
         .sample-text-title { font-family: 'Arial', sans-serif; font-weight: bold; font-size: 16px; color: #c62828; margin-bottom: 12px; border-bottom: 2px solid #eee; padding-bottom: 5px;}
     </style>
@@ -317,9 +308,8 @@ Bài 1: AI小语，你好！</textarea>
 <script>
     const hanziCache = {};
     let updateTimer = null; 
-    
-    window.customReps = {}; 
 
+    // Cho phép nhập liệu bằng Tab trong ô TextBox
     document.getElementById('vocabList').addEventListener('keydown', function(e) {
         if (e.key === 'Tab') {
             e.preventDefault();
@@ -330,13 +320,6 @@ Bài 1: AI小语，你好！</textarea>
             autoUpdate();
         }
     });
-
-    window.adjustReps = function(key, delta, defaultReps) {
-        if (window.customReps[key] === undefined) window.customReps[key] = defaultReps;
-        window.customReps[key] += delta;
-        if (window.customReps[key] < 1) window.customReps[key] = 1; 
-        generateSheet();
-    };
 
     function toggleInputs() {
         const type = document.getElementById('templateType').value;
@@ -352,18 +335,18 @@ Bài 1: AI小语，你好！</textarea>
         
         if (type === '1') {
             hint.innerHTML = '<b>Dán 3 cột từ Excel (Hoặc bấm Tab để chuyển ô):</b><br>Chữ Hán | Pinyin | Nghĩa';
-            labelNumRows.innerText = 'Số hàng tập viết mặc định:';
+            labelNumRows.innerText = 'Số hàng tập viết (mỗi mục):';
             if (parseInt(inputNumRows.value) > 10) inputNumRows.value = 2;
         } else if (type === '2') {
-            hint.innerHTML = 'Dán chữ Hán, hệ thống tự động tách nét và phân chia số hàng.<br>Bạn có thể tinh chỉnh riêng cho từng nét bên phải.';
-            labelNumRows.innerText = 'Số hàng mặc định cho mỗi nét:';
+            hint.innerHTML = 'Dán chữ Hán, hệ thống tự động tách nét và phân chia số hàng.';
+            labelNumRows.innerText = 'Số hàng (mỗi nét):';
             if (parseInt(inputNumRows.value) > 5) inputNumRows.value = 1; 
         } else if (type === '3') {
             hint.innerHTML = 'Dán chữ Hán, hệ thống sẽ <b>tự động tách chữ</b> và tạo lưới.';
             labelNumRows.innerText = 'Số hàng luyện viết (Mỗi chữ):';
             if (parseInt(inputNumRows.value) > 10) inputNumRows.value = 2;
         } else if (type === '4') {
-            labelNumRows.innerText = 'Số lần viết lại cả câu:';
+            labelNumRows.innerText = 'Số hàng trống viết lại cả câu:';
             if (parseInt(inputNumRows.value) > 10) inputNumRows.value = 2;
         }
     }
@@ -381,10 +364,15 @@ Bài 1: AI小语，你好！</textarea>
         return null;
     }
 
-    function createStrokeHtml(data) {
+    // CẬP NHẬT TRỌNG TÂM: Tạo HTML Nét vẽ đính kèm số Nét ngay đầu dòng (你好 -> 你 7 画)
+    function createStrokeHtml(char, data) {
         if (!data) return '';
         const strokes = data.strokes;
         let html = `<div class="stroke-char-row">`;
+        
+        // Thêm khối hiển thị số nét bên trái
+        html += `<div class="stroke-char-label">${char} <span>${strokes.length} 画</span></div>`;
+        
         for (let i = 0; i < strokes.length; i++) {
             html += `<div class="tiny-tzg"><svg viewBox="0 0 1024 1024" class="stroke-svg">`;
             html += `<g transform="scale(1, -1) translate(0, -900)">`;
@@ -398,23 +386,21 @@ Bài 1: AI小语，你好！</textarea>
         return html;
     }
 
-    // CẬP NHẬT: Không trừ đi gap bên phải, chia đều dựa vào space-between
-    function calculateGridParams(targetTotalGroups, charsPerGroup, numRows, containerWidth = 675) {
-        let groupsPerRow = Math.ceil(targetTotalGroups / numRows);
-        if (groupsPerRow < 1) groupsPerRow = 1;
-        
-        let groupBorders = (charsPerGroup - 1) * 1 + 3; 
-        
-        // Vì space-between đẩy đều ra sát mép, ta không cần trừ trước khoảng gap như cũ
-        // Chỉ chia khung cho số lượng block để chúng tự scale
-        let boxSize = (containerWidth * 0.95 - (groupsPerRow * groupBorders)) / (groupsPerRow * charsPerGroup);
-        if (boxSize > 44) boxSize = 44; 
-        
-        let pyHeight = boxSize * (18/44);
-        return { groupsPerRow, boxSize, pyHeight };
+    function createGridRow(chunk, showPinyinBox, mode = 'trace') {
+        let html = `<div class="practice-row" style="margin-bottom: 8px;">`;
+        for(let i=0; i<12; i++) {
+            let char = (mode !== 'blank' && chunk && i < chunk.length) ? chunk[i] : '';
+            let charClass = char ? (mode === 'trace' ? 'trace-text' : 'solid-text') : '';
+            
+            html += `<div class="word-group">`;
+            if (showPinyinBox) html += `<div class="py-row"><div class="py-box ${charClass}" style="flex:1;"><span></span></div></div>`;
+            html += `<div class="hz-row"><div class="tzg-box ${charClass}">${char ? '<span>'+char+'</span>' : ''}</div></div></div>`;
+        }
+        html += `</div>`;
+        return html;
     }
 
-    // MODULE: Template 2 (Mỗi nét 1 hàng)
+    // MODULE: Template 2 (Mỗi nét 1 hàng - Không dùng Reps)
     function generateSingleStrokePracticeNodes(char, index, numRowsPerStroke, showPinyinBox) {
         if (!char) return [];
         const data = hanziCache[char];
@@ -422,45 +408,26 @@ Bài 1: AI小语，你好！</textarea>
 
         const strokes = data.strokes;
         const idxStr = index.toString().padStart(2, '0');
-        let strokeContentHtml = createStrokeHtml(data);
+        let strokeContentHtml = createStrokeHtml(char, data);
         let bigCharsHtml = `<div class="big-char"><span>${char}</span></div>`;
-
-        const repKey = `stroke_${index}_${char}`;
-        let defaultTotalReps = 12 * numRowsPerStroke; 
-        if (window.customReps[repKey] === undefined) window.customReps[repKey] = defaultTotalReps;
-        let totalReps = window.customReps[repKey];
-
-        let { groupsPerRow, boxSize, pyHeight } = calculateGridParams(totalReps, 1, numRowsPerStroke);
 
         const nodes = [];
         nodes.push(`
         <div style="display: flex; flex-direction: column; margin-bottom: 12px; position: relative; page-break-inside: avoid;">
-            <div class="block-controls no-print">
-                <button onclick="adjustReps('${repKey}', -1, ${defaultTotalReps})">-</button>
-                <span>Mỗi nét: ${totalReps} ô</span>
-                <button onclick="adjustReps('${repKey}', 1, ${defaultTotalReps})">+</button>
-            </div>
             <div class="v-top-section">
                 <div class="v-badge">${idxStr}</div>
                 <div class="v-left"><div class="big-chars">${bigCharsHtml}</div></div>
                 <div class="v-right">
-                    <div class="info-row-1">
-                        <div class="word-details"></div>
-                        <span class="total-strokes">Số nét: ${strokes.length}</span>
-                    </div>
                     <div class="v-strokes">${strokeContentHtml}</div>
                 </div>
             </div>
         </div>`);
 
         for (let s = 0; s < strokes.length; s++) {
-            let practiceHtml = `<div class="v-practice" style="margin-bottom: 10px; page-break-inside: avoid; --box-size: ${boxSize}px; --py-height: ${pyHeight}px;">`;
+            let practiceHtml = `<div class="v-practice" style="margin-bottom: 10px; page-break-inside: avoid;">`;
             for (let r = 0; r < numRowsPerStroke; r++) {
                 practiceHtml += `<div class="practice-row">`; 
-                for (let i = 0; i < groupsPerRow; i++) {
-                    let k = r * groupsPerRow + i;
-                    if (k >= totalReps) break; 
-
+                for (let i = 0; i < 12; i++) {
                     practiceHtml += `<div class="word-group">`;
                     if (showPinyinBox) practiceHtml += `<div class="py-row"><div class="py-box" style="flex: 1;"></div></div>`;
                     
@@ -484,7 +451,7 @@ Bài 1: AI小语，你好！</textarea>
             nodes.push(practiceHtml);
         }
 
-        nodes.push(`<div class="vocab-block" style="padding-bottom: 15px; margin-bottom: 15px; page-break-inside: avoid;"><div class="v-free"><span class="free-label">Luyện viết tự do:</span> <div class="dotted-line"></div></div></div>`);
+        nodes.push(`<div class="vocab-block" style="padding-bottom: 15px; margin-bottom: 15px; page-break-inside: avoid;"><div class="v-free"><div class="dotted-line"></div></div></div>`);
         return nodes;
     }
 
@@ -492,30 +459,20 @@ Bài 1: AI小语，你好！</textarea>
     function generateSimpleVocabHTML(char, index, numRows, showPinyinBox) {
         if (!char) return '';
         let strokeContentHtml = '';
-        let totalStrokes = 0;
         let bigCharsHtml = `<div class="big-char"><span>${char}</span></div>`;
         const data = hanziCache[char];
         if (data) {
-            strokeContentHtml += createStrokeHtml(data);
-            totalStrokes = data.strokes.length;
+            strokeContentHtml += createStrokeHtml(char, data);
         }
 
-        const repKey = `single_${index}_${char}`;
-        let defaultTotalReps = 12 * numRows; 
-        if (window.customReps[repKey] === undefined) window.customReps[repKey] = defaultTotalReps;
-        let totalReps = window.customReps[repKey];
-
-        let { groupsPerRow, boxSize, pyHeight } = calculateGridParams(totalReps, 1, numRows);
         const idxStr = index.toString().padStart(2, '0');
+        let groupCount = 12;
 
         let practiceHtml = `<div class="v-practice">`;
         for (let r = 0; r < numRows; r++) {
             practiceHtml += `<div class="practice-row">`; 
-            for (let i = 0; i < groupsPerRow; i++) {
-                let k = r * groupsPerRow + i;
-                if (k >= totalReps) break; 
-                let isFirstOverall = (k === 0); 
-                
+            for (let i = 0; i < groupCount; i++) {
+                let isFirstOverall = (r === 0 && i === 0); 
                 practiceHtml += `<div class="word-group">`;
                 if (showPinyinBox) practiceHtml += `<div class="py-row"><div class="py-box" style="flex: 1;"></div></div>`;
                 practiceHtml += `<div class="hz-row"><div class="tzg-box ${isFirstOverall ? 'trace-text' : ''}">${isFirstOverall ? '<span>'+char+'</span>' : ''}</div></div></div>`; 
@@ -525,29 +482,20 @@ Bài 1: AI小语，你好！</textarea>
         practiceHtml += `</div>`; 
 
         return `
-        <div class="vocab-block" style="--box-size: ${boxSize}px; --py-height: ${pyHeight}px;">
-            <div class="block-controls no-print">
-                <button onclick="adjustReps('${repKey}', -1, ${defaultTotalReps})">-</button>
-                <span>Viết: ${totalReps} ô</span>
-                <button onclick="adjustReps('${repKey}', 1, ${defaultTotalReps})">+</button>
-            </div>
+        <div class="vocab-block">
             <div class="v-top-section">
                 <div class="v-badge">${idxStr}</div>
                 <div class="v-left"><div class="big-chars">${bigCharsHtml}</div></div>
                 <div class="v-right">
-                    <div class="info-row-1">
-                        <div class="word-details"></div>
-                        <span class="total-strokes">Số nét: ${totalStrokes}</span>
-                    </div>
                     <div class="v-strokes">${strokeContentHtml}</div>
                 </div>
             </div>
             ${practiceHtml}
-            <div class="v-free"><span class="free-label">Luyện viết tự do:</span> <div class="dotted-line"></div></div>
+            <div class="v-free"><div class="dotted-line"></div></div>
         </div>`;
     }
 
-    // MODULE: Template 1 (Từ vựng Đầy đủ)
+    // MODULE: Template 1 (Từ vựng Đầy đủ - Mặc định dàn hàng)
     function generateVocabHTML(line, index, numRows, showPinyinBox) {
         const parts = line.split(/\t|\|/);
         const word = (parts[0] || "").replace(/\s/g, ''); 
@@ -559,25 +507,16 @@ Bài 1: AI小语，你好！</textarea>
         const N = chars.length;
         if (N === 0) return '';
 
-        let totalStrokes = 0, strokeContentHtml = '', bigCharsHtml = '';
+        let strokeContentHtml = '', bigCharsHtml = '';
         
         chars.forEach(char => {
             bigCharsHtml += `<div class="big-char"><span>${char}</span></div>`;
             if (/[，。！？、]/g.test(char)) return; 
             const data = hanziCache[char];
-            if (data) { totalStrokes += data.strokes.length; strokeContentHtml += createStrokeHtml(data); }
+            if (data) { strokeContentHtml += createStrokeHtml(char, data); }
         });
 
-        const repKey = `vocab_${index}`;
-        let defaultGroupsPerRow = Math.floor((675 + 8) / (N * 44 + (N - 1) * 1 + 3 + 8)) || 1;
-        let defaultTotalReps = defaultGroupsPerRow * numRows;
-        
-        if (window.customReps[repKey] === undefined) window.customReps[repKey] = defaultTotalReps;
-        let totalReps = window.customReps[repKey];
-
-        let { groupsPerRow, boxSize, pyHeight } = calculateGridParams(totalReps, N, numRows);
         const idxStr = index.toString().padStart(2, '0');
-
         let colspans = [];
         if (pinyins.length === 0) {
             for(let i=0; i<N; i++) colspans.push(1);
@@ -593,13 +532,14 @@ Bài 1: AI小语，你好！</textarea>
             }
         }
 
+        // Dàn đều tiêu chuẩn với số cụm cho 1 hàng 675px
+        let groupCount = Math.floor((675 + 8) / (N * 44 + (N - 1) * 1 + 3 + 8)) || 1;
+        
         let practiceHtml = `<div class="v-practice">`;
         for (let r = 0; r < numRows; r++) {
             practiceHtml += `<div class="practice-row">`; 
-            for (let i = 0; i < groupsPerRow; i++) {
-                let k = r * groupsPerRow + i;
-                if (k >= totalReps) break; 
-                let isFirstOverall = (k === 0); 
+            for (let i = 0; i < groupCount; i++) {
+                let isFirstOverall = (r === 0 && i === 0); 
                 
                 practiceHtml += `<div class="word-group">`;
                 if (showPinyinBox) {
@@ -625,12 +565,7 @@ Bài 1: AI小语，你好！</textarea>
         practiceHtml += `</div>`; 
 
         return `
-        <div class="vocab-block" style="--box-size: ${boxSize}px; --py-height: ${pyHeight}px;">
-            <div class="block-controls no-print">
-                <button onclick="adjustReps('${repKey}', -1, ${defaultTotalReps})">-</button>
-                <span>Viết: ${totalReps} cụm</span>
-                <button onclick="adjustReps('${repKey}', 1, ${defaultTotalReps})">+</button>
-            </div>
+        <div class="vocab-block">
             <div class="v-top-section">
                 <div class="v-badge">${idxStr}</div>
                 <div class="v-left"><div class="big-chars">${bigCharsHtml}</div></div>
@@ -640,27 +575,13 @@ Bài 1: AI小语，你好！</textarea>
                             <span class="pinyin">[ ${pinyinStr} ]</span>
                             ${meaning ? `<span class="meaning">${meaning}</span>` : ''}
                         </div>
-                        <span class="total-strokes">Số nét: ${totalStrokes}</span>
                     </div>
                     <div class="v-strokes">${strokeContentHtml}</div>
                 </div>
             </div>
             ${practiceHtml}
-            <div class="v-free"><span class="free-label">Luyện viết tự do:</span> <div class="dotted-line"></div></div>
+            <div class="v-free"><div class="dotted-line"></div></div>
         </div>`;
-    }
-
-    function createGridRow(chunk, showPinyinBox, mode = 'trace') {
-        let html = `<div class="practice-row" style="margin-bottom: 8px;">`;
-        for(let i=0; i<12; i++) {
-            let char = (mode !== 'blank' && chunk && i < chunk.length) ? chunk[i] : '';
-            let charClass = char ? (mode === 'trace' ? 'trace-text' : 'solid-text') : '';
-            html += `<div class="word-group">`;
-            if (showPinyinBox) html += `<div class="py-row"><div class="py-box ${charClass}" style="flex:1;"><span></span></div></div>`;
-            html += `<div class="hz-row"><div class="tzg-box ${charClass}">${char ? '<span>'+char+'</span>' : ''}</div></div></div>`;
-        }
-        html += `</div>`;
-        return html;
     }
 
     function stringToNode(html) {
