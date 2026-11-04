@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Công Cụ Luyện Viết Chữ Hán - Master (V61 - Chuẩn mực Giáo trình)</title>
+    <title>Công Cụ Luyện Viết Chữ Hán - Master (V63 - Clean Layout & Smart Badges)</title>
     <style>
         /* ================= GIAO DIỆN CHUNG & LAYOUT ================= */
         body { 
@@ -149,13 +149,16 @@
         .v-strokes { display: flex; flex-direction: column; gap: 6px; }
         .stroke-char-row { display: flex; flex-wrap: wrap; gap: 2px; align-items: center; }
         
-        /* CSS Ghi số nét đầu dòng */
+        /* CSS MỚI: NHÃN HIỂN THỊ SỐ NÉT ĐỒNG BỘ */
         .stroke-char-label {
-            font-family: 'KaiTi', 'Kaiti SC', STKaiti, serif; font-size: 22px; font-weight: bold; color: #c62828;
-            display: flex; align-items: baseline; gap: 4px; margin-right: 12px; min-width: 50px;
+            display: flex; align-items: center; gap: 6px; margin-right: 8px;
+            background-color: #f3f4f6; border: 1px solid #e5e7eb; border-radius: 4px; padding: 2px 8px; height: 20px;
         }
-        .stroke-char-label span {
-            font-family: 'Segoe UI', Arial, sans-serif; font-size: 13px; font-weight: 600; color: #666;
+        .scl-char {
+            font-family: "KaiTi", "Kaiti SC", STKaiti, serif; font-size: 18px; color: #111; font-weight: bold;
+        }
+        .scl-count {
+            font-family: 'Segoe UI', Arial, sans-serif; font-size: 13px; color: #555; font-weight: bold;
         }
 
         .tiny-tzg {
@@ -166,15 +169,12 @@
         .stroke-svg { width: 100%; height: 100%; display: block; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 
         .v-practice { display: flex; flex-direction: column; gap: 6px; margin-bottom: 6px; }
-        
-        /* CẬP NHẬT: Không còn gap, dùng space-between để dàn mép hoàn hảo */
         .practice-row { display: flex; width: 100%; flex-wrap: nowrap; justify-content: space-between; }
         
         .word-group { display: flex; flex-direction: column; border: 1.5px solid #555; width: max-content; }
         .py-row { display: flex; width: 100%; border-bottom: 1px solid #999; }
         .hz-row { display: flex; width: 100%; }
 
-        /* Khôi phục kích thước cứng để dàn dòng Space-between đẹp mắt */
         .py-box {
             height: 18px; 
             background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" shape-rendering="crispEdges"><line x1="0" y1="33.3%" x2="100%" y2="33.3%" stroke="%23999999" stroke-dasharray="1.5,2.5" stroke-width="1"/><line x1="0" y1="66.6%" x2="100%" y2="66.6%" stroke="%23999999" stroke-dasharray="1.5,2.5" stroke-width="1"/></svg>'); 
@@ -364,14 +364,17 @@ Bài 1: AI小语，你好！</textarea>
         return null;
     }
 
-    // CẬP NHẬT TRỌNG TÂM: Tạo HTML Nét vẽ đính kèm số Nét ngay đầu dòng (你好 -> 你 7 画)
+    // CẬP NHẬT: Nhãn ghi Số Nét chuyên nghiệp, font xám trơn, không màu đỏ
     function createStrokeHtml(char, data) {
         if (!data) return '';
         const strokes = data.strokes;
         let html = `<div class="stroke-char-row">`;
         
-        // Thêm khối hiển thị số nét bên trái
-        html += `<div class="stroke-char-label">${char} <span>${strokes.length} 画</span></div>`;
+        html += `
+        <div class="stroke-char-label">
+            <span class="scl-char">${char}</span>
+            <span class="scl-count">${strokes.length} 画</span>
+        </div>`;
         
         for (let i = 0; i < strokes.length; i++) {
             html += `<div class="tiny-tzg"><svg viewBox="0 0 1024 1024" class="stroke-svg">`;
@@ -400,7 +403,7 @@ Bài 1: AI小语，你好！</textarea>
         return html;
     }
 
-    // MODULE: Template 2 (Mỗi nét 1 hàng - Không dùng Reps)
+    // MODULE: Template 2 (Mỗi nét 1 hàng)
     function generateSingleStrokePracticeNodes(char, index, numRowsPerStroke, showPinyinBox) {
         if (!char) return [];
         const data = hanziCache[char];
@@ -495,7 +498,7 @@ Bài 1: AI小语，你好！</textarea>
         </div>`;
     }
 
-    // MODULE: Template 1 (Từ vựng Đầy đủ - Mặc định dàn hàng)
+    // MODULE: Template 1 (Từ vựng Đầy đủ)
     function generateVocabHTML(line, index, numRows, showPinyinBox) {
         const parts = line.split(/\t|\|/);
         const word = (parts[0] || "").replace(/\s/g, ''); 
@@ -532,7 +535,6 @@ Bài 1: AI小语，你好！</textarea>
             }
         }
 
-        // Dàn đều tiêu chuẩn với số cụm cho 1 hàng 675px
         let groupCount = Math.floor((675 + 8) / (N * 44 + (N - 1) * 1 + 3 + 8)) || 1;
         
         let practiceHtml = `<div class="v-practice">`;
