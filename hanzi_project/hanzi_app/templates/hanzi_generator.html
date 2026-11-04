@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Công Cụ Luyện Viết Chữ Hán - Master (V58 - Floating Controls & Info Layout)</title>
+    <title>Công Cụ Luyện Viết Chữ Hán - Master (V59 - Hoàn thiện Nút Trôi & In Đậm Nghĩa)</title>
     <style>
         /* ================= GIAO DIỆN CHUNG & LAYOUT ================= */
         body { 
@@ -73,10 +73,9 @@
         #btn-print:hover { background: #1565C0; transform: translateY(-1px); box-shadow: 0 4px 6px rgba(0,0,0,0.1);}
         .status-text { font-size: 13px; color: #4CAF50; font-weight: bold; text-align: center; height: 15px; margin-bottom: 10px; }
 
-
         /* ================= KHU VỰC XEM TRƯỚC (BÊN PHẢI) ================= */
-        /* Thêm padding-right lớn để chừa chỗ cho bảng điều khiển trôi nổi */
-        .right-panel { flex: 1; padding: 30px 100px 30px 20px; overflow-y: auto; overflow-x: auto; display: flex; flex-direction: column; align-items: center; }
+        /* CẬP NHẬT: Tăng padding-right để chừa không gian rộng rãi cho nút lơ lửng */
+        .right-panel { flex: 1; padding: 30px 280px 30px 20px; overflow-y: auto; overflow-x: auto; display: flex; flex-direction: column; align-items: center; }
 
         @page { size: A4; margin: 0; } 
         @media print {
@@ -119,9 +118,11 @@
         
         /* ================= BẢNG ĐIỀU KHIỂN NỔI NGOÀI TRANG (CẬP NHẬT) ================= */
         .block-controls {
-            position: absolute; top: 12px; right: -165px; /* Kéo vượt ra khỏi viền tờ giấy A4 */
+            position: absolute; top: 12px; 
+            /* CẬP NHẬT: Dùng calc(100% + 70px) để đẩy nút ra ngoài tờ giấy trắng hoàn toàn */
+            left: calc(100% + 70px); 
             display: flex; background: #fff; border: 1.5px solid #c62828; border-radius: 6px; 
-            overflow: hidden; z-index: 50; box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            overflow: hidden; z-index: 50; box-shadow: 0 2px 8px rgba(0,0,0,0.15); width: max-content;
         }
         .block-controls button {
             background: #ffebee; color: #c62828; border: none; padding: 4px 12px;
@@ -160,11 +161,13 @@
         
         .v-right { flex: 1; display: flex; flex-direction: column; gap: 4px; justify-content: flex-start; min-width: 0; padding-left: 5px;}
         
-        /* CẬP NHẬT: Trả lại không gian cho Số Nét */
         .info-row-1 { display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 4px;}
         .word-details { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
         .pinyin { font-weight: bold; font-size: 17px; color: #c62828; font-family: "Arial", sans-serif; letter-spacing: 0.5px; } 
-        .meaning { font-size: 14px; color: #1f2937; font-family: "Segoe UI", Arial, sans-serif; font-style: italic; background-color: #f3f4f6; padding: 2px 8px; border-radius: 4px; border: 1px solid #e5e7eb; }
+        
+        /* CẬP NHẬT: In đậm Nghĩa tiếng Việt */
+        .meaning { font-size: 14px; color: #1f2937; font-family: "Segoe UI", Arial, sans-serif; font-style: italic; font-weight: bold; background-color: #f3f4f6; padding: 2px 8px; border-radius: 4px; border: 1px solid #e5e7eb; }
+        
         .total-strokes { font-size: 13px; font-style: italic; color: #555; white-space: nowrap;}
 
         .v-strokes { display: flex; flex-direction: column; gap: 4px; }
@@ -216,8 +219,7 @@
             background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" shape-rendering="crispEdges"><line x1="50%" y1="0" x2="50%" y2="100%" stroke="%23888888" stroke-dasharray="2,2.5" stroke-width="1.2"/><line x1="0" y1="50%" x2="100%" y2="50%" stroke="%23888888" stroke-dasharray="2,2.5" stroke-width="1.2"/></svg>'); 
             background-size: 100% 100%; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important;
         }
-        .tzg-box.trace-text span, .tzg-box.solid-text span { position: relative; z-index: 1; }
-        .tzg-box.trace-text svg { position: relative; z-index: 1; width: 85%; height: 85%; }
+        .tzg-box.trace-text span, .tzg-box.solid-text span, .tzg-box.trace-text svg { position: relative; z-index: 1; }
 
         .v-free { display: flex; align-items: flex-end; margin-top: 5px; gap: 10px; }
         .free-label { font-size: 14px; color: #111; white-space: nowrap; font-family: "Times New Roman", serif; font-weight: bold;}
