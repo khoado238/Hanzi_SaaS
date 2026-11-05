@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Công Cụ Luyện Viết Chữ Hán - Master (V65 - Giao diện Phẳng Tối Giản)</title>
+    <title>Công Cụ Luyện Viết Chữ Hán - Master (V66 - Bổ sung Hệ thống Bộ Thủ)</title>
     <style>
         /* ================= GIAO DIỆN CHUNG & LAYOUT ================= */
         body { 
@@ -142,13 +142,11 @@
         .info-row-1 { display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 4px;}
         .word-details { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
         .pinyin { font-weight: bold; font-size: 17px; color: #c62828; font-family: "Arial", sans-serif; letter-spacing: 0.5px; } 
-        /* CẬP NHẬT: Loại bỏ khối hộp của Nghĩa Tiếng Việt */
         .meaning { font-size: 14px; color: #1f2937; font-family: "Segoe UI", Arial, sans-serif; font-style: italic; font-weight: bold; padding: 2px 4px; }
         
         .v-strokes { display: flex; flex-direction: column; gap: 6px; }
         .stroke-char-row { display: flex; flex-wrap: wrap; gap: 2px; align-items: center; }
         
-        /* CẬP NHẬT: Loại bỏ khối hộp của Nhãn Số Nét */
         .stroke-char-label {
             display: flex; align-items: center; justify-content: center; gap: 6px; margin-right: 8px;
             padding: 2px 4px; height: 20px;
@@ -230,6 +228,10 @@
                     <option value="3">Mẫu 3: Luyện chữ đơn lẻ (Chỉ chữ Hán)</option>
                     <option value="4">Mẫu 4: Luyện viết Câu / Đoạn văn</option>
                     <option value="5">Mẫu 5: Trang lưới trắng</option>
+                    <!-- MẪU BỘ THỦ MỚI -->
+                    <option value="6">Mẫu 6: 50 Bộ thủ thông dụng</option>
+                    <option value="7">Mẫu 7: 214 Bộ thủ truyền thống</option>
+                    <option value="8">Mẫu 8: Luyện bộ thủ (Tùy chọn trống)</option>
                 </select>
             </div>
             
@@ -245,7 +247,7 @@ Bài 1: AI小语，你好！</textarea>
             
             <div id="block-vocab" class="input-group">
                 <div class="hint" id="vocabHint"></div>
-                <textarea id="vocabList" rows="6" oninput="autoUpdate()">你好	nǐhǎo	xin chào; chào bạn
+                <textarea id="vocabList" rows="8" oninput="autoUpdate()">你好	nǐhǎo	xin chào; chào bạn
 大家	dàjiā	mọi người
 好	hǎo	tốt; khỏe</textarea>
             </div>
@@ -304,6 +306,20 @@ Bài 1: AI小语，你好！</textarea>
 <script>
     const hanziCache = {};
     let updateTimer = null; 
+    let currentTemplate = '1';
+
+    // Dữ liệu mẫu (Vui lòng gửi lại danh sách chuẩn để thay thế)
+    const demo50Radicals = `亻\trén\tNhân (người)
+氵\tshuǐ\tThủy (nước)
+木\tmù\tMộc (cây)
+口\tkǒu\tKhẩu (miệng)
+火\thuǒ\tHỏa (lửa)`;
+
+    const demo214Radicals = `一\tyī\tNhất (một)
+丨\tgǔn\tCổn (nét sổ)
+丶\tzhǔ\tChủ (điểm)
+丿\tpiě\tPhiệt (nét phẩy)
+乙\tyǐ\tẤt (can ất)`;
 
     document.getElementById('vocabList').addEventListener('keydown', function(e) {
         if (e.key === 'Tab') {
@@ -320,8 +336,9 @@ Bài 1: AI小语，你好！</textarea>
         const type = document.getElementById('templateType').value;
         const labelNumRows = document.getElementById('label-numRows');
         const inputNumRows = document.getElementById('numRows');
+        const vocabList = document.getElementById('vocabList');
         
-        document.getElementById('block-vocab').style.display = (type === '1' || type === '2' || type === '3') ? 'block' : 'none';
+        document.getElementById('block-vocab').style.display = (['1','2','3','6','7','8'].includes(type)) ? 'block' : 'none';
         document.getElementById('block-paragraph').style.display = (type === '4') ? 'block' : 'none';
         document.getElementById('block-numPages').style.display = (type === '5') ? 'block' : 'none';
         document.getElementById('block-display-options').style.display = (type === '5') ? 'none' : 'block';
@@ -343,7 +360,21 @@ Bài 1: AI小语，你好！</textarea>
         } else if (type === '4') {
             labelNumRows.innerText = 'Số hàng trống viết lại cả câu:';
             if (parseInt(inputNumRows.value) > 10) inputNumRows.value = 2;
+        } else if (type === '6') {
+            hint.innerHTML = '<b>50 Bộ thủ thông dụng</b> (Dữ liệu đã được nạp sẵn, có thể chỉnh sửa).';
+            labelNumRows.innerText = 'Số hàng tập viết (mỗi bộ):';
+            if (currentTemplate !== '6') vocabList.value = demo50Radicals;
+        } else if (type === '7') {
+            hint.innerHTML = '<b>214 Bộ thủ truyền thống</b> (Dữ liệu đã được nạp sẵn, có thể chỉnh sửa).';
+            labelNumRows.innerText = 'Số hàng tập viết (mỗi bộ):';
+            if (currentTemplate !== '7') vocabList.value = demo214Radicals;
+        } else if (type === '8') {
+            hint.innerHTML = '<b>Bộ thủ tùy chọn:</b> Hãy dán danh sách bộ thủ của riêng bạn vào đây.';
+            labelNumRows.innerText = 'Số hàng tập viết (mỗi bộ):';
+            if (currentTemplate !== '8') vocabList.value = '';
         }
+        
+        currentTemplate = type;
     }
 
     async function fetchHanziData(char) {
@@ -489,6 +520,7 @@ Bài 1: AI小语，你好！</textarea>
         </div>`;
     }
 
+    // MODULE: Template 1 & Bộ Thủ (6, 7, 8) dùng chung
     function generateVocabHTML(line, index, numRows, showPinyinBox) {
         const parts = line.split(/\t|\|/);
         const word = (parts[0] || "").replace(/\s/g, ''); 
@@ -597,7 +629,7 @@ Bài 1: AI小语，你好！</textarea>
             let allChars = [];
             let validVocabs = [];
             
-            if (template === '1' || template === '2' || template === '3') {
+            if (['1','2','3','6','7','8'].includes(template)) {
                 validVocabs = document.getElementById('vocabList').value.trim().split('\n').filter(line => line.trim().length > 0);
                 validVocabs.forEach(line => {
                     const word = line.split(/\t|\|/)[0].replace(/\s/g, '');
@@ -651,7 +683,7 @@ Bài 1: AI小语，你好！</textarea>
                 }
             }
 
-            if (template === '1') {
+            if (['1','6','7','8'].includes(template)) {
                 validVocabs.forEach((line, idx) => {
                     const html = generateVocabHTML(line, idx + 1, numRowsInput, showPinyinBox); 
                     if(html) appendNodeWithPagination(stringToNode(html));
