@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Công Cụ Luyện Viết Chữ Hán - Master (V70 - Mũi tên Song Song)</title>
+    <title>Công Cụ Luyện Viết Chữ Hán - Master (V71 - Mũi Tên Song Song Tối Ưu)</title>
     <style>
         /* ================= GIAO DIỆN CHUNG & LAYOUT ================= */
         body { 
@@ -430,7 +430,7 @@ Bài 1: AI小语，你好！</textarea>
         return html;
     }
 
-    // CẬP NHẬT: MODULE Template 7 (Vẽ đè mũi tên mỏng song song với nét chữ)
+    // CẬP NHẬT: TĂNG TỊNH TIẾN LÊN translate(120, 120) ĐỂ TÁCH RÕ MŨI TÊN
     function generateStrokeTemplateHTML(line, index, numRows, showPinyinBox) {
         const parts = line.split(/\t|\|/);
         const char = (parts[0] || "").replace(/\s/g, ''); 
@@ -445,13 +445,10 @@ Bài 1: AI小语，你好！</textarea>
             let pathsBlack = '';
             let polylines = '';
             for (let s = 0; s < data.strokes.length; s++) {
-                // Lớp 1: Vẽ nét chữ Hán chuẩn màu đen
                 pathsBlack += `<path d="${data.strokes[s]}" fill="#000000"></path>`;
-                
-                // Lớp 2: Vẽ đường dẫn mũi tên đứt nét màu đỏ
                 let mappedMedians = data.medians[s].map(p => `${p[0]},${900 - p[1]}`).join(' ');
-                // CẬP NHẬT: Giảm stroke-width và thêm transform="translate(x,y)" để đường đỏ nằm song song nét đen
-                polylines += `<polyline points="${mappedMedians}" fill="none" stroke="#c62828" stroke-width="20" stroke-dasharray="30 30" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-${index})"></polyline>`;
+                // Đẩy mũi tên ra xa nét đen bằng cách tăng mức dịch chuyển
+                polylines += `<polyline points="${mappedMedians}" fill="none" stroke="#c62828" stroke-width="25" stroke-dasharray="30 30" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-${index})"></polyline>`;
             }
             
             const svgCombo = `
@@ -464,7 +461,8 @@ Bài 1: AI小语，你好！</textarea>
                 <g transform="scale(1, -1) translate(0, -900)">
                     ${pathsBlack}
                 </g>
-                <g transform="translate(40, 40)">
+                <!-- TỊNH TIẾN MŨI TÊN RA XA NÉT ĐEN -->
+                <g transform="translate(120, 120)">
                     ${polylines}
                 </g>
             </svg>`;
