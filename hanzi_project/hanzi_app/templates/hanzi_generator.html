@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Công Cụ Luyện Viết Chữ Hán - Master (V66 - Bổ sung Hệ thống Bộ Thủ)</title>
+    <title>Công Cụ Luyện Viết Chữ Hán - Master (V66 - Giao diện Bộ thủ Chuẩn hóa)</title>
     <style>
         /* ================= GIAO DIỆN CHUNG & LAYOUT ================= */
         body { 
@@ -142,7 +142,11 @@
         .info-row-1 { display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 4px;}
         .word-details { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
         .pinyin { font-weight: bold; font-size: 17px; color: #c62828; font-family: "Arial", sans-serif; letter-spacing: 0.5px; } 
+        
+        /* CSS CHO BỘ THỦ / NGHĨA */
+        .rad-name { font-size: 15px; color: #111; font-weight: bold; padding: 2px 0px; text-transform: capitalize; }
         .meaning { font-size: 14px; color: #1f2937; font-family: "Segoe UI", Arial, sans-serif; font-style: italic; font-weight: bold; padding: 2px 4px; }
+        .meaning.has-border { border-left: 1.5px solid #ccc; margin-left: 4px; padding-left: 10px; color: #555; font-weight: 600; }
         
         .v-strokes { display: flex; flex-direction: column; gap: 6px; }
         .stroke-char-row { display: flex; flex-wrap: wrap; gap: 2px; align-items: center; }
@@ -228,10 +232,7 @@
                     <option value="3">Mẫu 3: Luyện chữ đơn lẻ (Chỉ chữ Hán)</option>
                     <option value="4">Mẫu 4: Luyện viết Câu / Đoạn văn</option>
                     <option value="5">Mẫu 5: Trang lưới trắng</option>
-                    <!-- MẪU BỘ THỦ MỚI -->
-                    <option value="6">Mẫu 6: 50 Bộ thủ thông dụng</option>
-                    <option value="7">Mẫu 7: 214 Bộ thủ truyền thống</option>
-                    <option value="8">Mẫu 8: Luyện bộ thủ (Tùy chọn trống)</option>
+                    <option value="6">Mẫu 6: Luyện Bộ thủ (4 cột: Bộ | Pinyin | Tên | Nghĩa)</option>
                 </select>
             </div>
             
@@ -308,18 +309,11 @@ Bài 1: AI小语，你好！</textarea>
     let updateTimer = null; 
     let currentTemplate = '1';
 
-    // Dữ liệu mẫu (Vui lòng gửi lại danh sách chuẩn để thay thế)
-    const demo50Radicals = `亻\trén\tNhân (người)
-氵\tshuǐ\tThủy (nước)
-木\tmù\tMộc (cây)
-口\tkǒu\tKhẩu (miệng)
-火\thuǒ\tHỏa (lửa)`;
-
-    const demo214Radicals = `一\tyī\tNhất (một)
-丨\tgǔn\tCổn (nét sổ)
-丶\tzhǔ\tChủ (điểm)
-丿\tpiě\tPhiệt (nét phẩy)
-乙\tyǐ\tẤt (can ất)`;
+    const demoRadicals = `亻\trén\tnhân (nhân đứng)\tngười
+氵\tshuǐ\tthuỷ (ba chấm thuỷ)\tnước
+木\tmù\tmộc\tgỗ, cây cối
+口\tkǒu\tkhẩu\tcái miệng
+火\thuǒ\thỏa\tlửa`;
 
     document.getElementById('vocabList').addEventListener('keydown', function(e) {
         if (e.key === 'Tab') {
@@ -338,7 +332,7 @@ Bài 1: AI小语，你好！</textarea>
         const inputNumRows = document.getElementById('numRows');
         const vocabList = document.getElementById('vocabList');
         
-        document.getElementById('block-vocab').style.display = (['1','2','3','6','7','8'].includes(type)) ? 'block' : 'none';
+        document.getElementById('block-vocab').style.display = (['1','2','3','6'].includes(type)) ? 'block' : 'none';
         document.getElementById('block-paragraph').style.display = (type === '4') ? 'block' : 'none';
         document.getElementById('block-numPages').style.display = (type === '5') ? 'block' : 'none';
         document.getElementById('block-display-options').style.display = (type === '5') ? 'none' : 'block';
@@ -361,19 +355,10 @@ Bài 1: AI小语，你好！</textarea>
             labelNumRows.innerText = 'Số hàng trống viết lại cả câu:';
             if (parseInt(inputNumRows.value) > 10) inputNumRows.value = 2;
         } else if (type === '6') {
-            hint.innerHTML = '<b>50 Bộ thủ thông dụng</b> (Dữ liệu đã được nạp sẵn, có thể chỉnh sửa).';
+            hint.innerHTML = '<b>Dán 4 cột cho Bộ Thủ:</b><br>Bộ thủ | Pinyin | Tên Hán Việt | Nghĩa';
             labelNumRows.innerText = 'Số hàng tập viết (mỗi bộ):';
-            if (currentTemplate !== '6') vocabList.value = demo50Radicals;
-        } else if (type === '7') {
-            hint.innerHTML = '<b>214 Bộ thủ truyền thống</b> (Dữ liệu đã được nạp sẵn, có thể chỉnh sửa).';
-            labelNumRows.innerText = 'Số hàng tập viết (mỗi bộ):';
-            if (currentTemplate !== '7') vocabList.value = demo214Radicals;
-        } else if (type === '8') {
-            hint.innerHTML = '<b>Bộ thủ tùy chọn:</b> Hãy dán danh sách bộ thủ của riêng bạn vào đây.';
-            labelNumRows.innerText = 'Số hàng tập viết (mỗi bộ):';
-            if (currentTemplate !== '8') vocabList.value = '';
+            if (currentTemplate !== '6') vocabList.value = demoRadicals;
         }
-        
         currentTemplate = type;
     }
 
@@ -427,6 +412,7 @@ Bài 1: AI小语，你好！</textarea>
         return html;
     }
 
+    // MODULE: Template 2 (Mỗi nét 1 hàng)
     function generateSingleStrokePracticeNodes(char, index, numRowsPerStroke, showPinyinBox) {
         if (!char) return [];
         const data = hanziCache[char];
@@ -481,6 +467,7 @@ Bài 1: AI小语，你好！</textarea>
         return nodes;
     }
 
+    // MODULE: Template 3 (Chữ Hán đơn lẻ)
     function generateSimpleVocabHTML(char, index, numRows, showPinyinBox) {
         if (!char) return '';
         let strokeContentHtml = '';
@@ -520,7 +507,7 @@ Bài 1: AI小语，你好！</textarea>
         </div>`;
     }
 
-    // MODULE: Template 1 & Bộ Thủ (6, 7, 8) dùng chung
+    // MODULE: Template 1 (Từ vựng Đầy đủ - 3 cột)
     function generateVocabHTML(line, index, numRows, showPinyinBox) {
         const parts = line.split(/\t|\|/);
         const word = (parts[0] || "").replace(/\s/g, ''); 
@@ -608,6 +595,96 @@ Bài 1: AI小语，你好！</textarea>
         </div>`;
     }
 
+    // MODULE: Template 6 (Bộ Thủ - 4 cột)
+    function generateRadicalHTML(line, index, numRows, showPinyinBox) {
+        const parts = line.split(/\t|\|/);
+        const word = (parts[0] || "").replace(/\s/g, ''); 
+        const pinyinStr = (parts[1] || "").trim();
+        const radName = (parts[2] || "").trim(); 
+        const meaning = (parts[3] || "").trim(); 
+        
+        const chars = word.split(''); 
+        const pinyins = pinyinStr.split(/\s+/).filter(Boolean); 
+        const N = chars.length;
+        if (N === 0) return '';
+
+        let strokeContentHtml = '', bigCharsHtml = '';
+        
+        chars.forEach(char => {
+            bigCharsHtml += `<div class="big-char"><span>${char}</span></div>`;
+            if (/[，。！？、]/g.test(char)) return; 
+            const data = hanziCache[char];
+            if (data) { strokeContentHtml += createStrokeHtml(char, data); }
+        });
+
+        const idxStr = index.toString().padStart(2, '0');
+        let colspans = [];
+        if (pinyins.length === 0) {
+            for(let i=0; i<N; i++) colspans.push(1);
+        } else {
+            let remainingN = N, remainingLen = pinyins.join('').length;
+            for (let i = 0; i < pinyins.length; i++) {
+                if (i === pinyins.length - 1) colspans.push(remainingN);
+                else {
+                    let cs = Math.max(1, Math.round((pinyins[i].length / remainingLen) * remainingN));
+                    cs = Math.min(cs, remainingN - (pinyins.length - 1 - i));
+                    colspans.push(cs); remainingN -= cs; remainingLen -= pinyins[i].length;
+                }
+            }
+        }
+
+        let groupCount = Math.floor((675 + 8) / (N * 44 + (N - 1) * 1 + 3 + 8)) || 1;
+        
+        let practiceHtml = `<div class="v-practice">`;
+        for (let r = 0; r < numRows; r++) {
+            practiceHtml += `<div class="practice-row">`; 
+            for (let i = 0; i < groupCount; i++) {
+                let isFirstOverall = (r === 0 && i === 0); 
+                
+                practiceHtml += `<div class="word-group">`;
+                if (showPinyinBox) {
+                    practiceHtml += `<div class="py-row">`;
+                    if (pinyins.length === 0) {
+                        for(let j=0; j<N; j++) practiceHtml += `<div class="py-box" style="flex: 1;"></div>`;
+                    } else {
+                        for(let j = 0; j < pinyins.length; j++) {
+                            practiceHtml += `<div class="py-box ${isFirstOverall ? 'trace-text' : ''}" style="flex: ${colspans[j]};"><span>${isFirstOverall ? pinyins[j] : ''}</span></div>`;
+                        }
+                    }
+                    practiceHtml += `</div>`;
+                }
+
+                practiceHtml += `<div class="hz-row">`;
+                chars.forEach(char => {
+                    practiceHtml += `<div class="tzg-box ${isFirstOverall ? 'trace-text' : ''}"><span>${isFirstOverall ? char : ''}</span></div>`; 
+                });
+                practiceHtml += `</div></div>`; 
+            }
+            practiceHtml += `</div>`; 
+        }
+        practiceHtml += `</div>`; 
+
+        return `
+        <div class="vocab-block">
+            <div class="v-top-section">
+                <div class="v-badge">${idxStr}</div>
+                <div class="v-left"><div class="big-chars">${bigCharsHtml}</div></div>
+                <div class="v-right">
+                    <div class="info-row-1">
+                        <div class="word-details">
+                            <span class="pinyin">[ ${pinyinStr} ]</span>
+                            ${radName ? `<span class="rad-name">${radName}</span>` : ''}
+                            ${meaning ? `<span class="meaning has-border">${meaning}</span>` : ''}
+                        </div>
+                    </div>
+                    <div class="v-strokes">${strokeContentHtml}</div>
+                </div>
+            </div>
+            ${practiceHtml}
+            <div class="v-free"><div class="dotted-line"></div></div>
+        </div>`;
+    }
+
     function stringToNode(html) {
         const tempDiv = document.createElement('div');
         tempDiv.innerHTML = html.trim();
@@ -629,7 +706,7 @@ Bài 1: AI小语，你好！</textarea>
             let allChars = [];
             let validVocabs = [];
             
-            if (['1','2','3','6','7','8'].includes(template)) {
+            if (['1','2','3','6'].includes(template)) {
                 validVocabs = document.getElementById('vocabList').value.trim().split('\n').filter(line => line.trim().length > 0);
                 validVocabs.forEach(line => {
                     const word = line.split(/\t|\|/)[0].replace(/\s/g, '');
@@ -683,12 +760,18 @@ Bài 1: AI小语，你好！</textarea>
                 }
             }
 
-            if (['1','6','7','8'].includes(template)) {
+            if (template === '1') {
                 validVocabs.forEach((line, idx) => {
                     const html = generateVocabHTML(line, idx + 1, numRowsInput, showPinyinBox); 
                     if(html) appendNodeWithPagination(stringToNode(html));
                 });
             } 
+            else if (template === '6') {
+                validVocabs.forEach((line, idx) => {
+                    const html = generateRadicalHTML(line, idx + 1, numRowsInput, showPinyinBox); 
+                    if(html) appendNodeWithPagination(stringToNode(html));
+                });
+            }
             else if (template === '2') {
                 uniqueChars.forEach((char, idx) => {
                     const htmlArray = generateSingleStrokePracticeNodes(char, idx + 1, numRowsInput, showPinyinBox); 
