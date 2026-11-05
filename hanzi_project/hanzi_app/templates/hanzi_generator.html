@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Công Cụ Luyện Viết Chữ Hán - Master (V71 - Mũi Tên Song Song Tối Ưu)</title>
+    <title>Công Cụ Luyện Viết Chữ Hán - Master (V72 - Fix Zoom & Mũi Tên Đứt Nét)</title>
     <style>
         /* ================= GIAO DIỆN CHUNG & LAYOUT ================= */
         body { 
@@ -10,11 +10,14 @@
             display: flex; height: 100vh; overflow: hidden; background-color: #525659;
         }
         
-        /* ================= BẢNG ĐIỀU KHIỂN BÊN TRÁI ================= */
+        /* ================= BẢNG ĐIỀU KHIỂN BÊN TRÁI (CẬP NHẬT CHỐNG LỖI ZOOM) ================= */
         .left-panel {
-            width: 420px; background: #f4f6f8; box-sizing: border-box;
+            min-width: 420px; /* Giữ cố định độ rộng tối thiểu */
+            width: 420px;
+            background: #f4f6f8; box-sizing: border-box;
             border-right: 1px solid #ddd; box-shadow: 2px 0 10px rgba(0,0,0,0.1);
             overflow-y: auto; z-index: 10; display: flex; flex-direction: column;
+            flex-shrink: 0; /* Ngăn bảng điều khiển bị co lại khi zoom */
         }
         
         .panel-header {
@@ -430,7 +433,7 @@ Bài 1: AI小语，你好！</textarea>
         return html;
     }
 
-    // CẬP NHẬT: TĂNG TỊNH TIẾN LÊN translate(120, 120) ĐỂ TÁCH RÕ MŨI TÊN
+    // CẬP NHẬT: THUẬT TOÁN VẼ ĐÈ MŨI TÊN (KHÔNG LỆCH) BẰNG STROKE-DASHARRAY
     function generateStrokeTemplateHTML(line, index, numRows, showPinyinBox) {
         const parts = line.split(/\t|\|/);
         const char = (parts[0] || "").replace(/\s/g, ''); 
@@ -445,24 +448,27 @@ Bài 1: AI小语，你好！</textarea>
             let pathsBlack = '';
             let polylines = '';
             for (let s = 0; s < data.strokes.length; s++) {
+                // Vẽ nét chữ Hán màu đen
                 pathsBlack += `<path d="${data.strokes[s]}" fill="#000000"></path>`;
+                
+                // Vẽ đè đường dẫn màu đỏ với nét đứt (stroke-dasharray="40 40")
+                // Đường đứt nét này sẽ bám sát lộ trình của nét đen, vừa chừa chỗ trống để lộ màu đen bên dưới.
                 let mappedMedians = data.medians[s].map(p => `${p[0]},${900 - p[1]}`).join(' ');
-                // Đẩy mũi tên ra xa nét đen bằng cách tăng mức dịch chuyển
-                polylines += `<polyline points="${mappedMedians}" fill="none" stroke="#c62828" stroke-width="25" stroke-dasharray="30 30" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-${index})"></polyline>`;
+                polylines += `<polyline points="${mappedMedians}" fill="none" stroke="#c62828" stroke-width="35" stroke-dasharray="40 40" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-${index})"></polyline>`;
             }
             
             const svgCombo = `
             <svg viewBox="0 0 1024 1024" class="stroke-svg" style="width: 85%; height: 85%; overflow: visible;">
                 <defs>
-                    <marker id="arrow-${index}" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+                    <marker id="arrow-${index}" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="4" markerHeight="4" orient="auto">
                         <path d="M 0 1 L 10 5 L 0 9 z" fill="#c62828" />
                     </marker>
                 </defs>
                 <g transform="scale(1, -1) translate(0, -900)">
                     ${pathsBlack}
                 </g>
-                <!-- TỊNH TIẾN MŨI TÊN RA XA NÉT ĐEN -->
-                <g transform="translate(120, 120)">
+                <!-- Vẽ đè thẳng lên, KHÔNG tịnh tiến (translate) nữa -->
+                <g>
                     ${polylines}
                 </g>
             </svg>`;
