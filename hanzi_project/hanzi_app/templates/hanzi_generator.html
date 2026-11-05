@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Công Cụ Luyện Viết Chữ Hán - Master (V78 - Song Song & Sửa Lỗi SVG)</title>
+    <title>Công Cụ Luyện Viết Chữ Hán - Master (V79 - Khoảng Cách Vector Vuông Góc)</title>
     <style>
         /* ================= GIAO DIỆN CHUNG & LAYOUT ================= */
         body { 
@@ -432,7 +432,7 @@ Bài 1: AI小语，你好！</textarea>
         return html;
     }
 
-    // CẬP NHẬT TRỌNG TÂM: Thuật toán lọc điểm nhiễu (chống lỗi góc tọa độ) và tịnh tiến mũi tên song song
+    // CẬP NHẬT TRỌNG TÂM: Thuật toán tịnh tiến Vector Vuông Góc thông minh
     function generateStrokeTemplateHTML(line, index, numRows, showPinyinBox) {
         const parts = line.split(/\t|\|/);
         const char = (parts[0] || "").replace(/\s/g, ''); 
@@ -449,36 +449,56 @@ Bài 1: AI小语，你好！</textarea>
             let defs = '<defs>';
             
             for (let s = 0; s < data.strokes.length; s++) {
-                // Lớp 1: Vẽ nét chữ Hán chuẩn màu đen
                 pathsBlack += `<path d="${data.strokes[s]}" fill="#111111"></path>`;
                 
-                // Thuật toán LỌC ĐIỂM (Lọc bỏ các điểm bị trùng hoặc quá gần nhau gây nhiễu góc quay mũi tên)
+                // Lọc điểm nhiễu để tính góc vector chính xác
                 let cleanMedians = [];
                 let lastPt = null;
                 for (let i = 0; i < data.medians[s].length; i++) {
                     let p = data.medians[s][i];
-                    // Chỉ lấy điểm nếu nó cách điểm trước đó ít nhất 15 pixel, hoặc là điểm cuối cùng
                     if (!lastPt || Math.hypot(p[0] - lastPt[0], p[1] - lastPt[1]) > 15 || i === data.medians[s].length - 1) {
                         cleanMedians.push(p);
                         lastPt = p;
                     }
                 }
-                // Fallback nếu lọc quá tay
                 if (cleanMedians.length < 2) cleanMedians = data.medians[s];
                 
-                // TỊNH TIẾN 65px (Khoảng 2.5mm trên giấy) để đường đỏ chạy song song bên ngoài nét đen
-                let mappedMedians = cleanMedians.map(p => (p[0] + 65) + ',' + (900 - p[1] + 65)).join(' ');
+                // Tính toán Vector vuông góc với hướng nét vẽ để tách đường đỏ song song ra ngoài
+                let startX = cleanMedians[0][0];
+                let startY = 900 - cleanMedians[0][1];
+                let endX = cleanMedians[cleanMedians.length - 1][0];
+                let endY = 900 - cleanMedians[cleanMedians.length - 1][1];
                 
-                // Khởi tạo ID ngẫu nhiên cho Marker để chống trùng lặp sinh ra lỗi tàng hình
+                let vecX = endX - startX;
+                let vecY = endY - startY;
+                let len = Math.hypot(vecX, vecY);
+                if (len === 0) len = 1;
+
+                // Khoảng cách dịch chuyển siêu rộng (220) để mũi tên nằm hoàn toàn bên ngoài nét
+                let offsetDist = 220; 
+                let normX = (-vecY / len) * offsetDist;
+                let normY = (vecX / len) * offsetDist;
+                
+                // Thuật toán Force Direction: Đảm bảo mũi tên luôn tách xuống Dưới hoặc sang Phải, chống đè lên nét mác/phẩy
+                if (normY < -10 || (Math.abs(normY) <= 10 && normX < 0)) {
+                    normX = -normX;
+                    normY = -normY;
+                }
+
+                let mappedMedians = cleanMedians.map(p => {
+                    let x = p[0] + normX;
+                    let y = (900 - p[1]) + normY;
+                    return `${x},${y}`;
+                }).join(' ');
+                
                 let markerId = `arr-${Date.now()}-${Math.floor(Math.random()*10000)}-${s}`;
                 
-                // Mũi tên được set fix cứng kích thước 60x60 trên hệ lưới 1024
                 defs += `
-                <marker id="${markerId}" markerUnits="userSpaceOnUse" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="60" markerHeight="60" orient="auto" overflow="visible">
+                <marker id="${markerId}" markerUnits="userSpaceOnUse" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="70" markerHeight="70" orient="auto" overflow="visible">
                     <path d="M 0 1 L 9 5 L 0 9 z" fill="#c62828" />
                 </marker>`;
                 
-                polylines += `<polyline points="${mappedMedians}" fill="none" stroke="#c62828" stroke-width="12" stroke-dasharray="25 25" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#${markerId})"></polyline>`;
+                polylines += `<polyline points="${mappedMedians}" fill="none" stroke="#c62828" stroke-width="18" stroke-dasharray="35 35" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#${markerId})"></polyline>`;
             }
             defs += '</defs>';
             
