@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Công Cụ Luyện Viết Chữ Hán - Master (V76 - Mũi Tên Đứt Nét Hoàn Hảo)</title>
+    <title>Công Cụ Luyện Viết Chữ Hán - Master (V77 - Mũi Tên Chỉ Hướng Chuẩn Mực)</title>
     <style>
         /* ================= GIAO DIỆN CHUNG & LAYOUT ================= */
         body { 
@@ -432,7 +432,7 @@ Bài 1: AI小语，你好！</textarea>
         return html;
     }
 
-    // CẬP NHẬT TRỌNG TÂM: Mũi tên đỏ mảnh chèn KHÍT lên khung xương nét đen
+    // CẬP NHẬT TRỌNG TÂM: Mũi tên đỏ đứt nét ôm sát "xương" của nét đen (stroke-width: 40)
     function generateStrokeTemplateHTML(line, index, numRows, showPinyinBox) {
         const parts = line.split(/\t|\|/);
         const char = (parts[0] || "").replace(/\s/g, ''); 
@@ -446,35 +446,30 @@ Bài 1: AI小语，你好！</textarea>
         if (data && data.strokes && data.medians) {
             let pathsBlack = '';
             let polylines = '';
-            let defs = '<defs>';
             
             for (let s = 0; s < data.strokes.length; s++) {
-                // Lớp 1: Vẽ nét chữ Hán nền đen dày
+                // Lớp 1: Vẽ nét chữ Hán chuẩn màu đen
                 pathsBlack += `<path d="${data.strokes[s]}" fill="#111111"></path>`;
                 
-                // Lớp 2: Vẽ đường đỏ mỏng có marker mũi tên để không bị chìm
-                // Cấp ID Marker ngẫu nhiên cho từng nét để không bao giờ bị đè vòng lặp ID (Lỗi mất mũi tên trước đó)
-                let markerId = `arr-${Math.random().toString(36).substr(2, 6)}-${s}`;
-                
-                defs += `
-                <marker id="${markerId}" markerUnits="userSpaceOnUse" viewBox="0 -5 12 10" refX="10" refY="0" markerWidth="60" markerHeight="60" orient="auto" overflow="visible">
-                    <path d="M 0 -4 L 10 0 L 0 4 z" fill="#c62828" />
-                </marker>`;
-                
-                let mappedMedians = data.medians[s].map(p => `${p[0]},${900 - p[1]}`).join(' ');
-                // Đường đứt nét nhỏ (stroke-width: 16) bám sát xương của nét đen
-                polylines += `<polyline points="${mappedMedians}" fill="none" stroke="#c62828" stroke-width="16" stroke-dasharray="20 25" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#${markerId})"></polyline>`;
+                // Lớp 2: Vẽ đường đứt nét màu đỏ trên "xương" của nét đen
+                if (data.medians[s]) {
+                    let mappedMedians = data.medians[s].map(p => `${p[0]},${900 - p[1]}`).join(' ');
+                    // Độ dày 40 giúp đường đỏ hiện rõ mà không lấn át mép nét đen bên dưới
+                    polylines += `<polyline points="${mappedMedians}" fill="none" stroke="#c62828" stroke-width="40" stroke-dasharray="60 40" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-${index})"></polyline>`;
+                }
             }
-            defs += '</defs>';
             
             const svgCombo = `
             <svg viewBox="0 0 1024 1024" class="stroke-svg" style="width: 85%; height: 85%; overflow: visible;">
-                ${defs}
-                <!-- Vẽ nét đen gốc -->
+                <defs>
+                    <!-- Định nghĩa mũi tên độc lập cho mỗi chữ để chống lỗi tàng hình -->
+                    <marker id="arrow-${index}" viewBox="0 -5 10 10" refX="7" refY="0" markerWidth="5" markerHeight="5" orient="auto">
+                        <path d="M 0 -4 L 10 0 L 0 4 z" fill="#c62828" />
+                    </marker>
+                </defs>
                 <g transform="scale(1, -1) translate(0, -900)">
                     ${pathsBlack}
                 </g>
-                <!-- Vẽ xương đỏ và mũi tên đè lên -->
                 <g>
                     ${polylines}
                 </g>
