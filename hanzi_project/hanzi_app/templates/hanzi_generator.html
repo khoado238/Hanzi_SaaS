@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Công Cụ Luyện Viết Chữ Hán - Master (V81 - Thuật Toán Vector Hoàn Hảo)</title>
+    <title>Công Cụ Luyện Viết Chữ Hán - Master (V83 - Fix Lưới Nét Đứt PDF)</title>
     <style>
         /* ================= GIAO DIỆN CHUNG & LAYOUT ================= */
         body { 
@@ -119,7 +119,7 @@
         
         .v-badge {
             position: absolute; top: -10px; left: -10px; background-color: #c62828; color: white;
-            font-size: 12px; font-weight: bold; width: 24px; height: 24px; border-radius: 50%; display: flex;
+            font-size: 12px; font-weight: bold; width: 22px; height: 22px; border-radius: 50%; display: flex;
             align-items: center; justify-content: center; z-index: 5; box-shadow: 1px 1px 3px rgba(0,0,0,0.3);
             -webkit-print-color-adjust: exact; print-color-adjust: exact;
         }
@@ -127,19 +127,18 @@
         .v-left-demo { display: inline-flex; border-radius: 2px; overflow: visible !important; flex-shrink: 0; position: relative; gap: 15px; align-items: center;}
         
         .v-left { display: inline-flex; border: 1.5px solid #333; border-radius: 2px; overflow: hidden; flex-shrink: 0; position: relative;}
+        .big-chars { display: flex; position: relative; }
         
-        /* Bỏ overflow: hidden để mũi tên không bao giờ bị cắt xén */
-        .big-chars { display: flex; position: relative; overflow: visible !important;}
-        
+        /* Đã đổi SVG sang shape-rendering="geometricPrecision" và stroke-dasharray="4,4" */
         .big-char { 
             width: 44px; height: 44px; font-size: 34px; font-family: "KaiTi", "Kaiti SC", STKaiti, serif; 
             display: flex; align-items: center; justify-content: center; border-right: 1.5px solid #333; 
-            background: white; position: relative; overflow: visible !important; -webkit-print-color-adjust: exact; print-color-adjust: exact;
+            background: white; position: relative; -webkit-print-color-adjust: exact; print-color-adjust: exact;
         }
         .big-char:last-child { border-right: none; }
         .big-char::before {
             content: ""; position: absolute; top: 0; left: 0; right: 0; bottom: 0; z-index: 0;
-            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" shape-rendering="crispEdges"><line x1="50%" y1="0" x2="50%" y2="100%" stroke="%23888888" stroke-dasharray="2,2.5" stroke-width="1.2"/><line x1="0" y1="50%" x2="100%" y2="50%" stroke="%23888888" stroke-dasharray="2,2.5" stroke-width="1.2"/></svg>');
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" shape-rendering="geometricPrecision"><line x1="50%" y1="0" x2="50%" y2="100%" stroke="%23888888" stroke-dasharray="4,4" stroke-width="1.2"/><line x1="0" y1="50%" x2="100%" y2="50%" stroke="%23888888" stroke-dasharray="4,4" stroke-width="1.2"/></svg>');
             background-size: 100% 100%; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important;
         }
         .big-char span { position: relative; z-index: 1; color: #000; }
@@ -166,12 +165,13 @@
         
         .stroke-name-title { font-size: 26px; font-weight: 800; color: #c62828; font-family: "Segoe UI", Arial, sans-serif; letter-spacing: 0.5px;}
 
+        /* Đã đổi SVG sang shape-rendering="geometricPrecision" và stroke-dasharray="2,2" */
         .tiny-tzg {
             width: 24px; height: 24px; border: 1px solid #777;
-            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" shape-rendering="crispEdges"><line x1="50%" y1="0" x2="50%" y2="100%" stroke="%23888888" stroke-dasharray="1.5,1.5" stroke-width="1"/><line x1="0" y1="50%" x2="100%" y2="50%" stroke="%23888888" stroke-dasharray="1.5,1.5" stroke-width="1"/></svg>'); 
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" shape-rendering="geometricPrecision"><line x1="50%" y1="0" x2="50%" y2="100%" stroke="%23888888" stroke-dasharray="2,2" stroke-width="1"/><line x1="0" y1="50%" x2="100%" y2="50%" stroke="%23888888" stroke-dasharray="2,2" stroke-width="1"/></svg>'); 
             background-size: 100% 100%; -webkit-print-color-adjust: exact; print-color-adjust: exact;
         }
-        .stroke-svg { width: 100%; height: 100%; display: block; -webkit-print-color-adjust: exact; print-color-adjust: exact; overflow: visible !important; z-index: 1; position: relative;}
+        .stroke-svg { width: 100%; height: 100%; display: block; -webkit-print-color-adjust: exact; print-color-adjust: exact; overflow: visible; z-index: 1; position: relative;}
 
         .v-practice { display: flex; flex-direction: column; gap: 6px; margin-bottom: 6px; }
         .practice-row { display: flex; width: 100%; flex-wrap: nowrap; justify-content: space-between; }
@@ -180,9 +180,10 @@
         .py-row { display: flex; width: 100%; border-bottom: 1px solid #999; }
         .hz-row { display: flex; width: 100%; }
 
+        /* Đã đổi SVG sang shape-rendering="geometricPrecision" và stroke-dasharray="3,3" */
         .py-box {
             height: 18px; 
-            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" shape-rendering="crispEdges"><line x1="0" y1="33.3%" x2="100%" y2="33.3%" stroke="%23999999" stroke-dasharray="1.5,2.5" stroke-width="1"/><line x1="0" y1="66.6%" x2="100%" y2="66.6%" stroke="%23999999" stroke-dasharray="1.5,2.5" stroke-width="1"/></svg>'); 
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" shape-rendering="geometricPrecision"><line x1="0" y1="33.3%" x2="100%" y2="33.3%" stroke="%23999999" stroke-dasharray="3,3" stroke-width="1"/><line x1="0" y1="66.6%" x2="100%" y2="66.6%" stroke="%23999999" stroke-dasharray="3,3" stroke-width="1"/></svg>'); 
             background-size: 100% 100%; border-right: 1px solid #999; display: flex; align-items: center; justify-content: center;
             font-family: "Arial", sans-serif; font-size: 12px; color: #000;
         }
@@ -192,14 +193,15 @@
         .py-box.solid-text { color: rgba(0,0,0,1) !important; }
         .py-box.trace-text::before, .py-box.solid-text::before {
             content: ""; position: absolute; top: 0; left: 0; right: 0; bottom: 0; z-index: 0;
-            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" shape-rendering="crispEdges"><line x1="0" y1="33.3%" x2="100%" y2="33.3%" stroke="%23999999" stroke-dasharray="1.5,2.5" stroke-width="1"/><line x1="0" y1="66.6%" x2="100%" y2="66.6%" stroke="%23999999" stroke-dasharray="1.5,2.5" stroke-width="1"/></svg>'); 
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" shape-rendering="geometricPrecision"><line x1="0" y1="33.3%" x2="100%" y2="33.3%" stroke="%23999999" stroke-dasharray="3,3" stroke-width="1"/><line x1="0" y1="66.6%" x2="100%" y2="66.6%" stroke="%23999999" stroke-dasharray="3,3" stroke-width="1"/></svg>'); 
             background-size: 100% 100%; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important;
         }
         .py-box.trace-text span, .py-box.solid-text span { position: relative; z-index: 1; }
 
+        /* Đã đổi SVG sang shape-rendering="geometricPrecision" và stroke-dasharray="4,4" */
         .tzg-box {
             width: 44px; height: 44px; border-right: 1px solid #999;
-            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" shape-rendering="crispEdges"><line x1="50%" y1="0" x2="50%" y2="100%" stroke="%23888888" stroke-dasharray="2,2.5" stroke-width="1.2"/><line x1="0" y1="50%" x2="100%" y2="50%" stroke="%23888888" stroke-dasharray="2,2.5" stroke-width="1.2"/></svg>'); 
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" shape-rendering="geometricPrecision"><line x1="50%" y1="0" x2="50%" y2="100%" stroke="%23888888" stroke-dasharray="4,4" stroke-width="1.2"/><line x1="0" y1="50%" x2="100%" y2="50%" stroke="%23888888" stroke-dasharray="4,4" stroke-width="1.2"/></svg>'); 
             background-size: 100% 100%; display: flex; align-items: center; justify-content: center;
             font-family: "KaiTi", "Kaiti SC", STKaiti, serif; font-size: 32px; color: #000;
         }
@@ -209,7 +211,7 @@
         .tzg-box.solid-text { color: rgba(0,0,0,1) !important; }
         .tzg-box.trace-text::before, .tzg-box.solid-text::before {
             content: ""; position: absolute; top: 0; left: 0; right: 0; bottom: 0; z-index: 0;
-            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" shape-rendering="crispEdges"><line x1="50%" y1="0" x2="50%" y2="100%" stroke="%23888888" stroke-dasharray="2,2.5" stroke-width="1.2"/><line x1="0" y1="50%" x2="100%" y2="50%" stroke="%23888888" stroke-dasharray="2,2.5" stroke-width="1.2"/></svg>'); 
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" shape-rendering="geometricPrecision"><line x1="50%" y1="0" x2="50%" y2="100%" stroke="%23888888" stroke-dasharray="4,4" stroke-width="1.2"/><line x1="0" y1="50%" x2="100%" y2="50%" stroke="%23888888" stroke-dasharray="4,4" stroke-width="1.2"/></svg>'); 
             background-size: 100% 100%; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important;
         }
         .tzg-box.trace-text span, .tzg-box.solid-text span, .tzg-box.trace-text svg { position: relative; z-index: 1; }
@@ -434,7 +436,6 @@ Bài 1: AI小语，你好！</textarea>
         return html;
     }
 
-    // CẬP NHẬT TRỌNG TÂM: Vẽ Mũi tên Thủ công (Polygon) & Tịnh tiến Vector Toán học Trực giao
     function generateStrokeTemplateHTML(line, index, numRows, showPinyinBox) {
         const parts = line.split(/\t|\|/);
         const char = (parts[0] || "").replace(/\s/g, ''); 
@@ -448,17 +449,14 @@ Bài 1: AI小语，你好！</textarea>
         if (data && data.strokes && data.medians) {
             let pathsBlack = '';
             let polylines = '';
-            let polygons = ''; // Chứa mũi tên vẽ tay
+            let polygons = ''; 
             
             for (let s = 0; s < data.strokes.length; s++) {
-                // Lớp 1: Vẽ nét chữ Hán chuẩn màu đen
                 pathsBlack += `<path d="${data.strokes[s]}" fill="#111111"></path>`;
                 
-                // Đồng bộ hệ tọa độ medians với SVG (lật ngược trục Y)
                 let mappedMedians = data.medians[s].map(p => ({x: p[0], y: 900 - p[1]}));
                 if (mappedMedians.length < 2) continue;
 
-                // 1. Tính toán Hướng đi của nét để sinh Vector Vuông góc
                 let startX = mappedMedians[0].x;
                 let startY = mappedMedians[0].y;
                 let endX = mappedMedians[mappedMedians.length - 1].x;
@@ -468,35 +466,29 @@ Bài 1: AI小语，你好！</textarea>
                 let dy = endY - startY;
                 let len = Math.hypot(dx, dy) || 1;
 
-                // Vector vuông góc chuẩn hóa (Normal Vector)
                 let nx = -dy / len;
                 let ny = dx / len;
                 
-                // Bắt ép Vector luôn hướng ra phía ĐÔNG hoặc NAM để không đè vào lòng nét chữ
                 if (nx < -0.1) {
                     nx = -nx;
                     ny = -ny;
                 } else if (Math.abs(nx) <= 0.1) {
-                    // Nếu là đường thẳng đứng hoặc ngang hoàn toàn
                     if (Math.abs(ny) > 0.9) {
-                        nx = 0; ny = 1; // Hướng xuống
+                        nx = 0; ny = 1; 
                     } else {
-                        nx = 1; ny = 0; // Hướng sang phải
+                        nx = 1; ny = 0; 
                     }
                 }
 
-                // Độ rộng tịnh tiến (đẩy mũi tên ra xa nét đen 160 units)
                 let offsetDist = 160; 
                 let offsetX = nx * offsetDist;
                 let offsetY = ny * offsetDist;
                 
-                // Áp dụng tịnh tiến cho toàn bộ điểm trong khung xương
                 let shiftedMedians = mappedMedians.map(p => ({
                     x: p.x + offsetX,
                     y: p.y + offsetY
                 }));
                 
-                // 2. Lọc bỏ các điểm ảnh quá khít nhau (Chống lỗi góc quay mũi tên)
                 let filtered = [];
                 let lastP = null;
                 for (let i = 0; i < shiftedMedians.length; i++) {
@@ -506,19 +498,17 @@ Bài 1: AI小语，你好！</textarea>
                         lastP = p;
                     }
                 }
-                if (filtered.length < 2) filtered = shiftedMedians; // Fallback
+                if (filtered.length < 2) filtered = shiftedMedians; 
 
-                // 3. Vẽ đường đứt nét màu đỏ
                 let polylineStr = filtered.map(p => `${p.x},${p.y}`).join(' ');
                 polylines += `<polyline points="${polylineStr}" fill="none" stroke="#c62828" stroke-width="24" stroke-dasharray="35 35" stroke-linecap="round" stroke-linejoin="round"></polyline>`;
                 
-                // 4. VẼ MŨI TÊN THỦ CÔNG (Tạo hình tam giác Polygon)
-                let pt2 = filtered[filtered.length - 1]; // Điểm ngọn mũi tên
-                let pt1 = filtered[filtered.length - 2]; // Điểm kề cuối
-                let angle = Math.atan2(pt2.y - pt1.y, pt2.x - pt1.x); // Tính góc Radian
+                let pt2 = filtered[filtered.length - 1]; 
+                let pt1 = filtered[filtered.length - 2]; 
+                let angle = Math.atan2(pt2.y - pt1.y, pt2.x - pt1.x); 
                 
-                let arrowLen = 75;  // Chiều dài cánh mũi tên
-                let arrowAngle = 0.6; // Góc mở của 2 cánh mũi tên (~35 độ)
+                let arrowLen = 75;  
+                let arrowAngle = 0.6; 
                 
                 let pA = pt2;
                 let pB = { x: pt2.x - arrowLen * Math.cos(angle - arrowAngle), y: pt2.y - arrowLen * Math.sin(angle - arrowAngle) };
@@ -597,7 +587,6 @@ Bài 1: AI小语，你好！</textarea>
         </div>`;
     }
 
-    // MODULE: Template 2 (Mỗi nét 1 hàng)
     function generateSingleStrokePracticeNodes(char, index, numRowsPerStroke, showPinyinBox) {
         if (!char) return [];
         const data = hanziCache[char];
@@ -652,7 +641,6 @@ Bài 1: AI小语，你好！</textarea>
         return nodes;
     }
 
-    // MODULE: Template 3 (Chữ Hán đơn lẻ)
     function generateSimpleVocabHTML(char, index, numRows, showPinyinBox) {
         if (!char) return '';
         let strokeContentHtml = '';
@@ -692,7 +680,6 @@ Bài 1: AI小语，你好！</textarea>
         </div>`;
     }
 
-    // MODULE: Template 1 & 6 (Dùng chung cho 3 cột Từ vựng và 4 cột Bộ thủ)
     function generateVocabHTML(line, index, numRows, showPinyinBox) {
         const parts = line.split(/\t|\|/);
         const word = (parts[0] || "").replace(/\s/g, ''); 
