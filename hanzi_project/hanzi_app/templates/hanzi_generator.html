@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Công Cụ Luyện Viết Chữ Hán - Master (V87 - Dàn Trang Cân Đối)</title>
+    <title>Công Cụ Luyện Viết Chữ Hán - Master (V88 - Fix Tràn Trang)</title>
     <style>
         /* ================= GIAO DIỆN CHUNG & LAYOUT ================= */
         body { 
@@ -115,7 +115,7 @@
         .vocab-block { display: flex; flex-direction: column; position: relative; page-break-inside: avoid; }
         .vocab-block:last-child { margin-bottom: 0px !important; padding-bottom: 0 !important; border-bottom: none !important;}
         
-        /* CẬP NHẬT: Giãn cách tiêu đề và lưới tập viết rộng hơn */
+        /* Giữ khoảng cách thoáng cho phần chữ mẫu */
         .v-top-section { display: flex; gap: 15px; align-items: flex-start; margin-bottom: 15px; position: relative;}
         
         .v-badge {
@@ -213,8 +213,8 @@
         }
         .tzg-box.trace-text span, .tzg-box.solid-text span, .tzg-box.trace-text svg { position: relative; z-index: 1; }
 
-        /* CẬP NHẬT: Tăng chiều cao và khoảng cách của dòng luyện viết cuối cùng */
-        .v-free { display: flex; align-items: flex-end; margin-top: 12px; margin-bottom: 6px; gap: 10px; width: 100%; }
+        /* Vẫn giữ dòng tự do cao thoáng */
+        .v-free { display: flex; align-items: flex-end; margin-top: 15px; margin-bottom: 5px; gap: 10px; width: 100%; }
         .dotted-line { flex: 1; border-bottom: 1.5px dotted #999; height: 25px;}
         .sample-text-title { font-family: 'Arial', sans-serif; font-weight: bold; font-size: 16px; color: #c62828; margin-bottom: 12px; border-bottom: 2px solid #eee; padding-bottom: 5px;}
     </style>
@@ -328,9 +328,9 @@ Bài 1: AI小语，你好！</textarea>
 
     const demoStrokes = `一\tNét ngang
 丨\tNét sổ thẳng
-丶\tNét chấm
+丶	Nét chấm
 丿\tNét phẩy
-乀\tNét mác
+乀	Nét mác
 亅\tNét sổ móc`;
 
     document.getElementById('vocabList').addEventListener('keydown', function(e) {
@@ -577,7 +577,7 @@ Bài 1: AI小语，你好！</textarea>
         practiceHtml += `</div>`; 
 
         return `
-        <div class="vocab-block" style="padding-bottom: 25px; margin-bottom: 20px;">
+        <div class="vocab-block" style="padding-bottom: 20px; margin-bottom: 15px;">
             <div class="v-top-section" style="align-items: center; position: relative;">
                 ${demoBoxHtml}
             </div>
@@ -666,7 +666,7 @@ Bài 1: AI小语，你好！</textarea>
         practiceHtml += `</div>`; 
 
         return `
-        <div class="vocab-block" style="padding-bottom: 25px; margin-bottom: 20px;">
+        <div class="vocab-block" style="padding-bottom: 20px; margin-bottom: 15px;">
             <div class="v-top-section">
                 <div class="v-badge">${idxStr}</div>
                 <div class="v-left"><div class="big-chars">${bigCharsHtml}</div></div>
@@ -754,9 +754,9 @@ Bài 1: AI小语，你好！</textarea>
         }
         practiceHtml += `</div>`; 
 
-        /* CẬP NHẬT: Dàn đều padding và margin cho Mẫu 1 và Mẫu 6 */
+        /* CẬP NHẬT TRỌNG TÂM: Điều chỉnh margin-bottom để cân bằng khoảng trống nhưng không bị JS đá sang trang mới */
         return `
-        <div class="vocab-block" style="padding-bottom: 25px; margin-bottom: 20px;">
+        <div class="vocab-block" style="padding-bottom: 20px; margin-bottom: 15px;">
             <div class="v-top-section">
                 <div class="v-badge">${idxStr}</div>
                 <div class="v-left"><div class="big-chars">${bigCharsHtml}</div></div>
@@ -842,7 +842,8 @@ Bài 1: AI小语，你好！</textarea>
                 const pageRect = currentPage.getBoundingClientRect();
                 const tablesRect = tablesContainer.getBoundingClientRect();
                 
-                if (tablesRect.bottom > pageRect.bottom - 15 && tablesContainer.children.length > 1) {
+                /* CẬP NHẬT TRỌNG TÂM: Đã bỏ -15px. Cho phép nội dung đi sát lề dưới của giấy (vì A4 đã có padding-bottom: 15mm) */
+                if (tablesRect.bottom > pageRect.bottom - 2 && tablesContainer.children.length > 1) {
                     tablesContainer.removeChild(node);
                     pageNum++;
                     currentPage = createPageElement(pageNum);
@@ -883,7 +884,7 @@ Bài 1: AI小语，你好！</textarea>
                     const node = stringToNode(html);
                     
                     tablesContainer.appendChild(node);
-                    if (tablesContainer.getBoundingClientRect().bottom > currentPage.getBoundingClientRect().bottom - 15) {
+                    if (tablesContainer.getBoundingClientRect().bottom > currentPage.getBoundingClientRect().bottom - 2) {
                         tablesContainer.removeChild(node);
                         pageNum++;
                         if (pageNum <= targetPages) {
