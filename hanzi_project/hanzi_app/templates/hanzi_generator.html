@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Công Cụ Luyện Viết Chữ Hán - Master (V89 - Tỷ Lệ Vàng Trang In)</title>
+    <title>Công Cụ Luyện Viết Chữ Hán - Master (V90 - Fix Giao Diện Mẫu 5)</title>
     <style>
         /* ================= GIAO DIỆN CHUNG & LAYOUT ================= */
         body { 
@@ -115,7 +115,6 @@
         .vocab-block { display: flex; flex-direction: column; position: relative; page-break-inside: avoid; }
         .vocab-block:last-child { margin-bottom: 0px !important; padding-bottom: 0 !important; border-bottom: none !important;}
         
-        /* Cân đối lại khoảng cách giữa tiêu đề và lưới */
         .v-top-section { display: flex; gap: 15px; align-items: flex-start; margin-bottom: 10px; position: relative;}
         
         .v-badge {
@@ -213,7 +212,6 @@
         }
         .tzg-box.trace-text span, .tzg-box.solid-text span, .tzg-box.trace-text svg { position: relative; z-index: 1; }
 
-        /* CẬP NHẬT: Giảm độ cao nét đứt xuống còn 16px để không lấn xuống lề dưới */
         .v-free { display: flex; align-items: flex-end; margin-top: 10px; margin-bottom: 5px; gap: 10px; width: 100%; }
         .dotted-line { flex: 1; border-bottom: 1.5px dotted #999; height: 16px;}
         
@@ -354,7 +352,12 @@ Bài 1: AI小语，你好！</textarea>
         document.getElementById('block-vocab').style.display = (['1','2','3','6','7'].includes(type)) ? 'block' : 'none';
         document.getElementById('block-paragraph').style.display = (type === '4') ? 'block' : 'none';
         document.getElementById('block-numPages').style.display = (type === '5') ? 'block' : 'none';
-        document.getElementById('block-display-options').style.display = (type === '5') ? 'none' : 'block';
+        
+        // CẬP NHẬT: Luôn hiện tùy chỉnh hiển thị để có thể bật/tắt ô Pinyin
+        document.getElementById('block-display-options').style.display = 'block';
+        
+        // CẬP NHẬT: Chỉ ẩn duy nhất bộ đếm "Số hàng tập viết" nếu là Mẫu 5
+        document.getElementById('block-numRows').style.display = (type === '5') ? 'none' : 'block';
         
         const hint = document.getElementById('vocabHint');
         
@@ -577,7 +580,6 @@ Bài 1: AI小语，你好！</textarea>
         }
         practiceHtml += `</div>`; 
 
-        /* GIẢM PADDING & MARGIN */
         return `
         <div class="vocab-block" style="border-bottom: 1.5px dotted #999; padding-bottom: 15px; margin-bottom: 15px;">
             <div class="v-top-section" style="align-items: center; position: relative;">
@@ -599,7 +601,7 @@ Bài 1: AI小语，你好！</textarea>
 
         const nodes = [];
         nodes.push(`
-        <div style="display: flex; flex-direction: column; margin-bottom: 10px; position: relative; page-break-inside: avoid;">
+        <div style="display: flex; flex-direction: column; margin-bottom: 12px; position: relative; page-break-inside: avoid;">
             <div class="v-top-section">
                 <div class="v-badge">${idxStr}</div>
                 <div class="v-left"><div class="big-chars">${bigCharsHtml}</div></div>
@@ -610,7 +612,7 @@ Bài 1: AI小语，你好！</textarea>
         </div>`);
 
         for (let s = 0; s < strokes.length; s++) {
-            let practiceHtml = `<div class="v-practice" style="margin-bottom: 6px; page-break-inside: avoid;">`;
+            let practiceHtml = `<div class="v-practice" style="margin-bottom: 10px; page-break-inside: avoid;">`;
             for (let r = 0; r < numRowsPerStroke; r++) {
                 practiceHtml += `<div class="practice-row">`; 
                 for (let i = 0; i < 12; i++) {
@@ -637,7 +639,7 @@ Bài 1: AI小语，你好！</textarea>
             nodes.push(practiceHtml);
         }
 
-        nodes.push(`<div class="vocab-block" style="padding-bottom: 10px; margin-bottom: 10px; page-break-inside: avoid;"><div class="v-free"><div class="dotted-line"></div></div></div>`);
+        nodes.push(`<div class="vocab-block" style="padding-bottom: 15px; margin-bottom: 15px; page-break-inside: avoid;"><div class="v-free"><div class="dotted-line"></div></div></div>`);
         return nodes;
     }
 
@@ -666,9 +668,8 @@ Bài 1: AI小语，你好！</textarea>
         }
         practiceHtml += `</div>`; 
 
-        /* GIẢM PADDING & MARGIN */
         return `
-        <div class="vocab-block" style="padding-bottom: 12px; margin-bottom: 12px;">
+        <div class="vocab-block" style="padding-bottom: 20px; margin-bottom: 15px;">
             <div class="v-top-section">
                 <div class="v-badge">${idxStr}</div>
                 <div class="v-left"><div class="big-chars">${bigCharsHtml}</div></div>
@@ -756,9 +757,8 @@ Bài 1: AI小语，你好！</textarea>
         }
         practiceHtml += `</div>`; 
 
-        /* GIẢM PADDING & MARGIN */
         return `
-        <div class="vocab-block" style="padding-bottom: 12px; margin-bottom: 12px;">
+        <div class="vocab-block" style="padding-bottom: 20px; margin-bottom: 15px;">
             <div class="v-top-section">
                 <div class="v-badge">${idxStr}</div>
                 <div class="v-left"><div class="big-chars">${bigCharsHtml}</div></div>
@@ -844,7 +844,6 @@ Bài 1: AI小语，你好！</textarea>
                 const pageRect = currentPage.getBoundingClientRect();
                 const tablesRect = tablesContainer.getBoundingClientRect();
                 
-                /* CẬP NHẬT TRỌNG TÂM: Đẩy giới hạn an toàn lên -30px để bảo vệ hoàn toàn phần số trang ở lề dưới */
                 if (tablesRect.bottom > pageRect.bottom - 30 && tablesContainer.children.length > 1) {
                     tablesContainer.removeChild(node);
                     pageNum++;
