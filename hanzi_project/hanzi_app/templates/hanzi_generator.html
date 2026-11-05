@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Công Cụ Luyện Viết Chữ Hán - Master (V79 - Khoảng Cách Vector Vuông Góc)</title>
+    <title>Công Cụ Luyện Viết Chữ Hán - Master (V80 - Mũi Tên Dày Khỏe)</title>
     <style>
         /* ================= GIAO DIỆN CHUNG & LAYOUT ================= */
         body { 
@@ -432,7 +432,7 @@ Bài 1: AI小语，你好！</textarea>
         return html;
     }
 
-    // CẬP NHẬT TRỌNG TÂM: Thuật toán tịnh tiến Vector Vuông Góc thông minh
+    // CẬP NHẬT: TĂNG ĐỘ DÀY ĐƯỜNG ĐỨT NÉT VÀ MŨI TÊN CHỈ HƯỚNG
     function generateStrokeTemplateHTML(line, index, numRows, showPinyinBox) {
         const parts = line.split(/\t|\|/);
         const char = (parts[0] || "").replace(/\s/g, ''); 
@@ -451,7 +451,6 @@ Bài 1: AI小语，你好！</textarea>
             for (let s = 0; s < data.strokes.length; s++) {
                 pathsBlack += `<path d="${data.strokes[s]}" fill="#111111"></path>`;
                 
-                // Lọc điểm nhiễu để tính góc vector chính xác
                 let cleanMedians = [];
                 let lastPt = null;
                 for (let i = 0; i < data.medians[s].length; i++) {
@@ -463,7 +462,6 @@ Bài 1: AI小语，你好！</textarea>
                 }
                 if (cleanMedians.length < 2) cleanMedians = data.medians[s];
                 
-                // Tính toán Vector vuông góc với hướng nét vẽ để tách đường đỏ song song ra ngoài
                 let startX = cleanMedians[0][0];
                 let startY = 900 - cleanMedians[0][1];
                 let endX = cleanMedians[cleanMedians.length - 1][0];
@@ -474,12 +472,10 @@ Bài 1: AI小语，你好！</textarea>
                 let len = Math.hypot(vecX, vecY);
                 if (len === 0) len = 1;
 
-                // Khoảng cách dịch chuyển siêu rộng (220) để mũi tên nằm hoàn toàn bên ngoài nét
                 let offsetDist = 220; 
                 let normX = (-vecY / len) * offsetDist;
                 let normY = (vecX / len) * offsetDist;
                 
-                // Thuật toán Force Direction: Đảm bảo mũi tên luôn tách xuống Dưới hoặc sang Phải, chống đè lên nét mác/phẩy
                 if (normY < -10 || (Math.abs(normY) <= 10 && normX < 0)) {
                     normX = -normX;
                     normY = -normY;
@@ -493,12 +489,14 @@ Bài 1: AI小语，你好！</textarea>
                 
                 let markerId = `arr-${Date.now()}-${Math.floor(Math.random()*10000)}-${s}`;
                 
+                // CẬP NHẬT: Tăng kích thước hộp vẽ mũi tên lên 95x95, lấp đầy path Mũi tên bằng M 0 0 L 10 5 L 0 10 z
                 defs += `
-                <marker id="${markerId}" markerUnits="userSpaceOnUse" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="70" markerHeight="70" orient="auto" overflow="visible">
-                    <path d="M 0 1 L 9 5 L 0 9 z" fill="#c62828" />
+                <marker id="${markerId}" markerUnits="userSpaceOnUse" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="95" markerHeight="95" orient="auto" overflow="visible">
+                    <path d="M 0 0 L 10 5 L 0 10 z" fill="#c62828" />
                 </marker>`;
                 
-                polylines += `<polyline points="${mappedMedians}" fill="none" stroke="#c62828" stroke-width="18" stroke-dasharray="35 35" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#${markerId})"></polyline>`;
+                // CẬP NHẬT: Tăng stroke-width lên 28 cho nét đứt dày và rõ hơn
+                polylines += `<polyline points="${mappedMedians}" fill="none" stroke="#c62828" stroke-width="28" stroke-dasharray="40 40" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#${markerId})"></polyline>`;
             }
             defs += '</defs>';
             
