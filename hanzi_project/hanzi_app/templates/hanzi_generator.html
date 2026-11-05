@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Công Cụ Luyện Viết Chữ Hán - Master (V74 - Mũi Tên Song Song Hoàn Hảo)</title>
+    <title>Công Cụ Luyện Viết Chữ Hán - Master (V75 - Chuẩn Mực Tuyệt Đối)</title>
     <style>
         /* ================= GIAO DIỆN CHUNG & LAYOUT ================= */
         body { 
@@ -118,16 +118,16 @@
         .v-top-section { display: flex; gap: 15px; align-items: flex-start; margin-bottom: 8px; position: relative;}
         
         .v-badge {
-            position: absolute; top: -5px; left: -12px; background-color: #c62828; color: white;
-            font-size: 12px; font-weight: bold; width: 20px; height: 20px; border-radius: 50%; display: flex;
-            align-items: center; justify-content: center; z-index: 2; box-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+            position: absolute; top: -10px; left: -10px; background-color: #c62828; color: white;
+            font-size: 12px; font-weight: bold; width: 22px; height: 22px; border-radius: 50%; display: flex;
+            align-items: center; justify-content: center; z-index: 5; box-shadow: 1px 1px 3px rgba(0,0,0,0.3);
             -webkit-print-color-adjust: exact; print-color-adjust: exact;
         }
 
-        .v-left-demo { display: inline-flex; border-radius: 2px; overflow: hidden; flex-shrink: 0; position: relative; gap: 10px; align-items: center;}
+        .v-left-demo { display: inline-flex; border-radius: 2px; overflow: visible; flex-shrink: 0; position: relative; gap: 15px; align-items: center;}
         
         .v-left { display: inline-flex; border: 1.5px solid #333; border-radius: 2px; overflow: hidden; flex-shrink: 0; position: relative;}
-        .big-chars { display: flex; }
+        .big-chars { display: flex; position: relative; }
         
         .big-char { 
             width: 44px; height: 44px; font-size: 34px; font-family: "KaiTi", "Kaiti SC", STKaiti, serif; 
@@ -162,7 +162,7 @@
             font-family: 'Segoe UI', Arial, sans-serif; font-size: 13px; color: #555; font-weight: bold;
         }
         
-        .stroke-name-title { font-size: 24px; font-weight: 800; color: #c62828; font-family: "Segoe UI", Arial, sans-serif;}
+        .stroke-name-title { font-size: 26px; font-weight: 800; color: #c62828; font-family: "Segoe UI", Arial, sans-serif; letter-spacing: 0.5px;}
 
         .tiny-tzg {
             width: 24px; height: 24px; border: 1px solid #777;
@@ -432,7 +432,7 @@ Bài 1: AI小语，你好！</textarea>
         return html;
     }
 
-    // CẬP NHẬT TRỌNG TÂM: Translate 60x60 đẩy mũi tên lệch hẳn ra khỏi nét đen
+    // CẬP NHẬT TRỌNG TÂM: Mũi tên đỏ mỏng chèn TRỰC TIẾP lên nét đen mà KHÔNG dịch chuyển
     function generateStrokeTemplateHTML(line, index, numRows, showPinyinBox) {
         const parts = line.split(/\t|\|/);
         const char = (parts[0] || "").replace(/\s/g, ''); 
@@ -447,30 +447,31 @@ Bài 1: AI小语，你好！</textarea>
             let pathsBlack = '';
             let polylines = '';
             for (let s = 0; s < data.strokes.length; s++) {
-                pathsBlack += `<path d="${data.strokes[s]}" fill="#000000"></path>`;
+                // Lớp 1: Vẽ nét chữ Hán chuẩn màu đen
+                pathsBlack += `<path d="${data.strokes[s]}" fill="#111111"></path>`;
                 
+                // Lớp 2: Vẽ đường dẫn mũi tên mỏng (stroke-width: 12) đè lên giữa
                 let mappedMedians = data.medians[s].map(p => `${p[0]},${900 - p[1]}`).join(' ');
-                // Đường viền đứt nét đỏ mỏng hơn, tịnh tiến 60 đơn vị tọa độ
-                polylines += `<polyline points="${mappedMedians}" fill="none" stroke="#c62828" stroke-width="25" stroke-dasharray="35 35" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-${index})"></polyline>`;
+                polylines += `<polyline points="${mappedMedians}" fill="none" stroke="#c62828" stroke-width="12" stroke-dasharray="15 15" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-${index})"></polyline>`;
             }
             
             const svgCombo = `
             <svg viewBox="0 0 1024 1024" class="stroke-svg" style="width: 85%; height: 85%; overflow: visible;">
                 <defs>
-                    <marker id="arrow-${index}" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto" overflow="visible">
-                        <path d="M 0 1 L 10 5 L 0 9 z" fill="#c62828" />
+                    <marker id="arrow-${index}" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto" overflow="visible">
+                        <path d="M 0 2 L 8 5 L 0 8 z" fill="#c62828" />
                     </marker>
                 </defs>
                 <g transform="scale(1, -1) translate(0, -900)">
                     ${pathsBlack}
                 </g>
-                <!-- Dịch mũi tên ra cách nét đen 60 đơn vị (khoảng ~2.5px trên màn hình 44px) -->
-                <g transform="translate(60, 60)">
+                <g>
                     ${polylines}
                 </g>
             </svg>`;
             
             demoBoxHtml = `
+            <div class="v-badge">${idxStr}</div>
             <div class="v-left-demo">
                 <div class="big-chars" style="border: 1.5px solid #333; border-radius: 2px;">
                     <div class="big-char" style="border-right: none;">${svgCombo}</div>
@@ -479,6 +480,7 @@ Bài 1: AI小语，你好！</textarea>
             </div>`;
         } else {
             demoBoxHtml = `
+            <div class="v-badge">${idxStr}</div>
             <div class="v-left-demo">
                 <div class="big-chars" style="border: 1.5px solid #333; border-radius: 2px;">
                     <div class="big-char" style="border-right: none;"><span>${char}</span></div>
@@ -519,13 +521,11 @@ Bài 1: AI小语，你好！</textarea>
         practiceHtml += `</div>`; 
 
         return `
-        <div class="vocab-block">
-            <div class="v-top-section" style="align-items: center;">
-                <div class="v-badge">${idxStr}</div>
+        <div class="vocab-block" style="border-bottom: 1.5px dotted #999; padding-bottom: 25px; margin-bottom: 25px;">
+            <div class="v-top-section" style="align-items: center; position: relative;">
                 ${demoBoxHtml}
             </div>
             ${practiceHtml}
-            <div class="v-free"><div class="dotted-line"></div></div>
         </div>`;
     }
 
@@ -701,7 +701,7 @@ Bài 1: AI小语，你好！</textarea>
         practiceHtml += `</div>`; 
 
         return `
-        <div class="vocab-block">
+        <div class="vocab-block" style="border-bottom: none; padding-bottom: 15px; margin-bottom: 15px;">
             <div class="v-top-section">
                 <div class="v-badge">${idxStr}</div>
                 <div class="v-left"><div class="big-chars">${bigCharsHtml}</div></div>
