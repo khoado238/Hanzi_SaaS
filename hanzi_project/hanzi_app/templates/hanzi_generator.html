@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Công Cụ Luyện Viết Chữ Hán - Master (V67 - Mũi tên Điều hướng Nét Bút)</title>
+    <title>Công Cụ Luyện Viết Chữ Hán - Master (V68 - Hướng dẫn nét vẽ độc lập)</title>
     <style>
         /* ================= GIAO DIỆN CHUNG & LAYOUT ================= */
         body { 
@@ -114,6 +114,7 @@
         .vocab-block:last-child { margin-bottom: 0px; padding-bottom: 0; }
         
         .v-top-section { display: flex; gap: 15px; align-items: flex-start; margin-bottom: 8px; position: relative;}
+        
         .v-badge {
             position: absolute; top: -5px; left: -12px; background-color: #c62828; color: white;
             font-size: 12px; font-weight: bold; width: 20px; height: 20px; border-radius: 50%; display: flex;
@@ -121,9 +122,13 @@
             -webkit-print-color-adjust: exact; print-color-adjust: exact;
         }
 
+        /* Lớp học mới cho Box Mẫu số 1 (Nét đen) của Mẫu 7 */
+        .v-left-demo { display: inline-flex; border-radius: 2px; overflow: hidden; flex-shrink: 0; position: relative; gap: 10px; align-items: center;}
+        
         .v-left { display: inline-flex; border: 1.5px solid #333; border-radius: 2px; overflow: hidden; flex-shrink: 0; position: relative;}
         .big-chars { display: flex; }
         
+        /* Box hiển thị Nét (Tương tự ảnh 1 - Có viền vuông) */
         .big-char { 
             width: 44px; height: 44px; font-size: 34px; font-family: "KaiTi", "Kaiti SC", STKaiti, serif; 
             display: flex; align-items: center; justify-content: center; border-right: 1.5px solid #333; 
@@ -135,7 +140,19 @@
             background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" shape-rendering="crispEdges"><line x1="50%" y1="0" x2="50%" y2="100%" stroke="%23888888" stroke-dasharray="2,2.5" stroke-width="1.2"/><line x1="0" y1="50%" x2="100%" y2="50%" stroke="%23888888" stroke-dasharray="2,2.5" stroke-width="1.2"/></svg>');
             background-size: 100% 100%; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important;
         }
-        .big-char span { position: relative; z-index: 1; }
+        .big-char span { position: relative; z-index: 1; color: #000; }
+        
+        /* Box hiển thị Hướng dẫn nét (Tương tự ảnh 2 - Có viền xanh nhạt) */
+        .guide-box {
+            width: 44px; height: 44px; font-size: 34px; font-family: "KaiTi", "Kaiti SC", STKaiti, serif; 
+            display: flex; align-items: center; justify-content: center; border: 1.5px solid #03a9f4; /* Viền xanh dương */
+            background: white; position: relative; -webkit-print-color-adjust: exact; print-color-adjust: exact;
+        }
+        .guide-box::before {
+            content: ""; position: absolute; top: 0; left: 0; right: 0; bottom: 0; z-index: 0;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" shape-rendering="crispEdges"><line x1="50%" y1="0" x2="50%" y2="100%" stroke="%2303a9f4" stroke-dasharray="2,2.5" stroke-width="1.2"/><line x1="0" y1="50%" x2="100%" y2="50%" stroke="%2303a9f4" stroke-dasharray="2,2.5" stroke-width="1.2"/></svg>');
+            background-size: 100% 100%; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important;
+        }
         
         .v-right { flex: 1; display: flex; flex-direction: column; gap: 4px; justify-content: flex-start; min-width: 0; padding-left: 5px;}
         
@@ -157,15 +174,15 @@
             font-family: 'Segoe UI', Arial, sans-serif; font-size: 13px; color: #555; font-weight: bold;
         }
         
-        /* CSS MỚI: Tên Nét Cơ Bản */
-        .stroke-name-title { font-size: 20px; font-weight: bold; color: #c62828; font-family: "Segoe UI", Arial, sans-serif; padding-top: 5px;}
+        /* CSS MỚI: Tên Nét Cơ Bản IN ĐẬM MÀU ĐỎ */
+        .stroke-name-title { font-size: 22px; font-weight: 800; color: #c62828; font-family: "Segoe UI", Arial, sans-serif;}
 
         .tiny-tzg {
             width: 24px; height: 24px; border: 1px solid #777;
             background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" shape-rendering="crispEdges"><line x1="50%" y1="0" x2="50%" y2="100%" stroke="%23888888" stroke-dasharray="1.5,1.5" stroke-width="1"/><line x1="0" y1="50%" x2="100%" y2="50%" stroke="%23888888" stroke-dasharray="1.5,1.5" stroke-width="1"/></svg>'); 
             background-size: 100% 100%; -webkit-print-color-adjust: exact; print-color-adjust: exact;
         }
-        .stroke-svg { width: 100%; height: 100%; display: block; -webkit-print-color-adjust: exact; print-color-adjust: exact; overflow: visible; }
+        .stroke-svg { width: 100%; height: 100%; display: block; -webkit-print-color-adjust: exact; print-color-adjust: exact; overflow: visible; z-index: 1; position: relative;}
 
         .v-practice { display: flex; flex-direction: column; gap: 6px; margin-bottom: 6px; }
         .practice-row { display: flex; width: 100%; flex-wrap: nowrap; justify-content: space-between; }
@@ -234,8 +251,7 @@
                     <option value="4">Mẫu 4: Luyện viết Câu / Đoạn văn</option>
                     <option value="5">Mẫu 5: Trang lưới trắng</option>
                     <option value="6">Mẫu 6: Luyện Bộ thủ (4 cột: Bộ | Pinyin | Tên | Nghĩa)</option>
-                    <!-- MẪU NÉT CƠ BẢN MỚI THÊM -->
-                    <option value="7" selected>Mẫu 7: Luyện Nét Cơ Bản (2 cột: Nét | Tên Nét)</option>
+                    <option value="7" selected>Mẫu 7: Luyện Nét Cơ Bản (Nét | Tên Nét)</option>
                 </select>
             </div>
             
@@ -313,7 +329,7 @@ Bài 1: AI小语，你好！</textarea>
 <script>
     const hanziCache = {};
     let updateTimer = null; 
-    let currentTemplate = '7'; // Đặt Mẫu 7 làm mặc định hiển thị lúc load
+    let currentTemplate = '7'; // Mặc định hiển thị Mẫu 7
 
     const demoRadicals = `亻\trén\tnhân (nhân đứng)\tngười
 氵\tshuǐ\tthuỷ (ba chấm thuỷ)\tnước
@@ -429,7 +445,7 @@ Bài 1: AI小语，你好！</textarea>
         return html;
     }
 
-    // MODULE: Template 7 (Luyện Nét Cơ Bản CÓ MŨI TÊN CHỈ HƯỚNG)
+    // CẬP NHẬT: MODULE Template 7 (Tách ô hiển thị nét và ô hiển thị mũi tên)
     function generateStrokeTemplateHTML(line, index, numRows, showPinyinBox) {
         const parts = line.split(/\t|\|/);
         const char = (parts[0] || "").replace(/\s/g, ''); 
@@ -438,66 +454,80 @@ Bài 1: AI小语，你好！</textarea>
 
         const data = hanziCache[char];
         const idxStr = index.toString().padStart(2, '0');
-        let bigCharsHtml = `<div class="big-char"><span>${char}</span></div>`;
-
-        let groupCount = 12; // Mặc định 12 ô/hàng cho lưới 675px
         
+        // Render 2 Box riêng biệt ở Top Section (1 box viền vuông xám chứa chữ đen, 1 box viền xanh chứa mũi tên)
+        let demoBoxHtml = '';
+        if (data && data.strokes && data.medians) {
+            // Box 1: Chữ đen chuẩn
+            let pathsBlack = '';
+            for (let s = 0; s < data.strokes.length; s++) {
+                pathsBlack += `<path d="${data.strokes[s]}" fill="#000000"></path>`;
+            }
+            const svgBlack = `<svg viewBox="0 0 1024 1024" class="stroke-svg" style="width: 85%; height: 85%;"><g transform="scale(1, -1) translate(0, -900)">${pathsBlack}</g></svg>`;
+            
+            // Box 2: Hướng dẫn mũi tên đứt nét (đổ màu xám nhạt nền chữ, vẽ đè viền đỏ đứt khúc)
+            let pathsGray = '';
+            let polylines = '';
+            for (let s = 0; s < data.strokes.length; s++) {
+                pathsGray += `<path d="${data.strokes[s]}" fill="#e0e0e0"></path>`;
+                let mappedMedians = data.medians[s].map(p => `${p[0]},${900 - p[1]}`).join(' ');
+                polylines += `<polyline points="${mappedMedians}" fill="none" stroke="#c62828" stroke-width="35" stroke-dasharray="50 50" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-${index})"></polyline>`;
+            }
+            const svgGuide = `
+            <svg viewBox="0 0 1024 1024" class="stroke-svg" style="width: 85%; height: 85%; overflow: visible;">
+                <defs>
+                    <marker id="arrow-${index}" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                        <path d="M 0 1 L 10 5 L 0 9 z" fill="#c62828" />
+                    </marker>
+                </defs>
+                <g transform="scale(1, -1) translate(0, -900)">
+                    ${pathsGray}
+                </g>
+                <g>
+                    ${polylines}
+                </g>
+            </svg>`;
+            
+            demoBoxHtml = `
+            <div class="v-left-demo">
+                <div class="big-chars" style="border: 1.5px solid #333; border-radius: 2px;"><div class="big-char" style="border-right: none;">${svgBlack}</div></div>
+                <div class="guide-box">${svgGuide}</div>
+                <div class="stroke-name-title" style="margin-left: 10px;">${strokeName}</div>
+            </div>`;
+        } else {
+            demoBoxHtml = `
+            <div class="v-left-demo">
+                <div class="big-chars" style="border: 1.5px solid #333; border-radius: 2px;"><div class="big-char" style="border-right: none;"><span>${char}</span></div></div>
+                <div class="stroke-name-title" style="margin-left: 10px;">${strokeName}</div>
+            </div>`;
+        }
+
+        let groupCount = 12; 
+        
+        // Tạo lưới tập viết (Không còn mũi tên ở ô đầu tiên nữa, tất cả đều là lưới tập viết bình thường)
         let practiceHtml = `<div class="v-practice">`;
         for (let r = 0; r < numRows; r++) {
             practiceHtml += `<div class="practice-row">`; 
             for (let i = 0; i < groupCount; i++) {
                 let k = r * groupCount + i;
+                let isFirstOverall = (k === 0);
                 
                 practiceHtml += `<div class="word-group">`;
                 if (showPinyinBox) practiceHtml += `<div class="py-row"><div class="py-box" style="flex: 1;"></div></div>`;
                 
                 practiceHtml += `<div class="hz-row">`;
-                
-                // Ô đầu tiên: Hiển thị nét mờ xám và đường Path Đỏ có Mũi tên
-                if (k === 0 && data && data.strokes && data.medians) {
-                    let paths = '';
-                    let polylines = '';
-                    for (let s = 0; s < data.strokes.length; s++) {
-                        paths += `<path d="${data.strokes[s]}" fill="#e0e0e0"></path>`;
-                        // Đảo ngược trục Y trực tiếp cho tọa độ Median để không bị flip hướng mũi tên do thuộc tính transform scale(1,-1)
-                        let mappedMedians = data.medians[s].map(p => `${p[0]},${900 - p[1]}`).join(' ');
-                        polylines += `<polyline points="${mappedMedians}" fill="none" stroke="#c62828" stroke-width="35" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-${index})"></polyline>`;
-                    }
-                    
-                    const svgHtml = `
-                    <svg viewBox="0 0 1024 1024" class="stroke-svg" style="width: 85%; height: 85%; overflow: visible;">
-                        <defs>
-                            <marker id="arrow-${index}" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto">
-                                <path d="M 0 1 L 10 5 L 0 9 z" fill="#c62828" />
-                            </marker>
-                        </defs>
-                        <!-- Vẽ nền nét xám (Cần transform lật trục Y cho khớp chuẩn hệ tọa độ) -->
-                        <g transform="scale(1, -1) translate(0, -900)">
-                            ${paths}
-                        </g>
-                        <!-- Vẽ đường dẫn đỏ (Không lật trục Y để bảo toàn đúng định hướng Vector mũi tên) -->
-                        <g>
-                            ${polylines}
-                        </g>
-                    </svg>`;
-                    practiceHtml += `<div class="tzg-box trace-text">${svgHtml}</div>`;
-                } 
-                // Ô thứ 2: Nét mờ xám bình thường không có mũi tên
-                else if (k === 1 && data && data.strokes) {
+                if (isFirstOverall && data && data.strokes) {
                     let bgPaths = '';
                     for (let s = 0; s < data.strokes.length; s++) {
                         bgPaths += `<path d="${data.strokes[s]}" fill="rgba(0,0,0,0.25)"></path>`;
                     }
                     const svgHtml = `<svg viewBox="0 0 1024 1024" class="stroke-svg" style="width: 85%; height: 85%;"><g transform="scale(1, -1) translate(0, -900)">${bgPaths}</g></svg>`;
                     practiceHtml += `<div class="tzg-box trace-text">${svgHtml}</div>`;
-                }
-                // Các ô còn lại hoặc nếu thiếu data Fallback
-                else if (k === 0 || k === 1) {
+                } else if (isFirstOverall) {
                     practiceHtml += `<div class="tzg-box trace-text"><span>${char}</span></div>`;
                 } else {
                     practiceHtml += `<div class="tzg-box"></div>`;
                 }
-                
                 practiceHtml += `</div></div>`; 
             }
             practiceHtml += `</div>`; 
@@ -508,10 +538,7 @@ Bài 1: AI小语，你好！</textarea>
         <div class="vocab-block">
             <div class="v-top-section" style="align-items: center;">
                 <div class="v-badge">${idxStr}</div>
-                <div class="v-left"><div class="big-chars">${bigCharsHtml}</div></div>
-                <div class="v-right" style="justify-content: center; padding-left: 10px;">
-                    <div class="stroke-name-title">${strokeName}</div>
-                </div>
+                ${demoBoxHtml}
             </div>
             ${practiceHtml}
             <div class="v-free"><div class="dotted-line"></div></div>
@@ -619,7 +646,6 @@ Bài 1: AI小语，你好！</textarea>
         const word = (parts[0] || "").replace(/\s/g, ''); 
         const pinyinStr = (parts[1] || "").trim();
         
-        // Nhận diện xem đang tạo Bộ thủ (4 cột) hay Từ vựng (3 cột)
         let radName = '';
         let meaning = '';
         if (currentTemplate === '6') {
