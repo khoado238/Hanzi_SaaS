@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Công Cụ Luyện Viết Chữ Hán - Master (V77 - Mũi Tên Chỉ Hướng Chuẩn Mực)</title>
+    <title>Công Cụ Luyện Viết Chữ Hán - Master (V78 - Song Song & Sửa Lỗi SVG)</title>
     <style>
         /* ================= GIAO DIỆN CHUNG & LAYOUT ================= */
         body { 
@@ -432,7 +432,7 @@ Bài 1: AI小语，你好！</textarea>
         return html;
     }
 
-    // CẬP NHẬT TRỌNG TÂM: Mũi tên đỏ đứt nét ôm sát "xương" của nét đen (stroke-width: 40)
+    // CẬP NHẬT TRỌNG TÂM: Thuật toán lọc điểm nhiễu (chống lỗi góc tọa độ) và tịnh tiến mũi tên song song
     function generateStrokeTemplateHTML(line, index, numRows, showPinyinBox) {
         const parts = line.split(/\t|\|/);
         const char = (parts[0] || "").replace(/\s/g, ''); 
@@ -446,27 +446,45 @@ Bài 1: AI小语，你好！</textarea>
         if (data && data.strokes && data.medians) {
             let pathsBlack = '';
             let polylines = '';
+            let defs = '<defs>';
             
             for (let s = 0; s < data.strokes.length; s++) {
                 // Lớp 1: Vẽ nét chữ Hán chuẩn màu đen
                 pathsBlack += `<path d="${data.strokes[s]}" fill="#111111"></path>`;
                 
-                // Lớp 2: Vẽ đường đứt nét màu đỏ trên "xương" của nét đen
-                if (data.medians[s]) {
-                    let mappedMedians = data.medians[s].map(p => `${p[0]},${900 - p[1]}`).join(' ');
-                    // Độ dày 40 giúp đường đỏ hiện rõ mà không lấn át mép nét đen bên dưới
-                    polylines += `<polyline points="${mappedMedians}" fill="none" stroke="#c62828" stroke-width="40" stroke-dasharray="60 40" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-${index})"></polyline>`;
+                // Thuật toán LỌC ĐIỂM (Lọc bỏ các điểm bị trùng hoặc quá gần nhau gây nhiễu góc quay mũi tên)
+                let cleanMedians = [];
+                let lastPt = null;
+                for (let i = 0; i < data.medians[s].length; i++) {
+                    let p = data.medians[s][i];
+                    // Chỉ lấy điểm nếu nó cách điểm trước đó ít nhất 15 pixel, hoặc là điểm cuối cùng
+                    if (!lastPt || Math.hypot(p[0] - lastPt[0], p[1] - lastPt[1]) > 15 || i === data.medians[s].length - 1) {
+                        cleanMedians.push(p);
+                        lastPt = p;
+                    }
                 }
+                // Fallback nếu lọc quá tay
+                if (cleanMedians.length < 2) cleanMedians = data.medians[s];
+                
+                // TỊNH TIẾN 65px (Khoảng 2.5mm trên giấy) để đường đỏ chạy song song bên ngoài nét đen
+                let mappedMedians = cleanMedians.map(p => (p[0] + 65) + ',' + (900 - p[1] + 65)).join(' ');
+                
+                // Khởi tạo ID ngẫu nhiên cho Marker để chống trùng lặp sinh ra lỗi tàng hình
+                let markerId = `arr-${Date.now()}-${Math.floor(Math.random()*10000)}-${s}`;
+                
+                // Mũi tên được set fix cứng kích thước 60x60 trên hệ lưới 1024
+                defs += `
+                <marker id="${markerId}" markerUnits="userSpaceOnUse" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="60" markerHeight="60" orient="auto" overflow="visible">
+                    <path d="M 0 1 L 9 5 L 0 9 z" fill="#c62828" />
+                </marker>`;
+                
+                polylines += `<polyline points="${mappedMedians}" fill="none" stroke="#c62828" stroke-width="12" stroke-dasharray="25 25" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#${markerId})"></polyline>`;
             }
+            defs += '</defs>';
             
             const svgCombo = `
             <svg viewBox="0 0 1024 1024" class="stroke-svg" style="width: 85%; height: 85%; overflow: visible;">
-                <defs>
-                    <!-- Định nghĩa mũi tên độc lập cho mỗi chữ để chống lỗi tàng hình -->
-                    <marker id="arrow-${index}" viewBox="0 -5 10 10" refX="7" refY="0" markerWidth="5" markerHeight="5" orient="auto">
-                        <path d="M 0 -4 L 10 0 L 0 4 z" fill="#c62828" />
-                    </marker>
-                </defs>
+                ${defs}
                 <g transform="scale(1, -1) translate(0, -900)">
                     ${pathsBlack}
                 </g>
