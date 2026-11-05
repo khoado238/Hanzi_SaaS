@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Công Cụ Luyện Viết Chữ Hán - Master (V66 - Giao diện Bộ thủ Chuẩn hóa)</title>
+    <title>Công Cụ Luyện Viết Chữ Hán - Master (V67 - Mũi tên Điều hướng Nét Bút)</title>
     <style>
         /* ================= GIAO DIỆN CHUNG & LAYOUT ================= */
         body { 
@@ -142,8 +142,6 @@
         .info-row-1 { display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 4px;}
         .word-details { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
         .pinyin { font-weight: bold; font-size: 17px; color: #c62828; font-family: "Arial", sans-serif; letter-spacing: 0.5px; } 
-        
-        /* CSS CHO BỘ THỦ / NGHĨA */
         .rad-name { font-size: 15px; color: #111; font-weight: bold; padding: 2px 0px; text-transform: capitalize; }
         .meaning { font-size: 14px; color: #1f2937; font-family: "Segoe UI", Arial, sans-serif; font-style: italic; font-weight: bold; padding: 2px 4px; }
         .meaning.has-border { border-left: 1.5px solid #ccc; margin-left: 4px; padding-left: 10px; color: #555; font-weight: 600; }
@@ -158,13 +156,16 @@
         .scl-count {
             font-family: 'Segoe UI', Arial, sans-serif; font-size: 13px; color: #555; font-weight: bold;
         }
+        
+        /* CSS MỚI: Tên Nét Cơ Bản */
+        .stroke-name-title { font-size: 20px; font-weight: bold; color: #c62828; font-family: "Segoe UI", Arial, sans-serif; padding-top: 5px;}
 
         .tiny-tzg {
             width: 24px; height: 24px; border: 1px solid #777;
             background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" shape-rendering="crispEdges"><line x1="50%" y1="0" x2="50%" y2="100%" stroke="%23888888" stroke-dasharray="1.5,1.5" stroke-width="1"/><line x1="0" y1="50%" x2="100%" y2="50%" stroke="%23888888" stroke-dasharray="1.5,1.5" stroke-width="1"/></svg>'); 
             background-size: 100% 100%; -webkit-print-color-adjust: exact; print-color-adjust: exact;
         }
-        .stroke-svg { width: 100%; height: 100%; display: block; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        .stroke-svg { width: 100%; height: 100%; display: block; -webkit-print-color-adjust: exact; print-color-adjust: exact; overflow: visible; }
 
         .v-practice { display: flex; flex-direction: column; gap: 6px; margin-bottom: 6px; }
         .practice-row { display: flex; width: 100%; flex-wrap: nowrap; justify-content: space-between; }
@@ -233,6 +234,8 @@
                     <option value="4">Mẫu 4: Luyện viết Câu / Đoạn văn</option>
                     <option value="5">Mẫu 5: Trang lưới trắng</option>
                     <option value="6">Mẫu 6: Luyện Bộ thủ (4 cột: Bộ | Pinyin | Tên | Nghĩa)</option>
+                    <!-- MẪU NÉT CƠ BẢN MỚI THÊM -->
+                    <option value="7" selected>Mẫu 7: Luyện Nét Cơ Bản (2 cột: Nét | Tên Nét)</option>
                 </select>
             </div>
             
@@ -248,9 +251,12 @@ Bài 1: AI小语，你好！</textarea>
             
             <div id="block-vocab" class="input-group">
                 <div class="hint" id="vocabHint"></div>
-                <textarea id="vocabList" rows="8" oninput="autoUpdate()">你好	nǐhǎo	xin chào; chào bạn
-大家	dàjiā	mọi người
-好	hǎo	tốt; khỏe</textarea>
+                <textarea id="vocabList" rows="8" oninput="autoUpdate()">一	Nét ngang
+丨	Nét sổ thẳng
+丶	Nét chấm
+丿	Nét phẩy
+乀	Nét mác
+亅	Nét sổ móc</textarea>
             </div>
 
             <div id="block-paragraph" class="input-group" style="display:none;">
@@ -307,13 +313,20 @@ Bài 1: AI小语，你好！</textarea>
 <script>
     const hanziCache = {};
     let updateTimer = null; 
-    let currentTemplate = '1';
+    let currentTemplate = '7'; // Đặt Mẫu 7 làm mặc định hiển thị lúc load
 
     const demoRadicals = `亻\trén\tnhân (nhân đứng)\tngười
 氵\tshuǐ\tthuỷ (ba chấm thuỷ)\tnước
 木\tmù\tmộc\tgỗ, cây cối
 口\tkǒu\tkhẩu\tcái miệng
 火\thuǒ\thỏa\tlửa`;
+
+    const demoStrokes = `一\tNét ngang
+丨\tNét sổ thẳng
+丶\tNét chấm
+丿\tNét phẩy
+乀\tNét mác
+亅\tNét sổ móc`;
 
     document.getElementById('vocabList').addEventListener('keydown', function(e) {
         if (e.key === 'Tab') {
@@ -332,7 +345,7 @@ Bài 1: AI小语，你好！</textarea>
         const inputNumRows = document.getElementById('numRows');
         const vocabList = document.getElementById('vocabList');
         
-        document.getElementById('block-vocab').style.display = (['1','2','3','6'].includes(type)) ? 'block' : 'none';
+        document.getElementById('block-vocab').style.display = (['1','2','3','6','7'].includes(type)) ? 'block' : 'none';
         document.getElementById('block-paragraph').style.display = (type === '4') ? 'block' : 'none';
         document.getElementById('block-numPages').style.display = (type === '5') ? 'block' : 'none';
         document.getElementById('block-display-options').style.display = (type === '5') ? 'none' : 'block';
@@ -358,6 +371,10 @@ Bài 1: AI小语，你好！</textarea>
             hint.innerHTML = '<b>Dán 4 cột cho Bộ Thủ:</b><br>Bộ thủ | Pinyin | Tên Hán Việt | Nghĩa';
             labelNumRows.innerText = 'Số hàng tập viết (mỗi bộ):';
             if (currentTemplate !== '6') vocabList.value = demoRadicals;
+        } else if (type === '7') {
+            hint.innerHTML = '<b>Dán 2 cột cho Nét Cơ Bản:</b><br>Ký tự Nét | Tên Nét Tiếng Việt';
+            labelNumRows.innerText = 'Số hàng tập viết (mỗi nét):';
+            if (currentTemplate !== '7') vocabList.value = demoStrokes;
         }
         currentTemplate = type;
     }
@@ -410,6 +427,95 @@ Bài 1: AI小语，你好！</textarea>
         }
         html += `</div>`;
         return html;
+    }
+
+    // MODULE: Template 7 (Luyện Nét Cơ Bản CÓ MŨI TÊN CHỈ HƯỚNG)
+    function generateStrokeTemplateHTML(line, index, numRows, showPinyinBox) {
+        const parts = line.split(/\t|\|/);
+        const char = (parts[0] || "").replace(/\s/g, ''); 
+        const strokeName = (parts[1] || "").trim();
+        if (!char) return '';
+
+        const data = hanziCache[char];
+        const idxStr = index.toString().padStart(2, '0');
+        let bigCharsHtml = `<div class="big-char"><span>${char}</span></div>`;
+
+        let groupCount = 12; // Mặc định 12 ô/hàng cho lưới 675px
+        
+        let practiceHtml = `<div class="v-practice">`;
+        for (let r = 0; r < numRows; r++) {
+            practiceHtml += `<div class="practice-row">`; 
+            for (let i = 0; i < groupCount; i++) {
+                let k = r * groupCount + i;
+                
+                practiceHtml += `<div class="word-group">`;
+                if (showPinyinBox) practiceHtml += `<div class="py-row"><div class="py-box" style="flex: 1;"></div></div>`;
+                
+                practiceHtml += `<div class="hz-row">`;
+                
+                // Ô đầu tiên: Hiển thị nét mờ xám và đường Path Đỏ có Mũi tên
+                if (k === 0 && data && data.strokes && data.medians) {
+                    let paths = '';
+                    let polylines = '';
+                    for (let s = 0; s < data.strokes.length; s++) {
+                        paths += `<path d="${data.strokes[s]}" fill="#e0e0e0"></path>`;
+                        // Đảo ngược trục Y trực tiếp cho tọa độ Median để không bị flip hướng mũi tên do thuộc tính transform scale(1,-1)
+                        let mappedMedians = data.medians[s].map(p => `${p[0]},${900 - p[1]}`).join(' ');
+                        polylines += `<polyline points="${mappedMedians}" fill="none" stroke="#c62828" stroke-width="35" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-${index})"></polyline>`;
+                    }
+                    
+                    const svgHtml = `
+                    <svg viewBox="0 0 1024 1024" class="stroke-svg" style="width: 85%; height: 85%; overflow: visible;">
+                        <defs>
+                            <marker id="arrow-${index}" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                                <path d="M 0 1 L 10 5 L 0 9 z" fill="#c62828" />
+                            </marker>
+                        </defs>
+                        <!-- Vẽ nền nét xám (Cần transform lật trục Y cho khớp chuẩn hệ tọa độ) -->
+                        <g transform="scale(1, -1) translate(0, -900)">
+                            ${paths}
+                        </g>
+                        <!-- Vẽ đường dẫn đỏ (Không lật trục Y để bảo toàn đúng định hướng Vector mũi tên) -->
+                        <g>
+                            ${polylines}
+                        </g>
+                    </svg>`;
+                    practiceHtml += `<div class="tzg-box trace-text">${svgHtml}</div>`;
+                } 
+                // Ô thứ 2: Nét mờ xám bình thường không có mũi tên
+                else if (k === 1 && data && data.strokes) {
+                    let bgPaths = '';
+                    for (let s = 0; s < data.strokes.length; s++) {
+                        bgPaths += `<path d="${data.strokes[s]}" fill="rgba(0,0,0,0.25)"></path>`;
+                    }
+                    const svgHtml = `<svg viewBox="0 0 1024 1024" class="stroke-svg" style="width: 85%; height: 85%;"><g transform="scale(1, -1) translate(0, -900)">${bgPaths}</g></svg>`;
+                    practiceHtml += `<div class="tzg-box trace-text">${svgHtml}</div>`;
+                }
+                // Các ô còn lại hoặc nếu thiếu data Fallback
+                else if (k === 0 || k === 1) {
+                    practiceHtml += `<div class="tzg-box trace-text"><span>${char}</span></div>`;
+                } else {
+                    practiceHtml += `<div class="tzg-box"></div>`;
+                }
+                
+                practiceHtml += `</div></div>`; 
+            }
+            practiceHtml += `</div>`; 
+        }
+        practiceHtml += `</div>`; 
+
+        return `
+        <div class="vocab-block">
+            <div class="v-top-section" style="align-items: center;">
+                <div class="v-badge">${idxStr}</div>
+                <div class="v-left"><div class="big-chars">${bigCharsHtml}</div></div>
+                <div class="v-right" style="justify-content: center; padding-left: 10px;">
+                    <div class="stroke-name-title">${strokeName}</div>
+                </div>
+            </div>
+            ${practiceHtml}
+            <div class="v-free"><div class="dotted-line"></div></div>
+        </div>`;
     }
 
     // MODULE: Template 2 (Mỗi nét 1 hàng)
@@ -507,101 +613,21 @@ Bài 1: AI小语，你好！</textarea>
         </div>`;
     }
 
-    // MODULE: Template 1 (Từ vựng Đầy đủ - 3 cột)
+    // MODULE: Template 1 & 6 (Dùng chung cho 3 cột Từ vựng và 4 cột Bộ thủ)
     function generateVocabHTML(line, index, numRows, showPinyinBox) {
         const parts = line.split(/\t|\|/);
         const word = (parts[0] || "").replace(/\s/g, ''); 
         const pinyinStr = (parts[1] || "").trim();
-        const meaning = (parts[2] || "").trim(); 
         
-        const chars = word.split(''); 
-        const pinyins = pinyinStr.split(/\s+/).filter(Boolean); 
-        const N = chars.length;
-        if (N === 0) return '';
-
-        let strokeContentHtml = '', bigCharsHtml = '';
-        
-        chars.forEach(char => {
-            bigCharsHtml += `<div class="big-char"><span>${char}</span></div>`;
-            if (/[，。！？、]/g.test(char)) return; 
-            const data = hanziCache[char];
-            if (data) { strokeContentHtml += createStrokeHtml(char, data); }
-        });
-
-        const idxStr = index.toString().padStart(2, '0');
-        let colspans = [];
-        if (pinyins.length === 0) {
-            for(let i=0; i<N; i++) colspans.push(1);
+        // Nhận diện xem đang tạo Bộ thủ (4 cột) hay Từ vựng (3 cột)
+        let radName = '';
+        let meaning = '';
+        if (currentTemplate === '6') {
+            radName = (parts[2] || "").trim();
+            meaning = (parts[3] || "").trim();
         } else {
-            let remainingN = N, remainingLen = pinyins.join('').length;
-            for (let i = 0; i < pinyins.length; i++) {
-                if (i === pinyins.length - 1) colspans.push(remainingN);
-                else {
-                    let cs = Math.max(1, Math.round((pinyins[i].length / remainingLen) * remainingN));
-                    cs = Math.min(cs, remainingN - (pinyins.length - 1 - i));
-                    colspans.push(cs); remainingN -= cs; remainingLen -= pinyins[i].length;
-                }
-            }
+            meaning = (parts[2] || "").trim();
         }
-
-        let groupCount = Math.floor((675 + 8) / (N * 44 + (N - 1) * 1 + 3 + 8)) || 1;
-        
-        let practiceHtml = `<div class="v-practice">`;
-        for (let r = 0; r < numRows; r++) {
-            practiceHtml += `<div class="practice-row">`; 
-            for (let i = 0; i < groupCount; i++) {
-                let isFirstOverall = (r === 0 && i === 0); 
-                
-                practiceHtml += `<div class="word-group">`;
-                if (showPinyinBox) {
-                    practiceHtml += `<div class="py-row">`;
-                    if (pinyins.length === 0) {
-                        for(let j=0; j<N; j++) practiceHtml += `<div class="py-box" style="flex: 1;"></div>`;
-                    } else {
-                        for(let j = 0; j < pinyins.length; j++) {
-                            practiceHtml += `<div class="py-box ${isFirstOverall ? 'trace-text' : ''}" style="flex: ${colspans[j]};"><span>${isFirstOverall ? pinyins[j] : ''}</span></div>`;
-                        }
-                    }
-                    practiceHtml += `</div>`;
-                }
-
-                practiceHtml += `<div class="hz-row">`;
-                chars.forEach(char => {
-                    practiceHtml += `<div class="tzg-box ${isFirstOverall ? 'trace-text' : ''}"><span>${isFirstOverall ? char : ''}</span></div>`; 
-                });
-                practiceHtml += `</div></div>`; 
-            }
-            practiceHtml += `</div>`; 
-        }
-        practiceHtml += `</div>`; 
-
-        return `
-        <div class="vocab-block">
-            <div class="v-top-section">
-                <div class="v-badge">${idxStr}</div>
-                <div class="v-left"><div class="big-chars">${bigCharsHtml}</div></div>
-                <div class="v-right">
-                    <div class="info-row-1">
-                        <div class="word-details">
-                            <span class="pinyin">[ ${pinyinStr} ]</span>
-                            ${meaning ? `<span class="meaning">${meaning}</span>` : ''}
-                        </div>
-                    </div>
-                    <div class="v-strokes">${strokeContentHtml}</div>
-                </div>
-            </div>
-            ${practiceHtml}
-            <div class="v-free"><div class="dotted-line"></div></div>
-        </div>`;
-    }
-
-    // MODULE: Template 6 (Bộ Thủ - 4 cột)
-    function generateRadicalHTML(line, index, numRows, showPinyinBox) {
-        const parts = line.split(/\t|\|/);
-        const word = (parts[0] || "").replace(/\s/g, ''); 
-        const pinyinStr = (parts[1] || "").trim();
-        const radName = (parts[2] || "").trim(); 
-        const meaning = (parts[3] || "").trim(); 
         
         const chars = word.split(''); 
         const pinyins = pinyinStr.split(/\s+/).filter(Boolean); 
@@ -674,7 +700,7 @@ Bài 1: AI小语，你好！</textarea>
                         <div class="word-details">
                             <span class="pinyin">[ ${pinyinStr} ]</span>
                             ${radName ? `<span class="rad-name">${radName}</span>` : ''}
-                            ${meaning ? `<span class="meaning has-border">${meaning}</span>` : ''}
+                            ${meaning ? `<span class="meaning ${radName ? 'has-border' : ''}">${meaning}</span>` : ''}
                         </div>
                     </div>
                     <div class="v-strokes">${strokeContentHtml}</div>
@@ -698,6 +724,7 @@ Bài 1: AI小语，你好！</textarea>
             statusText.style.color = "#ff9800";
 
             const template = document.getElementById('templateType').value;
+            currentTemplate = template;
             const titleHtml = document.getElementById('lessonTitle').value.replace(/\n/g, '<br>');
             const numRowsInput = parseInt(document.getElementById('numRows').value) || 1;
             const wmOpacityInput = document.getElementById('wmOpacity').value || 0.035; 
@@ -706,7 +733,7 @@ Bài 1: AI小语，你好！</textarea>
             let allChars = [];
             let validVocabs = [];
             
-            if (['1','2','3','6'].includes(template)) {
+            if (['1','2','3','6','7'].includes(template)) {
                 validVocabs = document.getElementById('vocabList').value.trim().split('\n').filter(line => line.trim().length > 0);
                 validVocabs.forEach(line => {
                     const word = line.split(/\t|\|/)[0].replace(/\s/g, '');
@@ -760,15 +787,15 @@ Bài 1: AI小语，你好！</textarea>
                 }
             }
 
-            if (template === '1') {
+            if (['1','6'].includes(template)) {
                 validVocabs.forEach((line, idx) => {
                     const html = generateVocabHTML(line, idx + 1, numRowsInput, showPinyinBox); 
                     if(html) appendNodeWithPagination(stringToNode(html));
                 });
-            } 
-            else if (template === '6') {
+            }
+            else if (template === '7') {
                 validVocabs.forEach((line, idx) => {
-                    const html = generateRadicalHTML(line, idx + 1, numRowsInput, showPinyinBox); 
+                    const html = generateStrokeTemplateHTML(line, idx + 1, numRowsInput, showPinyinBox); 
                     if(html) appendNodeWithPagination(stringToNode(html));
                 });
             }
